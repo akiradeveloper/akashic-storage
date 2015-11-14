@@ -20,7 +20,7 @@ object ServerConfig {
   }
 
   def fromConfig(configRoot: Config) = new ServerConfig {
-    val config = configRoot.getConfig("akka.s3")
+    val config = configRoot.getConfig("fss3")
 
     val mp = Paths.get(config.getString("mountpoint"))
     mp.mkdirp
