@@ -30,13 +30,23 @@ case class Server(config: ServerConfig) {
     // </ListAllMyBucketsResult>
   }
 
-  val endpoint: Endpoint[String] =
+  val api: Endpoint[String] =
     doGetService
     // :+: doGetBucket
     // :+: doGetObject
     // :+: doGetObject
     // :+: doPutObject
     // :+: doPutBucket
+
+  val TMPRESOURCE = "/"
+  val TMPREQID = "TMPREDID"
+
+  val endpoint = api.handle {
+    case Error.Exception(e) =>
+      val cam = Error.toCodeAndMessage(e)
+      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
+      Output.Payload(xml.toString)
+  }
 }
 
 object TestApp extends App {

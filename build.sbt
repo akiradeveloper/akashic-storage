@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.github.finagle" %% "finch-core" % finchV changing(),
   "com.github.finagle" %% "finch-test" % finchV changing(),
   "com.github.finagle" %% "finch-circe" % finchV changing(),
-  // "org.scala-lang.modules" %% "scala-pickling" % "0.10.1",
+  "org.scala-lang.modules" %% "scala-pickling" % "0.10.1",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
   "com.typesafe" % "config" % "1.3.0",
   // "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
