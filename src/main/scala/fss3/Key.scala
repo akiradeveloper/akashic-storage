@@ -19,9 +19,11 @@ case class Key(parent: Bucket, path: Path) {
 
   def listVersions: Seq[Path] = {
     versions.children
+
       // exclude multipart uploads
       // complete versions have integer names
       .filter(_.lastName.optInt.isDefined)
+
       // descending order by Id
       .sortWith(new Version(this, _).id > new Version(this, _).id)
   }

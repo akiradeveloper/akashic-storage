@@ -1,14 +1,41 @@
 package fss3
 
 import com.twitter.finagle.Http
+import com.twitter.finagle.http.Status
 import com.twitter.util.Await
 import io.finch._
+
+import scala.xml.XML
 
 case class Server(config: ServerConfig) {
   val tree = config.treePath
   val admin = config.adminPath
 
-  val callerId = None
+  val users = UserTable(admin)
+
+  val callerId = Some(TestUsers.hoge.id)
+
+  val adminService =
+    get("admin" / "user") {
+      val newUser = users.mkUser
+      Ok(User.toXML(newUser))
+    } :+:
+    get("admin" / "user" / string) { id: String =>
+      val user = users.getUser(id)
+      user.isDefined.orFailWith(Error.AccountProblem()) // FIXME error type
+      Ok(User.toXML(user.get))
+    } :+:
+    delete("admin" / "user" / string) { id: String =>
+      Output.Payload("", Status.NotImplemented)
+    } :+:
+    put("admin" / "user" / string ? request.body) { (id: String, body: String) =>
+      val xml = XML.loadString(body)
+      val user = users.getUser(id)
+      user.isDefined.orFailWith(Error.AccountProblem())
+      val newUser = user.get.modifyWith(xml)
+      users.updateUser(id, newUser)
+      Ok("")
+    }
 
   val doGetService: Endpoint[String] = get(/) {
     val xml = <a/>
