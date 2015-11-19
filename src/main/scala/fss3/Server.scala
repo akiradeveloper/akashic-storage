@@ -5,13 +5,13 @@ import com.twitter.finagle.http.Status
 import com.twitter.util.Await
 import io.finch._
 
-import scala.xml.XML
+import io.finch.ext._
+
+import scala.xml.{NodeSeq, XML}
 
 case class Server(config: ServerConfig) {
-  val tree = config.treePath
-  val admin = config.adminPath
-
-  val users = UserTable(admin)
+  val tree = Tree(config.treePath)
+  val users = UserTable(config.adminPath)
 
   val callerId = Some(TestUsers.hoge.id)
 
@@ -28,7 +28,7 @@ case class Server(config: ServerConfig) {
     delete("admin" / "user" / string) { id: String =>
       Output.Payload("", Status.NotImplemented)
     } :+:
-    put("admin" / "user" / string ? request.body) { (id: String, body: String) =>
+    put("admin" / "user" / string ? body) { (id: String, body: String) =>
       val xml = XML.loadString(body)
       val user = users.getUser(id)
       user.isDefined.orFailWith(Error.AccountProblem())
@@ -37,27 +37,32 @@ case class Server(config: ServerConfig) {
       Ok("")
     }
 
-  val doGetService: Endpoint[String] = get(/) {
-    val xml = <a/>
-    xml.toString
-    // "hoge"
-    // <ListAllMyBucketsResult>
-    //   <Owner>
-    //     <ID>{callerId.get}</ID>
-    //     <DisplayName>{admin.getUser(callerId.get).get.displayName}</DisplayName>
-    //   </Owner>
-    //   <Buckets>
-    //     { for (b <- tree.listBuckets if b.completed) yield
-    //   <Bucket>
-    //     <Name>{b.path.lastName}</Name>
-    //     <CreationDate>{b.path.lastModified.format000Z}</CreationDate>
-    //   </Bucket>
-    //     }
-    //   </Buckets>
-    // </ListAllMyBucketsResult>
+
+  val TMPRESOURCE = "/"
+  val TMPREQID = "TMPREQID"
+
+  val doGetService = get(/) {
+    val xml: NodeSeq =
+     <ListAllMyBucketsResult>
+       <Owner>
+         <ID>{callerId.get}</ID>
+         <DisplayName>{users.getUser(callerId.get).get.displayName}</DisplayName>
+       </Owner>
+       <Buckets>
+         { for (b <- tree.listBuckets if b.completed) yield
+       <Bucket>
+         <Name>{b.path.lastName}</Name>
+         <CreationDate>{b.path.lastModified.format000Z}</CreationDate>
+       </Bucket>
+         }
+       </Buckets>
+     </ListAllMyBucketsResult>
+    Ok(xml)
+      .withHeader(("x-amz-request-id", TMPREQID))
   }
 
-  val api: Endpoint[String] =
+  val api =
+    adminService :+:
     doGetService
     // :+: doGetBucket
     // :+: doGetObject
@@ -65,14 +70,13 @@ case class Server(config: ServerConfig) {
     // :+: doPutObject
     // :+: doPutBucket
 
-  val TMPRESOURCE = "/"
-  val TMPREQID = "TMPREDID"
 
   val endpoint = api.handle {
-    case Error.Exception(e) =>
-      val cam = Error.toCodeAndMessage(e)
-      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
-      Output.Payload(xml.toString)
+    case e => BadRequest(io.finch.Error("aaa"))
+//    case Error.Exception(e) =>
+//      val cam = Error.toCodeAndMessage(e)
+//      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
+//      Output.Payload(xml)
   }
 }
 

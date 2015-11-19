@@ -2,11 +2,12 @@ name := "fss3"
 
 version := "1.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.6"
     
 resolvers += Resolver.sonatypeRepo("snapshots")
     
-val finchV = "0.9.1"
+val finchV = "0.9.2-SNAPSHOT"
+
 
 libraryDependencies ++= Seq(
   "com.github.finagle" %% "finch-core" % finchV changing(),
