@@ -72,11 +72,11 @@ case class Server(config: ServerConfig) {
 
 
   val endpoint = api.handle {
-    case e => BadRequest(io.finch.Error("aaa"))
-//    case Error.Exception(e) =>
-//      val cam = Error.toCodeAndMessage(e)
-//      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
-//      Output.Payload(xml)
+    //case e => BadRequest(io.finch.Error("aaa"))
+    case Error.Exception(e) =>
+      val cam = Error.toCodeAndMessage(e)
+      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
+      BadRequest(io.finch.Error(xml.toString)).withHeader(("a", "b"))
   }
 }
 
