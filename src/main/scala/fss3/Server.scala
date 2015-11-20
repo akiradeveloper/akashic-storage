@@ -61,6 +61,10 @@ case class Server(config: ServerConfig) {
       .withHeader(("x-amz-request-id", TMPREQID))
   }
 
+  val doGetBucket = get(string) { bucketName: String =>
+    Ok("hoge")
+  }
+
   val api =
     adminService :+:
     doGetService
