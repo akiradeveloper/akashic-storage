@@ -6,7 +6,7 @@ scalaVersion := "2.11.6"
     
 resolvers += Resolver.sonatypeRepo("snapshots")
     
-val finchV = "0.9.2-SNAPSHOT"
+val finchV = "0.9.3-SNAPSHOT"
 
 
 libraryDependencies ++= Seq(
