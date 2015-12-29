@@ -6,8 +6,7 @@ scalaVersion := "2.11.6"
     
 resolvers += Resolver.sonatypeRepo("snapshots")
     
-val finchV = "0.9.3-SNAPSHOT"
-
+val finchV = "0.9.4-SNAPSHOT"
 
 libraryDependencies ++= Seq(
   "com.github.finagle" %% "finch-core" % finchV changing(),
