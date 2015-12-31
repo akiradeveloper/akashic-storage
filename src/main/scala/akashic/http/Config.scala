@@ -1,4 +1,4 @@
-package fss3
+package akashic.http
 
 import java.nio.file.{Paths, Path}
 

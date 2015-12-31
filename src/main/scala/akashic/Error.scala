@@ -1,4 +1,4 @@
-package fss3
+package akashic
 
 import com.twitter.finagle.http.Status
 

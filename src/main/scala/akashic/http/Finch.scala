@@ -1,4 +1,4 @@
-package io.finch
+package akashic.http
 
 import cats.Eval
 import com.twitter.util.{Await, Future}
@@ -6,7 +6,8 @@ import io.finch.internal.Mapper
 
 import scala.xml.NodeSeq
 
-package object ext {
+object FinchExtensions {
+
   implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
 
   implicit class MonadicEndpoint[A](self: Endpoint[A]) {

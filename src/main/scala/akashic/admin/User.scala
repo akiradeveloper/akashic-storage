@@ -1,4 +1,4 @@
-package fss3
+package akashic.admin
 
 import scala.xml.NodeSeq
 

@@ -1,4 +1,4 @@
-package fss3
+package akashic.api
 
 import java.nio.file.{Files, Path}
 
@@ -9,6 +9,7 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 object Acl {
+
   case class t(owner: Option[String], grants: Seq[Grant]) {
     def write(path: Path): Unit = {
       LoggedFile(path).put { f =>

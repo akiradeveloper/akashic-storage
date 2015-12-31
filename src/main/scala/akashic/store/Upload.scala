@@ -1,4 +1,4 @@
-package fss3
+package akashic.store
 
 import java.io.BufferedOutputStream
 import java.nio.file.{Files, Path, StandardCopyOption}

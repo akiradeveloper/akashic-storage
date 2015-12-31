@@ -1,4 +1,4 @@
-package fss3
+package akashic.store
 
 import java.nio.file.Path
 

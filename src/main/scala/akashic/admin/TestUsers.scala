@@ -1,4 +1,4 @@
-package fss3
+package akashic.admin
 
 object TestUsers {
   val hoge = User(

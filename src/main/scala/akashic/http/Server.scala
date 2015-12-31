@@ -1,8 +1,8 @@
-package fss3
+package akashic.http
 
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.Status
-import com.twitter.util.Await
+import com.twitter.util.{Future, Await}
 import io.finch._
 
 import io.finch.ext._

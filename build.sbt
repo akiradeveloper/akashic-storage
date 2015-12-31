@@ -1,4 +1,4 @@
-name := "fss3"
+name := "akashic"
 
 version := "1.0"
 
