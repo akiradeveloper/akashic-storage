@@ -1,4 +1,4 @@
-package akashic.store
+package akashic.tree
 
 import java.io.BufferedOutputStream
 import java.nio.file.{Files, Path, StandardCopyOption}

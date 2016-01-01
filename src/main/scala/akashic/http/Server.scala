@@ -42,21 +42,7 @@ case class Server(config: ServerConfig) {
   val TMPREQID = "TMPREQID"
 
   val doGetService = get(/) {
-    val xml: NodeSeq =
-     <ListAllMyBucketsResult>
-       <Owner>
-         <ID>{callerId.get}</ID>
-         <DisplayName>{users.getUser(callerId.get).get.displayName}</DisplayName>
-       </Owner>
-       <Buckets>
-         { for (b <- tree.listBuckets if b.completed) yield
-       <Bucket>
-         <Name>{b.path.lastName}</Name>
-         <CreationDate>{b.path.lastModified.format000Z}</CreationDate>
-       </Bucket>
-         }
-       </Buckets>
-     </ListAllMyBucketsResult>
+    val xml = ???
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }

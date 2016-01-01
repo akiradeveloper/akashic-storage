@@ -1,4 +1,4 @@
-package akashic.store
+package akashic.tree
 
 import java.nio.file._
 
