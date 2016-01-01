@@ -1,4 +1,4 @@
-package akashic.store
+package akashic.patch
 
 object CommitStorategy {
   case class Once(patch: Patch, to: Path) {

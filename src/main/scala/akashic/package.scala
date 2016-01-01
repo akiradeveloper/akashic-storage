@@ -1,5 +1,3 @@
-package akashic.patch
-
 import java.io.IOException
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file._
@@ -10,7 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.IOUtils
 import org.apache.tika.Tika
 
-package object store {
+package object akashic {
 
   def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
     try {

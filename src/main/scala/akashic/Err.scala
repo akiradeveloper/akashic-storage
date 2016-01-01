@@ -2,7 +2,7 @@ package akashic
 
 import com.twitter.finagle.http.Status
 
-object Error {
+object Err{
 
   sealed trait t
   case class AccessDenied() extends t
