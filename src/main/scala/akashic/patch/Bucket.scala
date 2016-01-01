@@ -1,6 +1,6 @@
 package akashic.patch
 
-case class BucketPatch(root: Path) extends Patch {
+case class Bucket(root: Path) extends Patch {
   val acl = PatchLog(root.resolve("acl"))
   val cors = PatchLog(root.resolve("cors"))
   val versioning = PatchLog(root.resolve("versioning"))
@@ -11,5 +11,12 @@ case class BucketPatch(root: Path) extends Patch {
     cors.init
     versioning.init
     Files.createDirectory(keys)
+  }
+
+  def findKey(name: String): Option[Key] = {
+    val path = keys.resolve(name)
+    if (Files.exists(keys.resolve(name)) {
+      Key(this, path)
+    } else { None }
   }
 }

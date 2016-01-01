@@ -13,4 +13,10 @@ case class PatchLog(root: Path) {
     }
     root.resolve(id)
   }
+  def get: Option[Int] = {
+    maxId match {
+      case 0 => None
+      case a => Some(a)
+    }
+  }
 }

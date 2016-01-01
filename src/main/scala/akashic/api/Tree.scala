@@ -5,7 +5,7 @@ case class Tree(root: Path) {
   def findBucket(name: String): Option[Bucket] = {
     val path = bucket(name)
     if (Files.exists(path)) {
-      Some(Bucket(this, path)
+      Some(Bucket(path))
     } else { None }
   }
 }

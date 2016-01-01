@@ -1,6 +1,6 @@
 package akashic.patch
 
-object CommitStorategy {
+object Commit {
   case class Once(patch: Patch, to: Path) {
     def run: Boolean = {
       Try {
@@ -11,13 +11,11 @@ object CommitStorategy {
       }
     }
   }
-
-  case class Force(patch: Patch, to: Path) {
+  case class ForceOnce(patch: Patch, to: Path) {
     def run {
       Files.move(patch.root, to, StandardCopyOption.ATOMIC_MOVE | StandardCopyOption.REPLACE_EXISTING)
     }
   }
-
   case class Retry(patch: Patch, to: PatchLog) {
     def run: Path = {
       try {
