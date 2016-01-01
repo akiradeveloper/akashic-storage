@@ -1,7 +1,13 @@
 package akashic.tree
 
 case class Upload(root: Path) extends Patch {
-  val part(id: Int): Data = Data(root.resolve("parts").resolve(id))
+  val parts = root.resolve("parts")
+  val part(id: Int): Data = Data(parts.resolve(id))
   val acl = PatchLog(root.resolve("acl"))
   val meta = PatchLog(root.resolve("meta"))
+  def init {
+    Files.createDirectory(root.resolve("parts"))
+    acl.init
+    meta.init
+  }
 }
