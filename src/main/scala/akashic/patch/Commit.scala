@@ -11,6 +11,7 @@ object Commit {
       }
     }
   }
+  // upload part can overwrite the existing part
   case class ForceOnce(patch: Patch, to: Path) {
     def run {
       Files.move(patch.root, to, StandardCopyOption.ATOMIC_MOVE | StandardCopyOption.REPLACE_EXISTING)

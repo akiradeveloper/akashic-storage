@@ -19,4 +19,5 @@ case class PatchLog(root: Path) {
       case a => Some(a)
     }
   }
+  def path(id: Int): Path = root.resolve(id)
 }

@@ -9,7 +9,6 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 object Acl {
-
   case class t(owner: Option[String], grants: Seq[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
   }

@@ -10,7 +10,6 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 object Cors {
-
   case class t(rules: Seq[Rule]) {
     def toBytes: Array[Byte] = this.pickle.value
   }
@@ -65,6 +64,12 @@ object Cors {
     }
   }
 
+  // FIXME return which rule was hit to return exposedHeaders
+  def tryMatch(rules: Seq[Rule], req: Request): Option[(Rule, Response)] = {
+    rules.map { rule => rule.tryMatch(req).map {a => (rule, a)} }
+      .find(_.isDefined).flatten
+  }
+
   def parseXML(xml: NodeSeq): Seq[Rule] = {
     (xml \ "CORSRule").map { rule =>
       Rule(
@@ -75,11 +80,5 @@ object Cors {
         (rule \ "ExposeHeader").map { a => ExposeHeader(a.text) }
       )
     }
-  }
-
-  // FIXME return which rule was hit to return exposedHeaders
-  def tryMatch(rules: Seq[Rule], req: Request): Option[(Rule, Response)] = {
-    rules.map { rule => rule.tryMatch(req).map {a => (rule, a)} }
-      .find(_.isDefined).flatten
   }
 }
