@@ -8,4 +8,5 @@ case class Tree(root: Path) {
       Some(Bucket(path))
     } else { None }
   }
+  def listBuckets: Seq[Bucket] = ???
 }

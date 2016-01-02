@@ -10,18 +10,11 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 object Cors {
+
   case class t(rules: Seq[Rule]) {
-    def write(path: Path): Unit = {
-      LoggedFile(path).put { f =>
-        f.writeBytes(this.pickle.value)
-      }
-    }
+    def toBytes: Array[Byte] = this.pickle.value
   }
-  def read(path: Path): t = {
-    using(Files.newInputStream(LoggedFile(path).get.get)) { f =>
-      BinaryPickle(IOUtils.toByteArray(f)).unpickle[t]
-    }
-  }
+  def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
 
   trait WildCardSupport {
     val unwrap: String
