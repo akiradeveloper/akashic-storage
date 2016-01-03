@@ -1,5 +1,7 @@
 package akasha.model
 
+import scala.xml.NodeSeq
+
 object GetService {
   case class Result(xml: NodeSeq)
 }

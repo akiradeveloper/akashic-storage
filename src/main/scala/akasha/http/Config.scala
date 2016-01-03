@@ -1,6 +1,6 @@
 package akasha.http
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -23,11 +23,13 @@ object ServerConfig {
     val config = configRoot.getConfig("akasha")
 
     val mp = Paths.get(config.getString("mountpoint"))
-    mp.mkdirp
-    mp.emptyDirectory
+    if (Files.exists(mp)) {
+      akasha.Files.purgeDirectory(mp)
+    }
+    Files.createDirectory(mp)
 
-    treePath.mkdirp
-    adminPath.mkdirp
+    Files.createDirectory(treePath)
+    Files.createDirectory(adminPath)
 
     override def mountpoint = mp
     override def ip = config.getString("ip")

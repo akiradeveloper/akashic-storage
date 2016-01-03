@@ -1,5 +1,7 @@
 package akasha.patch
 
+import java.nio.file.{Files, Path}
+
 case class Tree(root: Path) {
   def bucketPath(name: String): Path = root.resolve(name)
   def findBucket(name: String): Option[Bucket] = {
@@ -11,6 +13,6 @@ case class Tree(root: Path) {
     }
   }
   def listBuckets: Seq[Bucket] = {
-    Files.children(root).map(Bucket(_)).filter(_.committed)
+    akasha.Files.children(root).map(Bucket(_)).filter(_.committed)
   }
 }

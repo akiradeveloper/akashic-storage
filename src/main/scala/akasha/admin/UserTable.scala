@@ -1,6 +1,8 @@
 package akasha.admin
 
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
+
+import akasha.Strings
 
 import scala.slick.driver.SQLiteDriver.simple._
 import scala.util.Random
@@ -12,7 +14,7 @@ case class UserTableDef(tag: Tag) extends Table[User.t](tag, "USER") {
   def name = column[String]("NAME")
   def email = column[String]("EMAIL")
   def displayName = column[String]("DISPLAYNAME")
-  def * = (id, accessKey, secretKey, name, email, displayName) <>((User.apply _).tupled, User.unapply _)
+  def * = (id, accessKey, secretKey, name, email, displayName) <>((User.t.apply _).tupled, User.t.unapply _)
 }
 
 case class UserTable(path: Path) {
@@ -22,7 +24,7 @@ case class UserTable(path: Path) {
   private val db = {
     val url = path.toString
     val ret = Database.forURL(s"jdbc:sqlite:${url}", driver = "org.sqlite.JDBC")
-    if (!path.exists) {
+    if (!Files.exists(path)) {
       ret withSession { implicit session =>
         users.ddl.create
       }
@@ -30,15 +32,11 @@ case class UserTable(path: Path) {
     ret
   }
 
-  private def randStr(n: Int) = {
-    Random.alphanumeric.take(n).mkString
-  }
-
   private def mkRandUser: User.t = {
-    User(
-      id = randStr(64),
-      accessKey = randStr(20).toUpperCase,
-      secretKey = randStr(40),
+    User.t(
+      id = Strings.random(64),
+      accessKey = Strings.random(20).toUpperCase,
+      secretKey = Strings.random(40),
       name = "noname",
       email = "noname@noname.org",
       displayName = "noname"

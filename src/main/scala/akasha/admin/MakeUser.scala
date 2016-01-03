@@ -1,5 +1,7 @@
 package akasha.admin
 
+import scala.xml.NodeSeq
+
 object MakeUser {
   case class Result(xml: NodeSeq)
   def run(users: UserTable): Result = {

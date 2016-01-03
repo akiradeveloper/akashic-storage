@@ -9,7 +9,7 @@ object User {
                name: String,
                email: String,
                displayName: String) {
-    def modifyWith(xml: NodeSeq): User = {
+    def modifyWith(xml: NodeSeq): User.t = {
       this.copy(
         name = (xml \ "Name").headOption.map(_.text).getOrElse(this.name),
         email = (xml \ "Email").headOption.map(_.text).getOrElse(this.email),

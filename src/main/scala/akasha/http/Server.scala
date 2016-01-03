@@ -1,7 +1,10 @@
 package akasha.http
 
+import akasha.admin
 import akasha.admin._
+import akasha.model
 import akasha.model._
+import akasha.patch.Tree
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.Status
 import com.twitter.util.Await
@@ -53,13 +56,16 @@ case class Server(config: ServerConfig) {
     // :+: doPutBucket
 
   val endpoint = api.handle {
-    case Error.Exception(context, e) =>
-      val withMessage = Error.withMessage(e)
-      val xml = Error.mkXML(withMessage, context.resource, context.requestId)
+    case model.Error.Exception(context, e) =>
+      val withMessage = model.Error.withMessage(e)
+      val xml = model.Error.mkXML(withMessage, context.resource, context.requestId)
       val cause = io.finch.Error(xml.toString)
       Output.Failure(cause, Status.fromCode(withMessage.httpCode))
         .withHeader(("a", "b"))
-    case _ => assert(false) // TODO
+    case admin.Error.Exception(e) =>
+      val (code, message) = admin.Error.interpret(e)
+      val cause = io.finch.Error(message)
+      Output.Failure(cause, Status.fromCode(code))
   }
 }
 
