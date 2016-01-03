@@ -1,4 +1,4 @@
-package akasha.api
+package akasha.patch
 
 case class Tree(root: Path) {
   def bucket(name: String): Path = root.resolve(name)

@@ -13,6 +13,6 @@ case class PatchBox(root: Path) {
   }
 
   def acquirePatchLoc: Path = {
-    Files.createDirectory(newPath)
+    retry
   }
 }

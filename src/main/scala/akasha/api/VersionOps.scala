@@ -1,7 +1,9 @@
 package akasha.api
 
-trait Version {
-  implicit class Version(unwrap: Version) {
+import akasha.patch.Version
+
+trait VersionOps {
+  implicit class VersionOps(unwrap: Version) {
     val metaT: Meta = {
       val path: Path = meta.path(meta.get.get)
       val bytes = Paths.toBytes(path)
