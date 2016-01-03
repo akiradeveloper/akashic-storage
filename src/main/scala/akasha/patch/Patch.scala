@@ -11,7 +11,4 @@ trait Patch {
   def commited: Boolean = {
     Files.exists(commitPath)
   }
-  def init {
-    Files.createDirectory(root)
-  }
 }

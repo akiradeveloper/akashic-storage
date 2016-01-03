@@ -1,9 +1,6 @@
 package akasha.patch
 
-case class PatchLog(root: Path) {
-  def init {
-    Files.createDirectory(root)
-  }
+case class PatchLog(root: Path) extends Patch {
   def acquireNewLoc: Path = {
     val xs = root.children.map(_.toInt)
     val newId = if (xs.isEmpty) {
@@ -13,11 +10,10 @@ case class PatchLog(root: Path) {
     }
     root.resolve(id)
   }
-  def get: Option[Int] = {
+  def get: Option[Patch] = {
     maxId match {
       case 0 => None
-      case a => Some(a)
+      case a => Some(AnyPatch(root.resolve(maxId)))
     }
   }
-  def path(id: Int): Path = root.resolve(id)
 }

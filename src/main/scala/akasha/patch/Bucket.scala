@@ -5,6 +5,7 @@ case class Bucket(root: Path) extends Patch {
   val cors = PatchLog(root.resolve("cors"))
   val versioning = PatchLog(root.resolve("versioning"))
   val keys: Path = root.resolve("keys")
+  def keyPath(name: String): Path = keys.resolve(name)
 
   def init {
     acl.init

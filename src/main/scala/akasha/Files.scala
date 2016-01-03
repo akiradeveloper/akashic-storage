@@ -27,6 +27,8 @@ object Files {
     }
   }
 
+  def touch(path: Path) = ???
+
   def computeMD5(path: Path): String = {
     using(Files.newInputStream(path)) { inp =>
       DigestUtils.md5Hex(inp)

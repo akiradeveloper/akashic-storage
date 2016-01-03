@@ -1,14 +1,10 @@
 package akasha.patch
 
 object Commit {
-  type Fn = Patch => Unit
-
-  val makePatch(to: Path) = new Patch { def root = to }
-
-  case class Once(to: Path, fn: Fn) {
+  case class Once(to: Path, fn: Patch => Unit) {
     def run: Boolean = {
       Try {
-        val patch = makePatch(to)
+        val patch = PatchGuard(to)
         if (Files.exists(to) && !pseudoPatch.commited) {
           akasha.Files.purgeDirectory(to)
         }
@@ -21,31 +17,23 @@ object Commit {
       }
     }
   }
-  // upload part can overwrite the existing part
-  case class ForceOnce(to: Path, fn: Fn) {
-    def run {
-      if (Files.exists(to)) {
-        akasha.Files.purgeDirectory(to)
-      }
-      val patch = makePatch(to)
-      patch.init
-      fn(patch)
-      patch.commit
-    }
-  }
-  case class Retry(to: PatchLog, f: Fn) {
-    def run: Path = {
+
+  case class RetryGeneric(makePath: => Path, f: Patch => Unit) {
+    def run: Patch = {
       try {
-        val newPath = to.acquireNewLoc
-        val patch = makePatch(newPath)
+        val patch = PatchGuard(makePath)
         patch.init
         fn(patch)
         patch.commit
-        newPath
+        patch
       } catch {
-        case FileAlreadyExistsException(_) => retry
+        case FileAlreadyExistsException(_) => run
         case e -> throw e
       }
     }
+  }
+
+  case class Retry(to: PatchLog, f: Patch => Unit) {
+    def run: Patch = RetryGeneric(() => to.acquireNewLoc, f).run
   }
 }
