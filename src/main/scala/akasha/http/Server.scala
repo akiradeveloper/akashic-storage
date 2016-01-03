@@ -17,26 +17,20 @@ case class Server(config: ServerConfig) {
 
   val adminService =
     get("admin" / "user") {
-      val newUser = users.mkUser
-      Ok(User.toXML(newUser))
+      val result = MakeUser.run(users)
+      Ok(result.xml)
     } :+:
     get("admin" / "user" / string) { id: String =>
-      val user = users.getUser(id)
-      user.isDefined.orFailWith(Error.AccountProblem()) // FIXME error type
-      Ok(User.toXML(user.get))
+      val result = GetUser.run(users, id)
+      Ok(result.xml)
     } :+:
     delete("admin" / "user" / string) { id: String =>
       Output.Payload("", Status.NotImplemented)
     } :+:
     put("admin" / "user" / string ? body) { (id: String, body: String) =>
-      val xml = XML.loadString(body)
-      val user = users.getUser(id)
-      user.isDefined.orFailWith(Error.AccountProblem())
-      val newUser = user.get.modifyWith(xml)
-      users.updateUser(id, newUser)
+      UpdateUser.run(users, id, body)
       Ok("")
     }
-
 
   val TMPRESOURCE = "/"
   val TMPREQID = "TMPREQID"

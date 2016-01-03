@@ -5,7 +5,7 @@ import java.nio.file.{FileSystems, Path}
 import scala.slick.driver.SQLiteDriver.simple._
 import scala.util.Random
 
-case class UserTableDef(tag: Tag) extends Table[User](tag, "USER") {
+case class UserTableDef(tag: Tag) extends Table[User.t](tag, "USER") {
   def id = column[String]("ID", O.PrimaryKey)
   def accessKey = column[String]("ACCESSKEY")
   def secretKey = column[String]("SECRETKEY")
@@ -34,7 +34,7 @@ case class UserTable(path: Path) {
     Random.alphanumeric.take(n).mkString
   }
 
-  private def mkRandUser: User = {
+  private def mkRandUser: User.t = {
     User(
       id = randStr(64),
       accessKey = randStr(20).toUpperCase,
@@ -45,13 +45,13 @@ case class UserTable(path: Path) {
     )
   }
 
-  def addUser(user: User): Unit = {
+  def addUser(user: User.t): Unit = {
     db withSession { implicit session =>
       users.insert(user)
     }
   }
 
-  def mkUser: User = {
+  def mkUser: User.t = {
     db withSession { implicit session =>
       val newUser = mkRandUser
       users.insert(newUser)
@@ -65,18 +65,15 @@ case class UserTable(path: Path) {
     }
   }
 
-  def getUser(id: String): Option[User] = {
+  def getUser(id: String): Option[User.t] = {
     db.withSession { implicit session =>
       users.where(_.id === id).list.headOption
     }
   }
 
-  // TODO findUser that throws exception on not found
-
-  def updateUser(id: String, user: User): Unit = {
+  def updateUser(id: String, user: User.t): Unit = {
     db withSession { implicit session =>
       users.where(_.id === id).update(user)
     }
   }
-  // def delUser: User = { }
 }
