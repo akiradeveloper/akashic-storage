@@ -17,7 +17,6 @@ object Commit {
       }
     }
   }
-
   case class RetryGeneric(makePath: => Path, f: Patch => Unit) {
     def run: Patch = {
       try {
@@ -32,7 +31,6 @@ object Commit {
       }
     }
   }
-
   case class Retry(to: PatchLog, f: Patch => Unit) {
     def run: Patch = RetryGeneric(() => to.acquireNewLoc, f).run
   }

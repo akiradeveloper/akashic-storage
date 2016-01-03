@@ -7,7 +7,6 @@ object Patch {
 trait Patch {
   def root: Path
   def commitPath = root.resolve("commit")
-
   // We assume file creation is atomic
   def commit {
     akasha.Files.touch(commitPath)
@@ -18,5 +17,8 @@ trait Patch {
   // throws if the dir exists
   def init {
     Files.createDirectory(root)
+  }
+  def name: String = {
+    Files.basename(root)
   }
 }

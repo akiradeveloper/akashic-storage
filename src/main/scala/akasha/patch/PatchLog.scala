@@ -10,11 +10,14 @@ case class PatchLog(root: Path) extends Patch {
     }
     root.resolve(id)
   }
+  // return by descending order
+  def listVersions: Seq[Patch] = {
+    Files.children(root).map(Patch(_)).filter(_.committed).sortBy(-1 * _.name.toInt)
+  }
+  // returns the newest version within committed
   def get: Option[Patch] = {
-    maxId match {
-      case 0 => None
-      case a => Some(Patch(root.resolve(maxId)))
-    }
+    val ls = listVersions
+    ls.headOption
   }
   def get(id: Int): Option[Patch] = {
     if (!Files.exists(root.resolve(id))) {
