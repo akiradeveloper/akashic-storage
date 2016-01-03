@@ -14,7 +14,7 @@ object KVList {
   case class Builder() {
     val l = mutable.ListBuffer[(String, String)]()
     def append(k: String, v: String): this.type = { 
-      l += k => v
+      l += k -> v
       this
     }
     def appendOpt(k: String, v: Option[String]): this.type = {

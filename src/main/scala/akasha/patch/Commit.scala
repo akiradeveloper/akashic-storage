@@ -14,12 +14,12 @@ object Commit {
         fn(patch)
         patch.commit
       } match {
-        Success(a) => true
-        Failure(a) => false
+        case Success(a) => true
+        case Failure(a) => false
       }
     }
   }
-  case class RetryGeneric(makePath: => Path, f: Patch => Unit) {
+  case class RetryGeneric(makePath: () => Path, f: Patch => Unit) {
     def run: Patch = {
       try {
         val patch = Patch(makePath)
@@ -29,7 +29,7 @@ object Commit {
         patch
       } catch {
         case FileAlreadyExistsException(_) => run
-        case e -> throw e
+        case e => throw e
       }
     }
   }

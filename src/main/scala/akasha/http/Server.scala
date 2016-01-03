@@ -54,12 +54,12 @@ case class Server(config: ServerConfig) {
     // :+: doPutObject
     // :+: doPutBucket
 
+  import com.twitter.finagle.http.Status
   val endpoint = api.handle {
-    import com.twitter.finagle.http.Status
     case Error.Exception(context, e) =>
       val withMessage = Error.withMessage(e)
       val xml = Error.mkXML(withMessage, context.resource, context.requestId)
-      val cause = io.finch.Error(xml.toString)) 
+      val cause = io.finch.Error(xml.toString)
       Output.Failure(cause, Status.fromCode(withMessage.httpCode))
         .withHeader(("a", "b"))
     case _ => assert(false) // TODO
