@@ -48,7 +48,11 @@ object Files {
     }
   }
 
-  def children(path: Path): Seq[Path] = ???
+  def children(path: Path): Seq[Path] = {
+    using(Files.newDirectoryStream(path)) { p =>
+      p.iterator.toList
+    }
+  }
 
   def purgeDirectory(path: Path) {
     // clean the contents

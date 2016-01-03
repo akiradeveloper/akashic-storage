@@ -18,9 +18,6 @@ object Error {
   }
 
   case class Exception(e: t) extends RuntimeException
-  def failWith(e: t): Unit = {
-    throw Exception(e)
-  }
 
   case class AccessDenied() extends t
   case class AccountProblem() extends t

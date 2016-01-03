@@ -12,8 +12,9 @@ import scala.xml.{NodeSeq, XML}
 case class Server(config: ServerConfig) {
   val tree = Tree(config.treePath)
   val users = UserTable(config.adminPath)
-
-  val callerId = Some(TestUsers.hoge.id)
+  val TMPREQID = "TMPREQID"
+  val TMPCALLERID = Some(TestUsers.hoge.id)
+  val TMPRESOURCE = "/"
 
   val adminService =
     get("admin" / "user") {
@@ -32,11 +33,10 @@ case class Server(config: ServerConfig) {
       Ok("")
     }
 
-  val TMPRESOURCE = "/"
-  val TMPREQID = "TMPREQID"
+  val TMPCONTEXT = Context(tree, users, TMPREQID, TMPCALLERID, TMPRESOURCE)
 
   val doGetService = get(/) {
-    val xml = ???
+    val xml = TMPCONTEXT.doGetService
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }
@@ -47,19 +47,17 @@ case class Server(config: ServerConfig) {
 
   val api =
     adminService :+:
-    doGetService
-    // :+: doGetBucket
+    doGetService :+:
+    doGetBucket
     // :+: doGetObject
     // :+: doGetObject
     // :+: doPutObject
     // :+: doPutBucket
 
-
   val endpoint = api.handle {
-    //case e => BadRequest(io.finch.Error("aaa"))
-    case Error.Exception(e) =>
+    case Error.Exception(context, e) =>
       val cam = Error.toCodeAndMessage(e)
-      val xml = Error.mkXML(cam, TMPRESOURCE, TMPREQID)
+      val xml = Error.mkXML(cam, context.resource, context.requestId)
       BadRequest(io.finch.Error(xml.toString)).withHeader(("a", "b"))
   }
 }
