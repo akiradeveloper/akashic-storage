@@ -2,9 +2,26 @@ package akasha
 
 import com.twitter.finagle.http.Status
 
-object Err{
+object Error {
 
-  sealed trait t
+  sealed trait t 
+  case class CodeAndMessage(code: Status, message: String)
+  
+  // FIXME resource should be bucketName/keyName. not uri.path.toString
+  def mkXML(o: CodeAndMessage, resource: String, requestId: String) = {
+    <Error>
+      <Code>{o.code}</Code>
+      <Message>{o.message}</Message>
+      <Resource>{resource.toString}</Resource>
+      <RequestId>{requestId}</RequestId>
+    </Error>
+  }
+
+  case class Exception(e: t) extends RuntimeException
+  def failWith(e: t): Unit = {
+    throw Exception(e)
+  }
+
   case class AccessDenied() extends t
   case class AccountProblem() extends t
   case class AmbiguousGrantByEmailAddress() extends t
@@ -36,7 +53,6 @@ object Err{
   case class InvalidPartOrder() extends t
   case class NoSuchUpload() extends t
 
-  case class CodeAndMessage(code: Status, message: String)
   def toCodeAndMessage(e: t): CodeAndMessage = {
     val tup = e match {
       case BadDigest() => (Status.BadRequest, "The Content-MD5 you specified did not match what we received.")
@@ -56,23 +72,8 @@ object Err{
       case InvalidPart() => (Status.BadRequest, "")
       case InvalidPartOrder() => (Status.BadRequest, "")
       case NoSuchUpload() => (Status.NotFound, "")
+      case _ => (Status.InternalServerError, "unknown error")
     }
     CodeAndMessage(tup._1, tup._2)
-  }
-
-  case class Exception(e: t) extends RuntimeException
-
-  // FIXME resource should be bucketName/keyName. not uri.path.toString
-  def mkXML(o: CodeAndMessage, resource: String, requestId: String) = {
-    <Error>
-      <Code>{o.code}</Code>
-      <Message>{o.message}</Message>
-      <Resource>{resource.toString}</Resource>
-      <RequestId>{requestId}</RequestId>
-    </Error>
-  }
-
-  def failWith(e: t): Unit = {
-    throw Exception(e)
   }
 }

@@ -1,5 +1,5 @@
 package akasha
 
 object Strings {
-  def random(n: Int) = Random.
+  def random(n: Int): String = Random.alphanumeric.take(n)
 }
