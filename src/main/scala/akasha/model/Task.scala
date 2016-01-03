@@ -1,4 +1,4 @@
-package akasha.api
+package akasha.model
 
 trait Task[T] {
   def doRun: T

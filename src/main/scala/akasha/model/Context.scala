@@ -1,4 +1,4 @@
-package akasha.api
+package akasha.model
 
 case class Context(tree: Tree, users: UserTable, requestId: String, callerId: Option[String], resource: String)
 extends GetService {

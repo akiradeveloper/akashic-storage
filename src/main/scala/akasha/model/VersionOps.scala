@@ -1,4 +1,4 @@
-package akasha.api
+package akasha.model
 
 import akasha.patch.Version
 

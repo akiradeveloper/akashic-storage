@@ -1,4 +1,4 @@
-package akasha.api
+package akasha.model
 
 object GetService {
   case class Result(xml: NodeSeq)

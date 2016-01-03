@@ -1,56 +1,9 @@
-package akasha
+package akasha.http
 
-import com.twitter.finagle.http.Status
+import akasha.model.{Error => E}
 
 object Error {
-
-  sealed trait t 
-  case class CodeAndMessage(code: Status, message: String)
-  
-  // FIXME resource should be bucketName/keyName. not uri.path.toString
-  def mkXML(o: CodeAndMessage, resource: String, requestId: String) = {
-    <Error>
-      <Code>{o.code}</Code>
-      <Message>{o.message}</Message>
-      <Resource>{resource.toString}</Resource>
-      <RequestId>{requestId}</RequestId>
-    </Error>
-  }
-
-  case class Exception(e: t) extends RuntimeException
-
-  case class AccessDenied() extends t
-  case class AccountProblem() extends t
-  case class AmbiguousGrantByEmailAddress() extends t
-  case class BadDigest() extends t
-  case class BucketAlreadyOwnByYou() extends t
-  case class BucketNotEmpty() extends t
-  case class CredentialsNotSupported() extends t
-  case class EntityTooLarge() extends t
-  case class IllegalVersioningConfigurationException() extends t
-  case class IncompleteBody() extends t
-  case class IncorrectNumberOfFilesInPostRequest() extends t
-  case class InlineDataTooLarge() extends t
-  // TODO
-
-  case class NotSignedUp() extends t
-  case class InvalidToken() extends t
-  case class ExpireToken() extends t
-  case class SignatureDoesNotMatch() extends t
-  case class NoSuchBucket() extends t
-  case class NoSuchKey() extends t
-  case class InternalError(s: String) extends t
-  case class MalformedXML() extends t
-  case class BucketAlreadyExists() extends t
-  case class NotImplemented() extends t
-
-  // Complte Multipart Upload specific
-  case class EntityTooSmall() extends t
-  case class InvalidPart() extends t
-  case class InvalidPartOrder() extends t
-  case class NoSuchUpload() extends t
-
-  def toCodeAndMessage(e: t): CodeAndMessage = {
+  def toCodeAndMessage(e: E.t): E.CodeAndMessage = {
     val tup = e match {
       case BadDigest() => (Status.BadRequest, "The Content-MD5 you specified did not match what we received.")
       case NotSignedUp() => (Status.Forbidden, "Your account is not signed up for the albero S3 service.")
@@ -71,6 +24,6 @@ object Error {
       case NoSuchUpload() => (Status.NotFound, "")
       case _ => (Status.InternalServerError, "unknown error")
     }
-    CodeAndMessage(tup._1, tup._2)
+    E.CodeAndMessage(tup._1, tup._2)
   }
 }

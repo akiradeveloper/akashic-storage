@@ -1,6 +1,6 @@
 package akasha.patch
 
-case class Data(root: Path) extends Patch with Leaf {
+case class Data(root: Path) extends Patch {
   val data: Path = root.resolve("data")
   def write(inp: InputStream) = ???
   def read: File = ???
