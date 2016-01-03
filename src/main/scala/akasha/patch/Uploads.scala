@@ -1,6 +1,6 @@
 package akasha.patch
 
-case class PatchBox(root: Path) {
+case class Uploads(root: Path) {
 
   def retry: Path = {
     try {

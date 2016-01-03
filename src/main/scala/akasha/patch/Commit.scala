@@ -1,16 +1,19 @@
 package akasha.patch
 
 object Commit {
-  case class Once(patch: Patch, to: Path) {
+  type Fn = Patch => Unit
+
+  val makePatch(to: Path) = new Patch { def root = to }
+
+  case class Once(to: Path, fn: Fn) {
     def run: Boolean = {
       Try {
-        val pseudoPatch = new Patch {
-          def root = to
-        }
+        val patch = makePatch(to)
         if (Files.exists(to) && !pseudoPatch.commited) {
           akasha.Files.purgeDirectory(to)
         }
-        Files.move(patch.root, to, StandardCopyOption.ATOMIC_MOVE)
+        patch.init
+        fn(patch)
         patch.commit
       } match {
         Success(a) => true
@@ -19,17 +22,24 @@ object Commit {
     }
   }
   // upload part can overwrite the existing part
-  case class ForceOnce(patch: Patch, to: Path) {
+  case class ForceOnce(to: Path, fn: Fn) {
     def run {
-      Files.move(patch.root, to, StandardCopyOption.ATOMIC_MOVE | StandardCopyOption.REPLACE_EXISTING)
+      if (Files.exists(to)) {
+        akasha.Files.purgeDirectory(to)
+      }
+      val patch = makePatch(to)
+      patch.init
+      fn(patch)
       patch.commit
     }
   }
-  case class Retry(patch: Patch, to: PatchLog) {
+  case class Retry(to: PatchLog, f: Fn) {
     def run: Path = {
       try {
         val newPath = to.acquireNewLoc
-        Files.move(patch.root, to.acquireNewLoc, StandardCopyOption.ATOMIC_MOVE)
+        val patch = makePatch(newPath)
+        patch.init
+        fn(patch)
         patch.commit
         newPath
       } catch {
