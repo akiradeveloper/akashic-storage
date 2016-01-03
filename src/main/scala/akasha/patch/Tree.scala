@@ -8,5 +8,7 @@ case class Tree(root: Path) {
       Some(Bucket(path))
     } else { None }
   }
-  def listBuckets: Seq[Bucket] = ???
+  def listBuckets: Seq[Bucket] = {
+    Files.children(root).map(Bucket(_)).filter(_.committed)
+  }
 }

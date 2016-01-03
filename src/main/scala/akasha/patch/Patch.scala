@@ -1,5 +1,9 @@
 package akasha.patch
 
+object Patch {
+  def apply(root: Path) = new Patch { def root = root }
+}
+
 trait Patch {
   def root: Path
   def commitPath = root.resolve("commit")
@@ -8,7 +12,7 @@ trait Patch {
   def commit {
     akasha.Files.touch(commitPath)
   }
-  def commited: Boolean = {
+  def committed: Boolean = {
     Files.exists(commitPath)
   }
   // throws if the dir exists

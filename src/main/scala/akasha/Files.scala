@@ -48,6 +48,8 @@ object Files {
     }
   }
 
+  def children(path: Path): Seq[Path] = ???
+
   def purgeDirectory(path: Path) {
     // clean the contents
     Files.walkFileTree(path, new SimpleFileVisitor[Path] {

@@ -4,7 +4,7 @@ object Commit {
   case class Once(to: Path, fn: Patch => Unit) {
     def run: Boolean = {
       Try {
-        val patch = PatchGuard(to)
+        val patch = Patch(to)
         if (Files.exists(to) && !pseudoPatch.commited) {
           akasha.Files.purgeDirectory(to)
         }
@@ -21,7 +21,7 @@ object Commit {
   case class RetryGeneric(makePath: => Path, f: Patch => Unit) {
     def run: Patch = {
       try {
-        val patch = PatchGuard(makePath)
+        val patch = Patch(makePath)
         patch.init
         fn(patch)
         patch.commit

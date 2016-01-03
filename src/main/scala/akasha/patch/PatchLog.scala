@@ -13,7 +13,16 @@ case class PatchLog(root: Path) extends Patch {
   def get: Option[Patch] = {
     maxId match {
       case 0 => None
-      case a => Some(AnyPatch(root.resolve(maxId)))
+      case a => Some(Patch(root.resolve(maxId)))
     }
+  }
+  def get(id: Int): Option[Patch] = {
+    if (!Files.exists(root.resolve(id))) {
+      return None
+    }
+    if (!Patch(root.resolve(id)).committed) {
+      return None
+    }
+    Patch(root.resolve(id))
   }
 }
