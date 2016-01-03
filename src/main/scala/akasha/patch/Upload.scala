@@ -1,4 +1,4 @@
-package akasha.tree
+package akasha.patch
 
 case class Upload(root: Path) extends Patch {
   val parts = root.resolve("parts")

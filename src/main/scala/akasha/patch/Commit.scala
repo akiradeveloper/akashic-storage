@@ -29,7 +29,7 @@ object Commit {
         patch
       } catch {
         case FileAlreadyExistsException(_) => run
-        case e => throw e
+        case e: Throwable => throw e
       }
     }
   }

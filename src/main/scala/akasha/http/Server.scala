@@ -7,6 +7,9 @@ import io.finch._
 
 import io.finch.ext._
 
+import akasha.admin._
+import akasha.model._
+
 import scala.xml.{NodeSeq, XML}
 
 case class Server(config: ServerConfig) {
@@ -54,7 +57,6 @@ case class Server(config: ServerConfig) {
     // :+: doPutObject
     // :+: doPutBucket
 
-  import com.twitter.finagle.http.Status
   val endpoint = api.handle {
     case Error.Exception(context, e) =>
       val withMessage = Error.withMessage(e)

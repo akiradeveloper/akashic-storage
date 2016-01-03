@@ -1,4 +1,4 @@
-package akasha.tree
+package akasha.patch
 
 case class Version(root: Path) extends Patch {
   val data = Data(path.resolve("data"))
