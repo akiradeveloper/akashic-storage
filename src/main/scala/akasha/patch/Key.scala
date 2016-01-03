@@ -2,10 +2,10 @@ package akasha.patch
 
 case class Key(root: Path) extends Patch {
   val versions = PatchLog(path.resolve("versions"))
-  val uploads: Path = root.resolve("uploads")
+  val uploads = Uploads(root.resolve("uploads"))
   def init {
     versions.init
-    Files.createDirectory(uploads)
+    uploads.init
   }
   def findLatestVersion: Option[Version] = {
     versions.get.map(Version(_.root))

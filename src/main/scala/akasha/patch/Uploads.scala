@@ -6,8 +6,11 @@ package akasha.patch
  *     parts/
  *       partNumber
  */
-case class Uploads(root: Path, fn: Upload => Unit) {
-  def acquireNewUpload: Upload = RetryGeneric(
+case class Uploads(root: Path) {
+  def init {
+    Files.createDirectory(root)
+  }
+  def acquireNewUpload(fn: Patch => Unit): Upload = RetryGeneric(
     () => {
       val uploadId = akasha.Strings.random(16)
       root.resolve(uploadId)

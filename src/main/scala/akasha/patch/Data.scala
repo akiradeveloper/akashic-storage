@@ -6,5 +6,6 @@ case class Data(root: Path) extends Patch with Leaf {
   def read: File = ???
   def writeBytes(data: Array[Byte]) = ???
   def readBytes: Array[Byte]  = ???
+  def merge(files: Seq[Data]) = ???
   def init {}
 }
