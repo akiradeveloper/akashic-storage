@@ -41,7 +41,7 @@ object Error {
     </Error>
   }
 
-  case class Exception(e: t) extends RuntimeException
+  case class Exception(context: Context, e: t) extends RuntimeException
 
   case class AccessDenied() extends t
   case class AccountProblem() extends t

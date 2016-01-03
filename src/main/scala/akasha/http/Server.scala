@@ -1,16 +1,11 @@
 package akasha.http
 
-import com.twitter.finagle.Http
-import com.twitter.finagle.http.Status
-import com.twitter.util.{Future, Await}
-import io.finch._
-
-import io.finch.ext._
-
 import akasha.admin._
 import akasha.model._
-
-import scala.xml.{NodeSeq, XML}
+import com.twitter.finagle.Http
+import com.twitter.finagle.http.Status
+import com.twitter.util.Await
+import io.finch._
 
 case class Server(config: ServerConfig) {
   val tree = Tree(config.treePath)

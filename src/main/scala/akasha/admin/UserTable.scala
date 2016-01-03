@@ -1,6 +1,6 @@
 package akasha.admin
 
-import java.nio.file.{FileSystems, Path}
+import java.nio.file.Path
 
 import scala.slick.driver.SQLiteDriver.simple._
 import scala.util.Random

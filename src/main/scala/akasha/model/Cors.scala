@@ -1,13 +1,9 @@
 package akasha.model
 
-import java.nio.file.{Files, Path}
-
-import org.apache.commons.io.IOUtils
-
-import scala.util.Try
-import scala.xml.NodeSeq
 import scala.pickling.Defaults._
 import scala.pickling.binary._
+import scala.util.Try
+import scala.xml.NodeSeq
 
 object Cors {
   case class t(rules: Seq[Rule]) {

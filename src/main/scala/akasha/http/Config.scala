@@ -1,6 +1,6 @@
 package akasha.http
 
-import java.nio.file.{Paths, Path}
+import java.nio.file.{Path, Paths}
 
 import com.typesafe.config.{Config, ConfigFactory}
 

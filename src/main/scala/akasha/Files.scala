@@ -1,5 +1,10 @@
 package akasha
 
+import java.io.{IOException, InputStream}
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{Files => JFiles, FileVisitResult, SimpleFileVisitor, StandardOpenOption, Path}
+import java.util.Date
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.IOUtils
 import org.apache.tika.Tika
@@ -22,55 +27,56 @@ object Files {
   def readBytes(path: Path): Array[Byte] = ???
 
   def write(path: Path, inp: InputStream) = {
-    using(Files.newOutputStream(path, StandardOpenOption.CREATE)) { oup =>
-      Files.copyLarge(inp, oup)
+    using(JFiles.newOutputStream(path, StandardOpenOption.CREATE)) { oup =>
+      IOUtils.copyLarge(inp, oup)
     }
   }
 
   def touch(path: Path) = ???
 
   def computeMD5(path: Path): String = {
-    using(Files.newInputStream(path)) { inp =>
+    using(JFiles.newInputStream(path)) { inp =>
       DigestUtils.md5Hex(inp)
     }
   }
 
-  def lastDate(path: Path): Date = new Date(Files.getLastModifiedTime(path).toMillis)
+  def lastDate(path: Path): Date = new Date(JFiles.getLastModifiedTime(path).toMillis)
 
   def basename(path: Path): String = path.getFileName.toString
 
-  def fileSize(path: Path): Long = Files.size(path)
+  def fileSize(path: Path): Long = JFiles.size(path)
 
   def detectContentType(path: Path): String = {
-    using(Files.newInputStream(path)) { f =>
+    using(JFiles.newInputStream(path)) { f =>
       val tika = new Tika()
       tika.detect(f)
     }
   }
 
   def children(path: Path): Seq[Path] = {
-    using(Files.newDirectoryStream(path)) { p =>
+    import scala.collection.JavaConversions._
+    using(JFiles.newDirectoryStream(path)) { p =>
       p.iterator.toList
     }
   }
 
   def purgeDirectory(path: Path) {
     // clean the contents
-    Files.walkFileTree(path, new SimpleFileVisitor[Path] {
+    JFiles.walkFileTree(path, new SimpleFileVisitor[Path] {
       override def visitFile(x: Path, attrs: BasicFileAttributes) = {
-        Files.delete(x)
+        JFiles.delete(x)
         FileVisitResult.CONTINUE
       }
       override def postVisitDirectory(x: Path, e: IOException) = {
         if (x == path) {
           FileVisitResult.TERMINATE
         } else {
-          Files.delete(x)
+          JFiles.delete(x)
           FileVisitResult.CONTINUE
         }
       }
     })
     // and delete itself
-    Files.delete(path)
+    JFiles.delete(path)
   }
 }

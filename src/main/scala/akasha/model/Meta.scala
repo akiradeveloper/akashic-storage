@@ -1,12 +1,10 @@
 package akasha.model
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.Paths
 
-import org.apache.commons.io.IOUtils
-
+import scala.collection.mutable
 import scala.pickling.Defaults._
 import scala.pickling.binary._
-import scala.collection.mutable
 
 object KVList {
   case class t(unwrap: Seq[(String, String)])

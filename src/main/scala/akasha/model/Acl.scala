@@ -1,12 +1,8 @@
 package akasha.model
 
-import java.nio.file.{Files, Path}
-
-import org.apache.commons.io.IOUtils
-
-import scala.xml.NodeSeq
 import scala.pickling.Defaults._
 import scala.pickling.binary._
+import scala.xml.NodeSeq
 
 object Acl {
   case class t(owner: Option[String], grants: Seq[Grant]) {

@@ -1,9 +1,5 @@
 package akasha.model
 
-import java.nio.file.{Files, Path}
-
-import org.apache.commons.io.IOUtils
-
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 
