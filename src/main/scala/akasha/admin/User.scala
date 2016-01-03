@@ -2,8 +2,6 @@ package akasha.admin
 
 import scala.xml.NodeSeq
 
-
-
 object User {
   case class t(id: String,
                accessKey: String,

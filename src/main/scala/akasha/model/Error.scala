@@ -1,15 +1,40 @@
 package akasha.model
 
-import com.twitter.finagle.http.Status
-
 object Error {
 
   sealed trait t 
-  case class CodeAndMessage(code: Status, message: String)
-  
-  def mkXML(o: CodeAndMessage, resource: String, requestId: String) = {
+  case class WithMessage(httpCode: Int, errorCode: String, message: String)
+
+  def withMessage(e: t): WithMessage = {
+    val tup = e match {
+      case BadDigest() => (400, "The Content-MD5 you specified did not match what we received.")
+      case NotSignedUp() => (403, "Your account is not signed up for the albero S3 service.")
+      case AccessDenied() => (403, "Access Denied")
+      case InvalidToken() => (400, "The provided token is malformed or otherwise invalid.")
+      case ExpireToken() => (400, "The provided token has expired.")
+      case SignatureDoesNotMatch() => (403, "The request signature we calculated does not match the signature you provided. ...")
+      case NoSuchBucket() => (404, "The specified bucket does not exist.")
+      case NoSuchKey() => (404, "The specified key does not exist.")
+      case InternalError(s) => (500, s"We encountered an internal error. Please try again. (${s})")
+      case BucketAlreadyExists() => (409, "The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.")
+      case MalformedXML() => (400, "The XML you provided was not well-formed or did not validate against our published schema.")
+      case NotImplemented() => (501, "A header you provided implies functionality that is not implemented.")
+
+      case EntityTooSmall() => (400, "Your proposed upload is too smaller than the minimum allowed object size. Each part ...")
+      case InvalidPart() => (400, "")
+      case InvalidPartOrder() => (400, "")
+      case NoSuchUpload() => (404, "")
+      case _ => (500, "unknown error")
+    }
+    WithMessage(
+      httpCode = tup._1,
+      errorCode = e.getClass.getSimpleName,
+      message = tup._2)
+  }
+
+  def mkXML(o: WithMessage, resource: String, requestId: String) = {
     <Error>
-      <Code>{o.code}</Code>
+      <Code>{o.errorCode}</Code>
       <Message>{o.message}</Message>
       <Resource>{resource}</Resource>
       <RequestId>{requestId}</RequestId>
