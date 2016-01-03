@@ -6,7 +6,7 @@ trait Task[T] {
     try {
       doRun
     } catch {
-      case akasha.Error(e) => throw e
+      case e: Error.Exception => throw e
       case _ => run
     }
   }

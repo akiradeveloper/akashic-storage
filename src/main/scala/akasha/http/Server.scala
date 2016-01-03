@@ -62,6 +62,7 @@ case class Server(config: ServerConfig) {
       val cause = io.finch.Error(xml.toString)) 
       Output.Failure(cause, Status.fromCode(withMessage.httpCode))
         .withHeader(("a", "b"))
+    case _ => assert(false) // TODO
   }
 }
 
