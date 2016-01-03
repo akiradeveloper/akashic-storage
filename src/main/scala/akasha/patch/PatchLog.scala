@@ -20,12 +20,11 @@ case class PatchLog(root: Path) extends Patch {
     ls.headOption
   }
   def get(id: Int): Option[Patch] = {
-    if (!Files.exists(root.resolve(id))) {
-      return None
+    val path = root.resolve(id)
+    if (Files.exists(path) && Patch(path).committed) {
+      Patch(path)
+    } else {
+      None
     }
-    if (!Patch(root.resolve(id)).committed) {
-      return None
-    }
-    Patch(root.resolve(id))
   }
 }

@@ -5,10 +5,12 @@ object Commit {
     def run: Boolean = {
       Try {
         val patch = Patch(to)
-        if (Files.exists(to) && !pseudoPatch.commited) {
+        if (Files.exists(to) && !pseudoPatch.committed) {
           akasha.Files.purgeDirectory(to)
         }
         patch.init
+        // As the previous line throws exception if the directory exists
+        // only a process created the directory can reach this line.
         fn(patch)
         patch.commit
       } match {
