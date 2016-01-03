@@ -46,7 +46,7 @@ object Files {
     }
   }
 
-  def deleteDirectory(path: Path) {
+  def purgeDirectory(path: Path) {
     // clean the contents
     Files.walkFileTree(path, new SimpleFileVisitor[Path] {
       override def visitFile(x: Path, attrs: BasicFileAttributes) = {
