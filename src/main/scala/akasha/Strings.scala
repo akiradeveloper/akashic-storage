@@ -1,0 +1,4 @@
+package akasha
+
+object Strings {
+}
