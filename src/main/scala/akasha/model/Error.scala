@@ -21,9 +21,9 @@ object Error {
       case NotImplemented() => (501, "A header you provided implies functionality that is not implemented.")
 
       case EntityTooSmall() => (400, "Your proposed upload is too smaller than the minimum allowed object size. Each part ...")
-      case InvalidPart() => (400, "")
-      case InvalidPartOrder() => (400, "")
-      case NoSuchUpload() => (404, "")
+      case InvalidPart() => (400, "One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.")
+      case InvalidPartOrder() => (400, "The list of parts was not in ascending order.Parts list must specified in order by part number.")
+      case NoSuchUpload() => (404, "The specified multipart upload does not exist. The upload ID might be invalid, or the multipart upload might have been aborted or completed.")
       case _ => (500, "unknown error")
     }
     WithMessage(
