@@ -49,8 +49,8 @@ case class Server(config: ServerConfig) {
   }
 
   val api =
-    //adminService :+:
-    //doGetService :+:
+    adminService :+:
+    doGetService :+:
     doGetBucket
     // :+: doGetObject
     // :+: doGetObject
@@ -72,6 +72,8 @@ case class Server(config: ServerConfig) {
 }
 
 object TestApp extends App {
+  implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
+
   val config = ServerConfig.forTest
   Await.ready(Http.server.serve(s"${config.ip}:${config.port}", Server(config).endpoint.toService))
 }
