@@ -20,7 +20,7 @@ case class Server(config: ServerConfig) {
   val TMPRESOURCE = "/"
 
   val adminService =
-    get("admin" / "user") {
+    post("admin" / "user") {
       val result = MakeUser.run(users)
       Ok(result.xml)
     } :+:
@@ -38,8 +38,12 @@ case class Server(config: ServerConfig) {
 
   val TMPCONTEXT = Context(tree, users, TMPREQID, TMPCALLERID, TMPRESOURCE)
 
-  val doGetService = get(/) {
-    val GetService.Result(xml) = TMPCONTEXT.doGetService
+  object GetService {
+    val readParams = get(/)
+  }
+
+  val doGetService = GetService.readParams {
+    val model.GetService.Output(xml) = TMPCONTEXT.doGetService
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }
@@ -56,7 +60,11 @@ case class Server(config: ServerConfig) {
     Ok("hoge")
   }
 
-  val doPutObject = get(string / string ? binaryBody) { (bucketName: String, keyName: String, body: Array[Byte]) =>
+  object PutObject {
+    val readParams = get(string / string ? binaryBody)
+  }
+
+  val doPutObject = PutObject.readParams { (bucketName: String, keyName: String, body: Array[Byte]) =>
     Ok("hoge")
   }
 

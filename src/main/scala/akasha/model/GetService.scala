@@ -3,12 +3,13 @@ package akasha.model
 import scala.xml.NodeSeq
 
 object GetService {
-  case class Result(xml: NodeSeq)
+  case class Input()
+  case class Output(xml: NodeSeq)
 }
 
 trait GetService { self: Context =>
   import akasha.model.GetService._
-  case class GetService() extends Task[Result] {
+  case class GetService(input: Input) extends Task[Output] {
     def doRun = {
       val xml =
         <ListAllMyBucketsResult>
@@ -26,8 +27,8 @@ trait GetService { self: Context =>
           </Buckets>
         </ListAllMyBucketsResult>
 
-      Result(xml)
+      Output(xml)
     }
   }
-  def doGetService = GetService().run
+  def doGetService = GetService(Input()).run
 }
