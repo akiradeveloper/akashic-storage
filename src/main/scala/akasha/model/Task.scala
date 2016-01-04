@@ -7,7 +7,7 @@ trait Task[T] {
       doRun
     } catch {
       case e: Error.Exception => throw e
-      case _ => run
+      case _: Throwable => run
     }
   }
 }

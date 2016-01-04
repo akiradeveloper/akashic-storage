@@ -10,6 +10,8 @@ import com.twitter.finagle.http.Status
 import com.twitter.util.Await
 import io.finch._
 
+import scala.xml.NodeSeq
+
 case class Server(config: ServerConfig) {
   val tree = Tree(config.treePath)
   val users = UserTable(config.adminPath)
@@ -37,7 +39,7 @@ case class Server(config: ServerConfig) {
   val TMPCONTEXT = Context(tree, users, TMPREQID, TMPCALLERID, TMPRESOURCE)
 
   val doGetService = get(/) {
-    val xml = TMPCONTEXT.doGetService
+    val GetService.Result(xml) = TMPCONTEXT.doGetService
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }
@@ -47,8 +49,8 @@ case class Server(config: ServerConfig) {
   }
 
   val api =
-    adminService :+:
-    doGetService :+:
+    //adminService :+:
+    //doGetService :+:
     doGetBucket
     // :+: doGetObject
     // :+: doGetObject

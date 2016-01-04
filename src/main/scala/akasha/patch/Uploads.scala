@@ -1,5 +1,9 @@
 package akasha.patch
 
+import java.nio.file.{Files, Path}
+
+import akasha.patch.Commit.RetryGeneric
+
 /*
  * uploads/
  *   uploadId/

@@ -7,7 +7,8 @@ object GetService {
 }
 
 trait GetService { self: Context =>
-  case class GetService() extends Task[GetService.Result] {
+  import akasha.model.GetService._
+  case class GetService() extends Task[Result] {
     def doRun = {
       val xml =
         <ListAllMyBucketsResult>
@@ -18,14 +19,14 @@ trait GetService { self: Context =>
           <Buckets>
             { for (b <- tree.listBuckets) yield
             <Bucket>
-              <Name>{b.root.lastName}</Name>
-              <CreationDate>{b.root.lastModified.format000Z}</CreationDate>
+              <Name>{b.name}</Name>
+              <CreationDate>{val date = akasha.Files.lastDate(b.root); Dates.format000Z(date)}</CreationDate>
             </Bucket>
             }
           </Buckets>
         </ListAllMyBucketsResult>
 
-      GetService.Result(xml)
+      Result(xml)
     }
   }
   def doGetService = GetService().run

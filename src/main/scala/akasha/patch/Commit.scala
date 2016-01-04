@@ -1,11 +1,15 @@
 package akasha.patch
 
+import java.nio.file.{FileAlreadyExistsException, Files, Path}
+
+import scala.util.{Failure, Success, Try}
+
 object Commit {
   case class Once(to: Path, fn: Patch => Unit) {
     def run: Boolean = {
       Try {
         val patch = Patch(to)
-        if (Files.exists(to) && !pseudoPatch.committed) {
+        if (Files.exists(to) && !patch.committed) {
           akasha.Files.purgeDirectory(to)
         }
         patch.init
@@ -19,21 +23,21 @@ object Commit {
       }
     }
   }
-  case class RetryGeneric(makePath: () => Path, f: Patch => Unit) {
+  case class RetryGeneric(makePath: () => Path, fn: Patch => Unit) {
     def run: Patch = {
       try {
-        val patch = Patch(makePath)
+        val patch = Patch(makePath())
         patch.init
         fn(patch)
         patch.commit
         patch
       } catch {
-        case FileAlreadyExistsException(_) => run
+        case e: FileAlreadyExistsException => run
         case e: Throwable => throw e
       }
     }
   }
-  case class Retry(to: PatchLog, f: Patch => Unit) {
-    def run: Patch = RetryGeneric(() => to.acquireNewLoc, f).run
+  case class Retry(to: PatchLog, fn: Patch => Unit) {
+    def run: Patch = RetryGeneric(() => to.acquireNewLoc, fn).run
   }
 }

@@ -35,9 +35,3 @@ object Meta {
     BinaryPickle(bytes).unpickle[t]
   }
 }
-
-object MetaDump extends App {
-  val path = Paths.get(args(0))
-  val meta = Meta.read(path)
-  println(meta)
-}
