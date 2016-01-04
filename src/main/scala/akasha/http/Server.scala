@@ -48,14 +48,25 @@ case class Server(config: ServerConfig) {
     Ok("hoge")
   }
 
+  val doGetObject = get(string / string) { (bucketName: String, keyName: String) =>
+    Ok("hoge")
+  }
+
+  val doPutBucket = put(string) { bucketName: String =>
+    Ok("hoge")
+  }
+
+  val doPutObject = get(string / string ? binaryBody) { (bucketName: String, keyName: String, body: Array[Byte]) =>
+    Ok("hoge")
+  }
+
   val api =
     adminService :+:
     doGetService :+:
-    doGetBucket
-    // :+: doGetObject
-    // :+: doGetObject
-    // :+: doPutObject
-    // :+: doPutBucket
+    doGetBucket :+:
+    doGetObject :+:
+    doPutObject :+:
+    doPutBucket
 
   val endpoint = api.handle {
     case model.Error.Exception(context, e) =>
