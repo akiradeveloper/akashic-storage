@@ -14,7 +14,7 @@ import scala.xml.NodeSeq
 
 case class Server(config: ServerConfig) {
   val tree = Tree(config.treePath)
-  val users = UserTable(config.adminPath)
+  val users = UserTable(config.adminPath.resolve("db.sqlite"))
   val TMPREQID = "TMPREQID"
   val TMPCALLERID = Some(TestUsers.hoge.id)
   val TMPRESOURCE = "/"
