@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   // "org.apache.httpcomponents" % "httpmime" % "4.5.1",
   "org.apache.tika" % "tika-core" % "1.10",
   // "com.google.guava" % "guava" % "18.0",
-  // "com.amazonaws" % "aws-java-sdk" % "1.10.12",
+  "com.amazonaws" % "aws-java-sdk" % "1.10.12",
   "com.typesafe.slick" %% "slick" % "3.0.2",
   "org.xerial" % "sqlite-jdbc" % "3.7.2"
   // "com.github.scopt" %% "scopt" % "3.3.0",

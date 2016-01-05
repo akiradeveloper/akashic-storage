@@ -5,7 +5,7 @@ import akasha.admin._
 import akasha.model
 import akasha.model._
 import akasha.patch.Tree
-import com.twitter.finagle.Http
+import com.twitter.finagle.{ListeningServer, Http}
 import com.twitter.finagle.http.Status
 import com.twitter.util.Await
 import io.finch._
@@ -88,11 +88,9 @@ case class Server(config: ServerConfig) {
       val cause = io.finch.Error(message)
       Output.Failure(cause, Status.fromCode(code))
   }
-}
 
-object TestApp extends App {
-  implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-
-  val config = ServerConfig.forTest
-  Await.ready(Http.server.serve(s"${config.ip}:${config.port}", Server(config).endpoint.toService))
+  def run: ListeningServer = {
+    implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
+    Http.server.serve(s"${config.ip}:${config.port}", Server(config).endpoint.toService)
+  }
 }

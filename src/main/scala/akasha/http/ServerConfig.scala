@@ -14,12 +14,14 @@ trait ServerConfig {
 }
 
 object ServerConfig {
+  def forProduction = ???
+
   def forTest = {
     val configRoot = ConfigFactory.load
-    fromConfig(configRoot)
+    forConfig(configRoot)
   }
 
-  def fromConfig(configRoot: Config) = new ServerConfig {
+  def forConfig(configRoot: Config) = new ServerConfig {
     val config = configRoot.getConfig("akasha")
 
     val mp = Paths.get(config.getString("mountpoint"))
