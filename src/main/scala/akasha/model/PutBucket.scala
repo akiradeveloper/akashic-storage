@@ -15,13 +15,13 @@ trait PutBucket { self: Context =>
       //   case Some(a) => a
       //   case None => failWith(Error.NoSuchBucket())
       // }
-      // FIXME
-      if (tree.findBucket(input.bucketName).isDefined) {
-        failWith(Error.BucketAlreadyExists())
-      }
-      Commit.Once(tree.bucketPath(input.bucketName)) { patch =>
-      }
-      ???
+      val created = Commit.Once(tree.bucketPath(input.bucketName)) { patch =>
+        val bucketPatch: Bucket = Bucket(patch.root)
+        bucketPatch.init
+        // TODO acl, cors, versioning
+      }.run
+      if (!created) failWith(Error.BucketAlreadyExists())
+      Output()
     }
   }
   def doPutBucket(input: Input) = PutBucket(input).run
