@@ -5,7 +5,7 @@ import java.nio.file.{FileAlreadyExistsException, Files, Path}
 import scala.util.{Failure, Success, Try}
 
 object Commit {
-  case class Once(to: Path, fn: Patch => Unit) {
+  case class Once(to: Path)(fn: Patch => Unit) {
     def run: Boolean = {
       Try {
         val patch = Patch(to)
@@ -23,7 +23,7 @@ object Commit {
       }
     }
   }
-  case class RetryGeneric(makePath: () => Path, fn: Patch => Unit) {
+  case class RetryGeneric(makePath: () => Path)(fn: Patch => Unit) {
     def run: Patch = {
       try {
         val patch = Patch(makePath())
@@ -37,7 +37,7 @@ object Commit {
       }
     }
   }
-  case class Retry(to: PatchLog, fn: Patch => Unit) {
-    def run: Patch = RetryGeneric(() => to.acquireNewLoc, fn).run
+  case class Retry(to: PatchLog)(fn: Patch => Unit) {
+    def run: Patch = RetryGeneric(() => to.acquireNewLoc)(fn).run
   }
 }

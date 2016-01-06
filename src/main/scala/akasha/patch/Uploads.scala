@@ -18,5 +18,5 @@ case class Uploads(root: Path) {
     () => {
       val uploadId = akasha.Strings.random(16)
       root.resolve(uploadId)
-    }, fn).run.asUpload
+    })(fn).run.asUpload
 }
