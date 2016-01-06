@@ -24,6 +24,25 @@ class AdminTest extends ServerTestBase {
     assert(user === gotUser)
   }
 
-  test("add -> put -> get") { p =>
+  test("post -> put -> get") { p =>
+    val postRes = Http(rootURL).method("POST").asString
+    assert(postRes.code === 200)
+    val user = User.fromXML(XML.loadString(postRes.body))
+    assert(user.name !== "hige")
+    assert(user.email !== "hige@hige.net")
+
+    val xml =
+      <User>
+        <Name>hige</Name>
+        <Email>hige@hige.net</Email>
+      </User>
+    val putRes = Http(s"${rootURL}/${user.id}").postData(xml.toString).method("PUT").asString
+    assert(putRes.code === 200)
+
+    val getRes = Http(s"${rootURL}/${user.id}").method("GET").asString
+    assert(postRes.code === 200)
+    val gotUser = User.fromXML(XML.loadString(getRes.body))
+    assert(gotUser.name === "hige")
+    assert(gotUser.email === "hige@hige.net")
   }
 }
