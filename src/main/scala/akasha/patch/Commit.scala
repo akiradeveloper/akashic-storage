@@ -12,7 +12,7 @@ object Commit {
         if (Files.exists(to) && !patch.committed) {
           akasha.Files.purgeDirectory(to)
         }
-        patch.init
+        Files.createDirectory(patch.root)
         // As the previous line throws exception if the directory exists
         // only a process created the directory can reach this line.
         fn(patch)
@@ -27,7 +27,7 @@ object Commit {
     def run: Patch = {
       try {
         val patch = Patch(makePath())
-        patch.init
+        Files.createDirectory(patch.root)
         fn(patch)
         patch.commit
         patch

@@ -3,6 +3,9 @@ package akasha.patch
 import java.nio.file.{Files, Path}
 
 case class PatchLog(root: Path) extends Patch {
+  def init: Unit = {
+    Files.createDirectory(root)
+  }
   def acquireNewLoc: Path = {
     val xs = akasha.Files.children(root).map(akasha.Files.basename(_).toInt)
     val newId = if (xs.isEmpty) {

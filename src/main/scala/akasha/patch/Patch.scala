@@ -3,7 +3,7 @@ package akasha.patch
 import java.nio.file.{Files, Path}
 
 object Patch {
-  def apply(root: Path) = new Patch { def root = root }
+  def apply(_root: Path) = new Patch { def root = _root }
 }
 
 trait Patch {
@@ -18,11 +18,6 @@ trait Patch {
 
   def committed: Boolean = {
     Files.exists(commitPath)
-  }
-
-  // throws if the dir exists
-  def init {
-    Files.createDirectory(root)
   }
 
   def name: String = {

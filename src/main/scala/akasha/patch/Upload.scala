@@ -8,7 +8,7 @@ case class Upload(root: Path) extends Patch {
   def part(n: Int) = PatchLog(partPath(n))
   val acl = PatchLog(root.resolve("acl"))
   val meta = PatchLog(root.resolve("meta"))
-  override def init {
+  def init {
     Files.createDirectory(root.resolve("parts"))
     acl.init
     meta.init

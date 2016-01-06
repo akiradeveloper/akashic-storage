@@ -6,10 +6,11 @@ import java.nio.file.{Files => JFiles, FileVisitResult, SimpleFileVisitor, Stand
 import java.util.Date
 
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.IOUtils
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.tika.Tika
 
 object Files {
+
   object Implicits {
     def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
       try {
@@ -22,17 +23,26 @@ object Files {
 
   import Implicits._
 
-  def writeBytes(path: Path, data: Array[Byte]) = ???
+  def writeBytes(path: Path, data: Array[Byte]) = {
+    FileUtils.writeByteArrayToFile(path.toFile, data)
+    // using(JFiles.newOutputStream(path, StandardOpenOption.CREATE_NEW)) { oup =>
+    //   IOUtils.write(data, oup)
+    // }
+  }
 
-  def readBytes(path: Path): Array[Byte] = ???
+  def readBytes(path: Path): Array[Byte] = {
+    FileUtils.readFileToByteArray(path.toFile)
+  }
 
   def write(path: Path, inp: InputStream) = {
-    using(JFiles.newOutputStream(path, StandardOpenOption.CREATE)) { oup =>
+    using(JFiles.newOutputStream(path, StandardOpenOption.CREATE_NEW)) { oup =>
       IOUtils.copyLarge(inp, oup)
     }
   }
 
-  def touch(path: Path) = ???
+  def touch(path: Path) = {
+    FileUtils.touch(path.toFile)
+  }
 
   def computeMD5(path: Path): String = {
     using(JFiles.newInputStream(path)) { inp =>

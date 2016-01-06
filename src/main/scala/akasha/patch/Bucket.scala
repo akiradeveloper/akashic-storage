@@ -8,7 +8,7 @@ case class Bucket(root: Path) extends Patch {
   val versioning = PatchLog(root.resolve("versioning"))
   val keys: Path = root.resolve("keys")
   def keyPath(name: String): Path = keys.resolve(name)
-  override def init {
+  def init {
     acl.init
     cors.init
     versioning.init

@@ -12,14 +12,10 @@ trait GetService { self: Context =>
   import akasha.model.GetService._
   case class GetService(input: Input) extends Task[Output] {
     def doRun = {
-      def Owner(callerId: Option[String]) = {
-        val id = callerId match {
-          case Some(a) => a
-          case None => "anonymous"
-        }
+      def Owner(callerId: String) = {
         <Owner>
-          <ID>{id}</ID>
-          <DisplayName>{users.getUser(callerId.get).get.displayName}</DisplayName>
+          <ID>{callerId}</ID>
+          <DisplayName>{users.getUser(callerId).get.displayName}</DisplayName>
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {

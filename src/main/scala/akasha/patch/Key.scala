@@ -5,7 +5,7 @@ import java.nio.file.Path
 case class Key(root: Path) extends Patch {
   val versions = PatchLog(root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
-  override def init {
+  def init {
     versions.init
     uploads.init
   }

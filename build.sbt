@@ -3,6 +3,9 @@ name := "akashic"
 version := "1.0"
 
 scalaVersion := "2.11.6"
+
+// Each test suite can be run in parallel
+parallelExecution in Test := false
     
 resolvers += Resolver.sonatypeRepo("snapshots")
     

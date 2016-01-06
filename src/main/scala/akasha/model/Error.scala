@@ -55,7 +55,6 @@ object Error {
   case class IncompleteBody() extends t
   case class IncorrectNumberOfFilesInPostRequest() extends t
   case class InlineDataTooLarge() extends t
-  // TODO
 
   case class NotSignedUp() extends t
   case class InvalidToken() extends t

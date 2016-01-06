@@ -16,7 +16,7 @@ case class Server(config: ServerConfig) {
   val tree = Tree(config.treePath)
   val users = UserTable(config.adminPath.resolve("db.sqlite"))
   val TMPREQID = "TMPREQID"
-  val TMPCALLERID = Some(TestUsers.hoge.id)
+  val TMPCALLERID = TestUsers.hoge.id
   val TMPRESOURCE = "/"
 
   val adminService =
@@ -57,7 +57,9 @@ case class Server(config: ServerConfig) {
   }
 
   val doPutBucket = put(string) { bucketName: String =>
-    Ok("hoge")
+    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(model.PutBucket.Input(bucketName))
+    Ok()
+      .withHeader(("x-amz-request-id", TMPREQID))
   }
 
   object PutObject {

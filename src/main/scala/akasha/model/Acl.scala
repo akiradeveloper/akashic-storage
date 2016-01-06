@@ -5,7 +5,7 @@ import scala.pickling.binary._
 import scala.xml.NodeSeq
 
 object Acl {
-  case class t(owner: Option[String], grants: Seq[Grant]) {
+  case class t(owner: String, grants: Seq[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
   }
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
@@ -28,10 +28,7 @@ object Acl {
   case class ReadAcp() extends Permission
 
   def parseXML(xml: NodeSeq): t = {
-    val owner = (xml \ "Owner" \ "ID").text match {
-      case "anonymous" => None
-      case a => Some(a)
-    }
+    val owner = (xml \ "Owner" \ "ID").text
 
     val grants = (xml \ "AccessControlList" \ "Grant").map { a =>
       // TODO
