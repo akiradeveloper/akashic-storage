@@ -14,7 +14,7 @@ class AdminTest extends ServerTestBase {
 
   val rootURL = "http://localhost:9000/admin/user"
 
-  test("post and get") { p =>
+  test("post -> get") { p =>
     val postRes = Http(rootURL).method("POST").asString
     assert(postRes.code === 200)
     val user = User.fromXML(XML.loadString(postRes.body))

@@ -41,5 +41,5 @@ trait GetService { self: Context =>
       Output(xml)
     }
   }
-  def doGetService = GetService(Input()).run
+  def doGetService(input: Input) = GetService(input).run
 }
