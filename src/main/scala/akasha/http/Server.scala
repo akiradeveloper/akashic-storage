@@ -63,13 +63,15 @@ case class Server(config: ServerConfig) {
   }
 
   object PutBucket {
-    val readParams = for {
-      bucketName <- put(string)
-    } yield model.PutBucket.Input(bucketName)
+    // val readParams = for {
+    //   bucketName <- put(string)
+    //   context <- readContext
+    // } yield model.PutBucket.Input(bucketName)
+    val readParams = put(string) ? readContext ? readContext
   }
 
-  val doPutBucket = PutBucket.readParams { input: model.PutBucket.Input =>
-    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(input)
+  val doPutBucket = PutBucket.readParams { (bucketName: String, context: Context, context2: Context) =>
+    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(model.PutBucket.Input(bucketName))
     Ok()
       .withHeader(("x-amz-request-id", TMPREQID))
   }
