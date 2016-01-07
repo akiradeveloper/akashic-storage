@@ -56,8 +56,12 @@ case class Server(config: ServerConfig) {
     Ok("hoge")
   }
 
-  val doPutBucket = put(string) { bucketName: String =>
-    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(model.PutBucket.Input(bucketName))
+  object PutBucket {
+    val readParams = put(string).as[model.PutBucket.Input]
+  }
+
+  val doPutBucket = PutBucket.readParams { input: model.PutBucket.Input =>
+    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(input)
     Ok()
       .withHeader(("x-amz-request-id", TMPREQID))
   }
