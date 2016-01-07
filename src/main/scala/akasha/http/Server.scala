@@ -38,6 +38,12 @@ case class Server(config: ServerConfig) {
 
   val TMPCONTEXT = Context(tree, users, TMPREQID, TMPCALLERID, TMPRESOURCE)
 
+  val readContext = for {
+    reqid <- RequestReader.value(TMPREQID)
+    callerid <- RequestReader.value(TMPCALLERID)
+    resource <- RequestReader.value(TMPRESOURCE)
+  } yield Context(tree, users, reqid, callerid, resource)
+
   object GetService {
     val readParams = get(/).as[model.GetService.Input]
   }
@@ -57,7 +63,9 @@ case class Server(config: ServerConfig) {
   }
 
   object PutBucket {
-    val readParams = put(string).as[model.PutBucket.Input]
+    val readParams = for {
+      bucketName <- put(string)
+    } yield model.PutBucket.Input(bucketName)
   }
 
   val doPutBucket = PutBucket.readParams { input: model.PutBucket.Input =>
