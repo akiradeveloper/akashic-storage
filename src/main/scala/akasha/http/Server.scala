@@ -39,11 +39,11 @@ case class Server(config: ServerConfig) {
   val TMPCONTEXT = Context(tree, users, TMPREQID, TMPCALLERID, TMPRESOURCE)
 
   object GetService {
-    val readParams = get(/)
+    val readParams = get(/).as[model.GetService.Input]
   }
 
-  val doGetService = GetService.readParams { 
-    val model.GetService.Output(xml) = TMPCONTEXT.doGetService(model.GetService.Input())
+  val doGetService = GetService.readParams { input: model.GetService.Input =>
+    val model.GetService.Output(xml) = TMPCONTEXT.doGetService(input)
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }
