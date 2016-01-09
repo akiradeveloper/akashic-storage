@@ -1,7 +1,6 @@
 package akasha
 
 import akasha.admin.User
-import akasha.http._
 
 import scala.xml.XML
 import scalaj.http.Http

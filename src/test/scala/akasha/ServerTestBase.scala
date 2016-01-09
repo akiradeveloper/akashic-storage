@@ -1,9 +1,6 @@
 package akasha
 
-import akasha.http._
-import akasha.service.Server
 import com.twitter.finagle.{NullServer, ListeningServer}
-import com.twitter.util.Await
 import com.typesafe.config._
 import org.scalatest._
 import akasha.admin.TestUsers

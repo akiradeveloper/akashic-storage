@@ -2,7 +2,7 @@ package akasha.patch
 
 import java.nio.file.{Files, Path}
 
-import akasha.StringOps
+import akasha.strings
 import akasha.patch.Commit.RetryGeneric
 
 /*
@@ -17,7 +17,7 @@ case class Uploads(root: Path) {
   }
   def acquireNewUpload(fn: Patch => Unit): Upload = RetryGeneric(
     () => {
-      val uploadId = StringOps.random(16)
+      val uploadId = strings.random(16)
       root.resolve(uploadId)
     })(fn).run.asUpload
 }

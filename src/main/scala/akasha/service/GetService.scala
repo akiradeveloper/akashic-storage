@@ -1,6 +1,6 @@
 package akasha.service
 
-import akasha.{FileOps, patch}
+import akasha.{files, patch}
 
 import scala.xml.NodeSeq
 
@@ -20,8 +20,8 @@ trait GetService { self: Context =>
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {
-        val date = FileOps.lastDate(b.root)
-        val creationDate = DateOps.format000Z(date)
+        val date = files.lastDate(b.root)
+        val creationDate = dates.format000Z(date)
         <Bucket>
           <Name>{b.name}</Name>
           <CreationDate>{creationDate}</CreationDate>

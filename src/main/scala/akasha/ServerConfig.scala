@@ -26,7 +26,7 @@ object ServerConfig {
 
     val mp = Paths.get(config.getString("mountpoint"))
     if (Files.exists(mp)) {
-      FileOps.purgeDirectory(mp)
+      files.purgeDirectory(mp)
     }
     Files.createDirectory(mp)
 

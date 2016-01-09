@@ -2,7 +2,7 @@ package akasha.admin
 
 import java.nio.file.{Files, Path}
 
-import akasha.StringOps
+import akasha.strings
 
 import scala.slick.driver.SQLiteDriver.simple._
 
@@ -33,9 +33,9 @@ case class UserTable(path: Path) {
 
   private def mkRandUser: User.t = {
     User.t(
-      id = StringOps.random(64),
-      accessKey = StringOps.random(20).toUpperCase,
-      secretKey = StringOps.random(40),
+      id = strings.random(64),
+      accessKey = strings.random(20).toUpperCase,
+      secretKey = strings.random(40),
       name = "noname",
       email = "noname@noname.org",
       displayName = "noname"

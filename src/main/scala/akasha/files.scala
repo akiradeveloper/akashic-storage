@@ -4,7 +4,7 @@ import java.nio.file.{Files => JFiles, Path}
 
 import org.apache.commons.io.FileUtils
 
-object FileOps {
+object files {
   object Implicits {
     def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
       try {
