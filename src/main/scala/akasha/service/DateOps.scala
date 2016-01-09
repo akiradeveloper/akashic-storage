@@ -1,9 +1,9 @@
-package akasha.model
+package akasha.service
 
 import java.text.SimpleDateFormat
-import java.util.{TimeZone, Date}
+import java.util.{Date, TimeZone}
 
-object Dates {
+object DateOps {
   def format000Z(date: Date): String = {
     val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))

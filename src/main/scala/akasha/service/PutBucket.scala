@@ -1,4 +1,4 @@
-package akasha.model
+package akasha.service
 
 import akasha.patch._
 
@@ -8,7 +8,7 @@ object PutBucket {
 }
 
 trait PutBucket { self: Context =>
-  import akasha.model.PutBucket._
+  import akasha.service.PutBucket._
   case class PutBucket(input: Input) extends Task[Output] {
     def doRun = {
       val created = Commit.Once(tree.bucketPath(input.bucketName)) { patch =>

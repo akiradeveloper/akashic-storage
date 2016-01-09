@@ -1,6 +1,7 @@
-package akasha.model
+package akasha.service
 
-import akasha.patch
+import akasha.{FileOps, patch}
+
 import scala.xml.NodeSeq
 
 object GetService {
@@ -9,7 +10,7 @@ object GetService {
 }
 
 trait GetService { self: Context =>
-  import akasha.model.GetService._
+  import akasha.service.GetService._
   case class GetService(input: Input) extends Task[Output] {
     def doRun = {
       def Owner(callerId: String) = {
@@ -19,8 +20,8 @@ trait GetService { self: Context =>
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {
-        val date = akasha.Files.lastDate(b.root)
-        val creationDate = Dates.format000Z(date)
+        val date = FileOps.lastDate(b.root)
+        val creationDate = DateOps.format000Z(date)
         <Bucket>
           <Name>{b.name}</Name>
           <CreationDate>{creationDate}</CreationDate>

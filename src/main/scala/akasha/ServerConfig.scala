@@ -1,6 +1,6 @@
-package akasha.http
+package akasha
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths, Files}
 
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -26,7 +26,7 @@ object ServerConfig {
 
     val mp = Paths.get(config.getString("mountpoint"))
     if (Files.exists(mp)) {
-      akasha.Files.purgeDirectory(mp)
+      FileOps.purgeDirectory(mp)
     }
     Files.createDirectory(mp)
 

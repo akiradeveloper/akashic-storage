@@ -1,4 +1,4 @@
-package akasha.model
+package akasha.service
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._

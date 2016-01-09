@@ -2,6 +2,8 @@ package akasha.patch
 
 import java.nio.file.{FileAlreadyExistsException, Files, Path}
 
+import akasha.FileOps
+
 import scala.util.{Failure, Success, Try}
 
 object Commit {
@@ -10,7 +12,7 @@ object Commit {
       Try {
         val patch = Patch(to)
         if (Files.exists(to) && !patch.committed) {
-          akasha.Files.purgeDirectory(to)
+          FileOps.purgeDirectory(to)
         }
         Files.createDirectory(patch.root)
         // As the previous line throws exception if the directory exists

@@ -1,4 +1,4 @@
-package akasha.model
+package akasha.service
 
 object Error {
 

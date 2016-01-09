@@ -2,6 +2,8 @@ package akasha.patch
 
 import java.nio.file.{Files, Path}
 
+import akasha.FileOps
+
 case class Bucket(root: Path) extends Patch {
   val acl = PatchLog(root.resolve("acl"))
   val cors = PatchLog(root.resolve("cors"))
@@ -23,6 +25,6 @@ case class Bucket(root: Path) extends Patch {
     }
   }
   def listKeys: Seq[Key] = {
-    akasha.Files.children(keys).map(Key(_)).filter(_.committed)
+    FileOps.children(keys).map(Key(_)).filter(_.committed)
   }
 }

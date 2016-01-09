@@ -1,6 +1,4 @@
-package akasha.model
-
-import java.nio.file.Paths
+package akasha.service
 
 import scala.collection.mutable
 import scala.pickling.Defaults._

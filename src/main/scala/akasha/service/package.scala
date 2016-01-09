@@ -2,7 +2,7 @@ package akasha
 
 import akasha.patch.Version
 
-package object model {
+package object service {
   implicit class _Version(unwrap: Version) {
     val metaT: Meta.t = {
       val patch = unwrap.meta.get.get

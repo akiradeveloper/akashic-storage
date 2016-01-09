@@ -2,10 +2,9 @@ package akasha.admin
 
 import java.nio.file.{Files, Path}
 
-import akasha.Strings
+import akasha.StringOps
 
 import scala.slick.driver.SQLiteDriver.simple._
-import scala.util.Random
 
 case class UserTableDef(tag: Tag) extends Table[User.t](tag, "USER") {
   def id = column[String]("ID", O.PrimaryKey)
@@ -34,9 +33,9 @@ case class UserTable(path: Path) {
 
   private def mkRandUser: User.t = {
     User.t(
-      id = Strings.random(64),
-      accessKey = Strings.random(20).toUpperCase,
-      secretKey = Strings.random(40),
+      id = StringOps.random(64),
+      accessKey = StringOps.random(20).toUpperCase,
+      secretKey = StringOps.random(40),
       name = "noname",
       email = "noname@noname.org",
       displayName = "noname"

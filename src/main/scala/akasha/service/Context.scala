@@ -1,4 +1,4 @@
-package akasha.model
+package akasha.service
 
 import akasha.admin.UserTable
 import akasha.patch.Tree

@@ -2,12 +2,14 @@ package akasha.patch
 
 import java.nio.file.{Files, Path}
 
+import akasha.FileOps
+
 case class PatchLog(root: Path) extends Patch {
   def init: Unit = {
     Files.createDirectory(root)
   }
   def acquireNewLoc: Path = {
-    val xs = akasha.Files.children(root).map(akasha.Files.basename(_).toInt)
+    val xs = FileOps.children(root).map(FileOps.basename(_).toInt)
     val newId = if (xs.isEmpty) {
       1
     } else {
@@ -17,7 +19,7 @@ case class PatchLog(root: Path) extends Patch {
   }
   // return by descending order
   def listVersions: Seq[Patch] = {
-    akasha.Files.children(root).map(Patch(_)).filter(_.committed).sortBy(-1 * _.name.toInt)
+    FileOps.children(root).map(Patch(_)).filter(_.committed).sortBy(-1 * _.name.toInt)
   }
   // returns the newest version within committed
   def get: Option[Patch] = {

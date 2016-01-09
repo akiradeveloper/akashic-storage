@@ -1,13 +1,10 @@
-package akasha.http
+package akasha
 
-import akasha.admin
 import akasha.admin._
-import akasha.model
-import akasha.model._
+import akasha.service.Context
 import akasha.patch.Tree
-import com.twitter.finagle.{ListeningServer, Http}
 import com.twitter.finagle.http.Status
-import com.twitter.util.Await
+import com.twitter.finagle.{Http, ListeningServer}
 import io.finch._
 
 import scala.xml.NodeSeq
@@ -45,11 +42,11 @@ case class Server(config: ServerConfig) {
   } yield Context(tree, users, reqid, callerid, resource)
 
   object GetService {
-    val readParams = get(/).as[model.GetService.Input]
+    val readParams = get(/).as[service.GetService.Input]
   }
 
-  val doGetService = GetService.readParams { input: model.GetService.Input =>
-    val model.GetService.Output(xml) = TMPCONTEXT.doGetService(input)
+  val doGetService = GetService.readParams { input: service.GetService.Input =>
+    val service.GetService.Output(xml) = TMPCONTEXT.doGetService(input)
     Ok(xml)
       .withHeader(("x-amz-request-id", TMPREQID))
   }
@@ -72,7 +69,7 @@ case class Server(config: ServerConfig) {
   }
 
   val doPutBucket = PutBucket.readParams { (t: T, context: Context, context2: Context) =>
-    val model.PutBucket.Output() = TMPCONTEXT.doPutBucket(model.PutBucket.Input(t.a))
+    val service.PutBucket.Output() = TMPCONTEXT.doPutBucket(service.PutBucket.Input(t.a))
     Ok()
       .withHeader(("x-amz-request-id", TMPREQID))
   }
@@ -94,9 +91,9 @@ case class Server(config: ServerConfig) {
     doPutBucket
 
   val endpoint = api.handle {
-    case model.Error.Exception(context, e) =>
-      val withMessage = model.Error.withMessage(e)
-      val xml = model.Error.mkXML(withMessage, context.resource, context.requestId)
+    case service.Error.Exception(context, e) =>
+      val withMessage = service.Error.withMessage(e)
+      val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
       val cause = io.finch.Error(xml.toString)
       Output.Failure(cause, Status.fromCode(withMessage.httpCode))
         .withHeader(("a", "b"))

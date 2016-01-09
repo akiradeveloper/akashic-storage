@@ -1,10 +1,10 @@
 package akasha
 
 import java.nio.file.{Files => JFiles, Path}
-import org.apache.commons.io.{FileUtils, IOUtils}
 
-object Files {
+import org.apache.commons.io.FileUtils
 
+object FileOps {
   object Implicits {
     def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
       try {
@@ -24,12 +24,6 @@ object Files {
   def readBytes(path: Path): Array[Byte] = {
     FileUtils.readFileToByteArray(path.toFile)
   }
-
-  // def write(path: Path, inp: InputStream) = {
-  //   using(JFiles.newOutputStream(path, StandardOpenOption.CREATE_NEW)) { oup =>
-  //     IOUtils.copyLarge(inp, oup)
-  //   }
-  // }
 
   def touch(path: Path) = {
     FileUtils.touch(path.toFile)

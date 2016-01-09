@@ -1,7 +1,6 @@
 package akasha.admin
 
 import scala.xml.NodeSeq
-import io.finch._
 
 object GetUser {
   case class Result(xml: NodeSeq)

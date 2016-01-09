@@ -2,6 +2,8 @@ package akasha.patch
 
 import java.nio.file.{Files, Path}
 
+import akasha.FileOps
+
 object Patch {
   def apply(_root: Path) = new Patch { def root = _root }
 }
@@ -13,7 +15,7 @@ trait Patch {
 
   // We assume file creation is atomic
   def commit {
-    akasha.Files.touch(commitPath)
+    FileOps.touch(commitPath)
   }
 
   def committed: Boolean = {
@@ -21,7 +23,7 @@ trait Patch {
   }
 
   def name: String = {
-    akasha.Files.basename(root)
+    FileOps.basename(root)
   }
 
   def asData = Data(root)
