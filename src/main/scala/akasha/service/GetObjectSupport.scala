@@ -9,6 +9,7 @@ trait GetObjectSupport {
   self: Server =>
   object GetObject {
     val matcher = get(string / string ?
+      paramOption("versionId") ?
       paramOption("response-content-type") ?
       paramOption("response-content-language") ?
       paramOption("response-expires") ?
@@ -22,6 +23,7 @@ trait GetObjectSupport {
 
     case class t(
       bucketName: String, keyName: String,
+      versionId: Option[String], // not used yet
       responseContentType: Option[String],
       responseContentLanguage: Option[String],
       responseExpires: Option[String],
@@ -45,6 +47,8 @@ trait GetObjectSupport {
           case Some(a) => a
           case None => failWith(Error.NoSuchKey())
         }
+        // TODO if this is a delete marker?
+        
         val filePath = version.data.data
         val computedContentType = None
         val objectData: Array[Byte] = Array()
