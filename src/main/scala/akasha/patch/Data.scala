@@ -6,6 +6,7 @@ import java.nio.file.Path
 import akasha.files
 
 case class Data(root: Path) extends Patch {
+  // FIXME rename to filePath
   val data: Path = root.resolve("data")
   def write(inp: InputStream) = ???
   def read: Path = ???

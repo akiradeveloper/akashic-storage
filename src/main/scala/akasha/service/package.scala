@@ -9,4 +9,12 @@ package object service {
       Meta.fromBytes(bytes)
     }
   }
+  implicit class _Option[A](unwrap: Option[A]) {
+    def `<+`(other: Option[A]): Option[A] = {
+      unwrap match {
+        case Some(a) => unwrap
+        case None => other
+      }
+    }
+  }
 }

@@ -3,6 +3,7 @@ import io.finch._
 import akasha.Server
 import akasha.service.Error.Reportable
 import com.twitter.io.Buf
+import akasha.files
 
 trait GetObjectSupport {
   self: Server =>
@@ -32,7 +33,22 @@ trait GetObjectSupport {
     ) extends Task[Output[Buf]] with Reportable {
       def resource = bucketName + "/" + keyName
       def runOnce = {
+        val bucket = tree.findBucket(bucketName) match {
+          case Some(a) => a
+          case None => failWith(Error.NoSuchBucket())
+        }
+        val key = bucket.findKey(keyName) match {
+          case Some(a) => a
+          case None => failWith(Error.NoSuchKey())
+        }
+        val version = key.findLatestVersion match {
+          case Some(a) => a
+          case None => failWith(Error.NoSuchKey())
+        }
+        val filePath = version.data.data
+        val computedContentType = None
         val objectData: Array[Byte] = Array()
+        val contentType = responseContentType <+ Some(files.detectContentType(filePath))
         val buf = Buf.Empty; buf.write(objectData, 0)
         Ok(buf)
       }
