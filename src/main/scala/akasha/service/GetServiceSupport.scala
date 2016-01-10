@@ -10,10 +10,8 @@ trait GetServiceSupport {
   self: Server =>
 
   object GetService {
-    val params = get(/) ? RequestId.reader ? CallerId.reader
-    def endpoint: Endpoint[NodeSeq] = params { (requestId: String, callerId: String) =>
-      t(requestId, callerId).run
-    }
+    val matcher = get(/ ? RequestId.reader ? CallerId.reader).as[t]
+    def endpoint: Endpoint[NodeSeq] = matcher { a: t => a.run }
 
     case class t(requestId: String, callerId: String) extends Task[Output[NodeSeq]] with Reportable {
       def resource = "/"

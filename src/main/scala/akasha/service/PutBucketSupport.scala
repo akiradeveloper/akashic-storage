@@ -8,10 +8,9 @@ import io.finch._
 trait PutBucketSupport {
   self: Server =>
   object PutBucket {
-    val params = put(string) ? RequestId.reader ? CallerId.reader
-    val endpoint = params { (bucketName: String, requestId: String, callerId: String) =>
-      t(bucketName, requestId, callerId).run
-    }
+    val matcher = put(string ? RequestId.reader ? CallerId.reader).as[t]
+    val endpoint = matcher { a: t => a.run }
+
     case class t(bucketName: String, requestId: String, callerId: String) extends Task[Output[Unit]] with Reportable {
       def resource = bucketName
       def runOnce = {
