@@ -4,8 +4,8 @@ import java.nio.file.Path
 
 case class Version(root: Path) extends Patch {
   val data = Data(root.resolve("data"))
+  val meta = Data(root.resolve("meta"))
   val acl = PatchLog(root.resolve("acl"))
-  val meta = PatchLog(root.resolve("meta"))
   def init {
     data.init
     acl.init

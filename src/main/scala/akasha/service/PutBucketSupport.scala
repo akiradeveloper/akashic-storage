@@ -15,7 +15,7 @@ trait PutBucketSupport {
       def resource = bucketName
       def runOnce = {
         val created = Commit.Once(tree.bucketPath(bucketName)) { patch =>
-          val bucketPatch: Bucket = Bucket(patch.root)
+          val bucketPatch = patch.asBucket
           bucketPatch.init
           Commit.Retry(bucketPatch.acl) { patch =>
             val dataPatch = patch.asData
