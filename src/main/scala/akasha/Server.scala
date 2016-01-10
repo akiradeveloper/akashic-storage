@@ -1,7 +1,7 @@
 package akasha
 
 import akasha.admin._
-import akasha.service.{PutBucketSupport, GetServiceSupport}
+import akasha.service._
 import akasha.patch.Tree
 import com.twitter.finagle.http.Status
 import com.twitter.finagle.{Http, ListeningServer}
@@ -11,7 +11,8 @@ import scala.xml.NodeSeq
 
 case class Server(config: ServerConfig)
 extends GetServiceSupport
-with PutBucketSupport {
+with PutBucketSupport
+with PutObjectSupport {
   val tree = Tree(config.treePath)
   val users = UserTable(config.adminPath.resolve("db.sqlite"))
 
@@ -35,7 +36,8 @@ with PutBucketSupport {
   val api =
     adminService :+:
     GetService.endpoint :+:
-    PutBucket.endpoint
+    PutBucket.endpoint :+:
+    PutObject.endpoint
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>
