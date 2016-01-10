@@ -2,7 +2,8 @@ package akasha.service
 
 object Error {
 
-  sealed trait t 
+  sealed trait t
+
   case class WithMessage(httpCode: Int, errorCode: String, message: String)
 
   def withMessage(e: t): WithMessage = {
@@ -32,6 +33,14 @@ object Error {
       message = tup._2)
   }
 
+  case class Exception(context: Reportable, e: t) extends RuntimeException
+
+  trait Reportable {
+    def requestId: String
+    def resource: String
+    def failWith(e: t) = throw Error.Exception(this, e)
+  }
+
   def mkXML(o: WithMessage, resource: String, requestId: String) = {
     <Error>
       <Code>{o.errorCode}</Code>
@@ -40,8 +49,6 @@ object Error {
       <RequestId>{requestId}</RequestId>
     </Error>
   }
-
-  case class Exception(context: Context, e: t) extends RuntimeException
 
   case class AccessDenied() extends t
   case class AccountProblem() extends t
