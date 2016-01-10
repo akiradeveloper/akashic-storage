@@ -2,6 +2,7 @@ package akasha.service
 import io.finch._
 import akasha.Server
 import akasha.service.Error.Reportable
+import com.twitter.io.Buf
 
 trait GetObjectSupport {
   self: Server =>
@@ -28,10 +29,12 @@ trait GetObjectSupport {
       responseContentEncoding: Option[String],
       requestId: String,
       callerid: String
-    ) extends Task[Output[String]] with Reportable {
+    ) extends Task[Output[Buf]] with Reportable {
       def resource = bucketName + "/" + keyName
       def runOnce = {
-        Ok("")
+        val objectData: Array[Byte] = Array()
+        val buf = Buf.Empty; buf.write(objectData, 0)
+        Ok(buf)
       }
     }
   }
