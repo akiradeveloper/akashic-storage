@@ -12,7 +12,8 @@ import scala.xml.NodeSeq
 case class Server(config: ServerConfig)
 extends GetServiceSupport
 with PutBucketSupport
-with PutObjectSupport {
+with PutObjectSupport
+with GetObjectSupport {
   val tree = Tree(config.treePath)
   val users = UserTable(config.adminPath.resolve("db.sqlite"))
 
@@ -36,6 +37,7 @@ with PutObjectSupport {
   val api =
     adminService :+:
     GetService.endpoint :+:
+    GetObject.endpoint :+:
     PutBucket.endpoint :+:
     PutObject.endpoint
 
