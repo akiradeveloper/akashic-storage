@@ -8,6 +8,7 @@ import akasha.files
 case class Data(root: Path) extends Patch {
   // FIXME rename to filePath
   val data: Path = root.resolve("data")
+  def length: Long = files.fileSize(data)
   def write(inp: InputStream) = ???
   def read: Path = ???
   def writeBytes(bytes: Array[Byte]) = {
