@@ -7,7 +7,8 @@ import akasha.files
 import scala.util.{Failure, Success, Try}
 
 object Commit {
-  case class Once(to: Path)(fn: Patch => Unit) {
+  def once(to: Path)(fn: Patch => Unit) = Once(to)(fn).run
+  private case class Once(to: Path)(fn: Patch => Unit) {
     def run: Boolean = {
       Try {
         val patch = Patch(to)
@@ -39,7 +40,8 @@ object Commit {
       }
     }
   }
-  case class Retry(to: PatchLog)(fn: Patch => Unit) {
+  def retry(to: PatchLog)(fn: Patch => Unit) = Retry(to)(fn).run
+  private case class Retry(to: PatchLog)(fn: Patch => Unit) {
     def run: Patch = RetryGeneric(() => to.acquireNewLoc)(fn).run
   }
 }

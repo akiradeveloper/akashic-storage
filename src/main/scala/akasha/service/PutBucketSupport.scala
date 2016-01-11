@@ -14,10 +14,10 @@ trait PutBucketSupport {
     case class t(bucketName: String, requestId: String, callerId: String) extends Task[Output[Unit]] with Reportable {
       def resource = Resource.forBucket(bucketName)
       def runOnce = {
-        val created = Commit.Once(tree.bucketPath(bucketName)) { patch =>
+        val created = Commit.once(tree.bucketPath(bucketName)) { patch =>
           val bucketPatch = patch.asBucket
           bucketPatch.init
-          Commit.Retry(bucketPatch.acl) { patch =>
+          Commit.retry(bucketPatch.acl) { patch =>
             val dataPatch = patch.asData
             dataPatch.writeBytes(Acl.t(callerId, Seq(
               Acl.Grant(
@@ -25,12 +25,12 @@ trait PutBucketSupport {
                 Acl.FullControl()
               )
             )).toBytes)
-          }.run
-          Commit.Retry(bucketPatch.versioning) { patch =>
+          }
+          Commit.retry(bucketPatch.versioning) { patch =>
             val dataPatch = patch.asData
             dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
-          }.run
-        }.run
+          }
+        }
         if (!created) failWith(Error.BucketAlreadyExists())
         Ok()
           .withHeader("x-amz-request-id" -> requestId)

@@ -29,15 +29,14 @@ trait PutObjectSupport {
           case Some(a) => a
           case None => failWith(Error.NoSuchBucket())
         }
-        val nn = bucket.keyPath(keyName)
-        Commit.Once(bucket.keyPath(keyName)) { patch => 
+        Commit.once(bucket.keyPath(keyName)) { patch => 
           patch.asKey.init
-        }.run
+        }
         val key = bucket.findKey(keyName).get
-        Commit.Retry(key.versions) { patch =>
+        Commit.retry(key.versions) { patch =>
           val version = patch.asVersion
           version.init
-          Commit.Retry(version.acl) { patch =>
+          Commit.retry(version.acl) { patch =>
             val dataPatch = patch.asData
             dataPatch.init
             dataPatch.writeBytes(Acl.t(callerId, Seq(
@@ -46,7 +45,7 @@ trait PutObjectSupport {
                 Acl.FullControl()
               )
             )).toBytes)
-          }.run
+          }
           version.meta.asData.writeBytes(
             Meta.t(
               isVersioned = false,
@@ -59,7 +58,7 @@ trait PutObjectSupport {
               xattrs = KVList.builder.build
             ).toBytes)
           version.data.asData.writeBytes(objectData)
-        }.run
+        }
         Ok()
           .withHeader("x-amz-request-id" -> requestId)
           .withHeader("x-amz-version-id" -> "null")
