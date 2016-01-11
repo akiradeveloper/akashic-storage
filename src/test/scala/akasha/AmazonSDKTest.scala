@@ -74,4 +74,23 @@ class AmazonSDKTest extends ServerTestBase {
     val obj = client.getObject("myb", "myobj")
     checkFileContent(obj, f)
   }
+
+  test("put and get several objects") { p =>
+    import p._
+
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "myobj1", f)
+    client.putObject("myb", "myobj2", f)
+    val objListing = client.listObjects("myb")
+    assert(objListing.getBucketName == "myb")
+    val summaries = objListing.getObjectSummaries
+    assert(summaries.size === 2)
+    assert(summaries(0).getOwner.getId === TestUsers.hoge.id)
+
+    val obj1 = client.getObject("myb", "myobj1")
+    checkFileContent(obj1, f)
+    val obj2 = client.getObject("myb", "myobj2")
+    checkFileContent(obj2, f)
+  }
 }
