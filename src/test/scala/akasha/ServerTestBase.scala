@@ -23,5 +23,6 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   override def afterEach {
     // Await.ready(finagleServer.close())
     finagleServer.close()
+    finagleServer = NullServer
   }
 }
