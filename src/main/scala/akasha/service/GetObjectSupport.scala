@@ -52,18 +52,18 @@ trait GetObjectSupport {
         val meta = Meta.fromBytes(version.meta.readBytes)
         
         val filePath = version.data.data
-        val computedContentType = None
-        val objectData: Array[Byte] = Array()
+        val objectData = version.data.readBytes
         val contentType = responseContentType <+ Some(files.detectContentType(filePath))
         val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
-        val buf = Buf.Empty; buf.write(objectData, 0)
+        val buf = Buf.ByteArray.Owned(objectData)
         val headers = KVList.builder
-          .appendOpt("Content-Type", contentType)
           .appendOpt("Content-Disposition", contentDisposition)
           // TODO (others)
           .build
         Ok(buf).append(headers)
+          .withContentType(contentType)
+          .withHeader("Content-Length" -> buf.length.toString)
       }
     }
   }

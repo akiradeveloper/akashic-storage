@@ -71,7 +71,7 @@ class AmazonSDKTest extends ServerTestBase {
     client.createBucket("myb")
     val f = getTestFile("test.jpg")
     client.putObject("myb", "myobj", f)
-    val obj = client.getObject("my", "myobj")
+    val obj = client.getObject("myb", "myobj")
     checkFileContent(obj, f)
   }
 }

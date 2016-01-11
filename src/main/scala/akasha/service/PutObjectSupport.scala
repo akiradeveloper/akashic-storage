@@ -1,7 +1,7 @@
 package akasha.service
 
 import akasha.patch.Commit
-import akasha.Server
+import akasha.{files, Server}
 import akasha.service.Error.Reportable
 import io.finch._
 
@@ -24,7 +24,7 @@ trait PutObjectSupport {
                  callerId: String) extends Task[Output[Unit]] with Reportable {
       def resource = bucketName + "/" + keyName
       def runOnce = {
-        val computedETag = "TMP"
+        val computedETag = files.computeMD5(objectData)
         val bucket = tree.findBucket(bucketName) match {
           case Some(a) => a
           case None => failWith(Error.NoSuchBucket())

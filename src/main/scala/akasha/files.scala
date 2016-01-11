@@ -5,6 +5,7 @@ import java.nio.file.{Files => JFiles, Path}
 import org.apache.commons.io.FileUtils
 
 object files {
+
   object Implicits {
     def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
       try {
@@ -30,10 +31,15 @@ object files {
   }
 
   import org.apache.commons.codec.digest.DigestUtils
+
   def computeMD5(path: Path): String = {
     using(JFiles.newInputStream(path)) { inp =>
       DigestUtils.md5Hex(inp)
     }
+  }
+
+  def computeMD5(data: Array[Byte]): String = {
+    DigestUtils.md5Hex(data)
   }
 
   import java.util.Date
