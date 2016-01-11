@@ -22,7 +22,7 @@ trait PutObjectSupport {
                  contentDisposition: Option[String],
                  requestId: String,
                  callerId: String) extends Task[Output[Unit]] with Reportable {
-      def resource = bucketName + "/" + keyName
+      def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val computedETag = files.computeMD5(objectData)
         val bucket = tree.findBucket(bucketName) match {

@@ -14,7 +14,7 @@ trait GetServiceSupport {
     def endpoint: Endpoint[NodeSeq] = matcher { a: t => a.run }
 
     case class t(requestId: String, callerId: String) extends Task[Output[NodeSeq]] with Reportable {
-      def resource = "/"
+      def resource = Resource.forRoot
 
       def runOnce = {
         def Owner(callerId: String) = {
