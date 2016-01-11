@@ -11,6 +11,7 @@ import scala.xml.NodeSeq
 
 case class Server(config: ServerConfig)
 extends GetServiceSupport
+with GetBucketSupport
 with PutBucketSupport
 with PutObjectSupport
 with GetObjectSupport {
@@ -37,6 +38,7 @@ with GetObjectSupport {
   val api =
     adminService :+:
     GetService.endpoint :+:
+    GetBucket.endpoint :+:
     GetObject.endpoint :+:
     PutBucket.endpoint :+:
     PutObject.endpoint
