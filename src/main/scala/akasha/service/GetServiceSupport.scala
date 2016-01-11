@@ -40,7 +40,7 @@ trait GetServiceSupport {
           </ListAllMyBucketsResult>
 
         Ok(xml)
-          .withHeader(("x-amz-request-id", requestId))
+          .withHeader("x-amz-request-id" -> requestId)
       }
     }
   }
