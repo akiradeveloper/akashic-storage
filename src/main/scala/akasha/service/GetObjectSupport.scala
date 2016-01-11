@@ -48,13 +48,22 @@ trait GetObjectSupport {
           case None => failWith(Error.NoSuchKey())
         }
         // TODO if this is a delete marker?
+
+        val meta = Meta.fromBytes(version.meta.readBytes)
         
         val filePath = version.data.data
         val computedContentType = None
         val objectData: Array[Byte] = Array()
         val contentType = responseContentType <+ Some(files.detectContentType(filePath))
+        val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
+
         val buf = Buf.Empty; buf.write(objectData, 0)
-        Ok(buf)
+        val headers = KVList.builder
+          .appendOpt("Content-Type", contentType)
+          .appendOpt("Content-Disposition", contentDisposition)
+          // TODO (others)
+          .build
+        Ok(buf).append(headers)
       }
     }
   }

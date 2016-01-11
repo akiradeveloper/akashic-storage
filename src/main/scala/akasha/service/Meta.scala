@@ -5,10 +5,12 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 object KVList {
-  case class t(unwrap: Seq[(String, String)])
+  case class t(unwrap: Seq[(String, String)]) {
+    def find(k: String) = unwrap.find(_._1 == k).map(_._2)
+  }
   def builder: Builder = Builder()
   case class Builder() {
-    val l = mutable.ListBuffer[(String, String)]()
+    private val l = mutable.ListBuffer[(String, String)]()
     def append(k: String, v: String): this.type = { 
       l += k -> v
       this
