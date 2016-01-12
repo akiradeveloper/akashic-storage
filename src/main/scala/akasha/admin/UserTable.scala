@@ -16,14 +16,15 @@ case class UserTableDef(tag: Tag) extends Table[User.t](tag, "USER") {
   def * = (id, accessKey, secretKey, name, email, displayName) <>((User.t.apply _).tupled, User.t.unapply _)
 }
 
-case class UserTable(path: Path) {
+case class UserTable(root: Path) {
+  val dbPath = root.resolve("db.sqlite")
 
   val users = TableQuery[UserTableDef]
 
   private val db = {
-    val url = path.toString
+    val url = dbPath.toString
     val ret = Database.forURL(s"jdbc:sqlite:${url}", driver = "org.sqlite.JDBC")
-    if (!Files.exists(path)) {
+    if (!Files.exists(dbPath)) {
       ret withSession { implicit session =>
         users.ddl.create
       }
