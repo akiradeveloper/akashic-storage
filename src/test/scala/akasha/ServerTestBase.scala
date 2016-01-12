@@ -6,11 +6,12 @@ import org.scalatest._
 import akasha.admin.TestUsers
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
-  def config = ServerConfig.forConfig(ConfigFactory.load("test.conf"))
+  def makeConfig = ServerConfig.forConfig(ConfigFactory.load("test.conf"))
   var server: Server = _
   var finagleServer: ListeningServer = NullServer
 
   override def beforeEach {
+    val config = makeConfig
     server = Server(config)
     finagleServer = server.run
 

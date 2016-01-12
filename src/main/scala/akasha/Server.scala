@@ -1,7 +1,10 @@
 package akasha
 
+import java.nio.file.Files
+
 import akasha.admin._
 import akasha.service._
+import akasha.cleaner.{CleanerQueue, GarbageCan, TreeCompactor}
 import akasha.patch.Tree
 import com.twitter.finagle.http.Status
 import com.twitter.finagle.{Http, ListeningServer}
@@ -15,8 +18,18 @@ with GetBucketSupport
 with PutBucketSupport
 with PutObjectSupport
 with GetObjectSupport {
-  val tree = Tree(config.treePath)
-  val users = UserTable(config.adminPath.resolve("db.sqlite"))
+  Files.createDirectory(config.mountpoint.resolve("tree"))
+  val tree = Tree(config.mountpoint.resolve("tree"))
+
+  Files.createDirectory(config.mountpoint.resolve("admin"))
+  val users = UserTable(config.mountpoint.resolve("admin"))
+
+  Files.createDirectory(config.mountpoint.resolve("garbage"))
+  val garbageCan = GarbageCan(config.mountpoint.resolve("garbage"))
+
+  // compact the store on reboot
+  val cleanerQueue = CleanerQueue()
+  cleanerQueue.queue(TreeCompactor(tree, this))
 
   val adminService =
     post("admin" / "user") {
@@ -58,6 +71,6 @@ with GetObjectSupport {
 
   def run: ListeningServer = {
     implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-    Http.server.serve(s"${config.ip}:${config.port}", Server(config).endpoint.toService)
+    Http.server.serve(s"${config.ip}:${config.port}", this.endpoint.toService)
   }
 }

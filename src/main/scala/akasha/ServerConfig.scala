@@ -8,9 +8,6 @@ trait ServerConfig {
   def mountpoint: Path
   def ip: String
   def port: Int
-
-  def treePath: Path = mountpoint.resolve("tree")
-  def adminPath: Path = mountpoint.resolve("admin")
 }
 
 object ServerConfig {
@@ -29,9 +26,6 @@ object ServerConfig {
       files.purgeDirectory(mp)
     }
     Files.createDirectory(mp)
-
-    Files.createDirectory(treePath)
-    Files.createDirectory(adminPath)
 
     override def mountpoint = mp
     override def ip = config.getString("ip")
