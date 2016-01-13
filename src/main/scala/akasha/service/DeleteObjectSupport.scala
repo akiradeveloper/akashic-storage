@@ -38,7 +38,7 @@ trait DeleteObjectSupport {
         // Returns the version ID of the delete marker created as a result of the DELETE operation.
         // If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
         if (versionId.isDefined) {
-          Ok()
+          NoContent()
         } else {
           // simple DELETE
           val patch = Commit.retry(key.versions) { patch =>
@@ -65,7 +65,7 @@ trait DeleteObjectSupport {
               ).toBytes
             )
           }
-          Ok()
+          NoContent()
             .withHeader("x-amz-request-id" -> requestId)
             .withHeader("x-amz-delete-marker" -> "true")
             .withHeader("x-amz-version-id" -> (if (versioningEnabled) { patch.name } else { "null" }))
