@@ -17,7 +17,8 @@ extends GetServiceSupport
 with GetBucketSupport
 with PutBucketSupport
 with PutObjectSupport
-with GetObjectSupport {
+with GetObjectSupport
+with DeleteObjectSupport {
   Files.createDirectory(config.mountpoint.resolve("tree"))
   val tree = Tree(config.mountpoint.resolve("tree"))
 
@@ -54,7 +55,8 @@ with GetObjectSupport {
     GetBucket.endpoint :+:
     GetObject.endpoint :+:
     PutBucket.endpoint :+:
-    PutObject.endpoint
+    PutObject.endpoint :+:
+    DeleteObject.endpoint
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>
