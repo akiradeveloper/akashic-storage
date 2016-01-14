@@ -93,4 +93,33 @@ class AmazonSDKTest extends ServerTestBase {
     val obj2 = client.getObject("myb", "myobj2")
     checkFileContent(obj2, f)
   }
+
+  test("delete an object") { p =>
+    import p._
+
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+
+    client.putObject("myb", "myobj1", f)
+    client.putObject("myb", "myobj2", f)
+    assert(client.listObjects("myb").getObjectSummaries.size === 2)
+
+    client.deleteObject("myb", "myobj1")
+    assert(client.listObjects("myb").getObjectSummaries.size === 1)
+    assert(client.listObjects("myb").getObjectSummaries.get(0).getKey === "myobj2")
+  }
+
+  test("put -> delete -> put") { p =>
+    import p._
+
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    assert(client.listObjects("myb").getObjectSummaries.size === 0)
+    client.putObject("myb", "a", f)
+    assert(client.listObjects("myb").getObjectSummaries.size === 1)
+    client.deleteObject("myb", "a")
+    assert(client.listObjects("myb").getObjectSummaries.size === 0)
+    client.putObject("myb", "a", f)
+    assert(client.listObjects("myb").getObjectSummaries.size === 1)
+  }
 }
