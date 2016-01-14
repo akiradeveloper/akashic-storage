@@ -9,6 +9,8 @@ import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
 import org.apache.commons.io.IOUtils
 
+import scalaj.http.Http
+
 class AmazonSDKTest extends ServerTestBase {
 
   def getTestFile(name: String): File = {
@@ -38,6 +40,9 @@ class AmazonSDKTest extends ServerTestBase {
     import p._
 
     client.createBucket("myb1")
+    val postRes = Http(s"http://localhost:9000/myb1").method("HEAD").asString
+    assert(postRes.code === 200)
+
     client.createBucket("myb2")
     val res = client.listBuckets
     assert(res.forall(_.getOwner.getId === TestUsers.hoge.id))
