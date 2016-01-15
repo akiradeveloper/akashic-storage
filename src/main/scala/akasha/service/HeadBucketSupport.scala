@@ -7,7 +7,7 @@ import io.finch._
 trait HeadBucketSupport {
   self: Server =>
   object HeadBucket {
-    val matcher = get(string ? RequestId.reader ? CallerId.reader).as[t]
+    val matcher = head(string ? RequestId.reader ? CallerId.reader).as[t]
     val endpoint = matcher { a: t => a.run }
     case class t(bucketName: String,
                  requestId: String,
