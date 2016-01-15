@@ -27,11 +27,7 @@ trait InitiateMultipartUploadSupport {
                  callerId: String) extends Task[Output[NodeSeq]] with Reportable {
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
-        // TODO Reportable#findBucket(tree): Bucket
-        val bucket = tree.findBucket(bucketName) match {
-          case Some(a) => a
-          case None => failWith(Error.NoSuchBucket())
-        }
+        val bucket = findBucket(tree, bucketName)
         Commit.once(bucket.keyPath(keyName)) { patch =>
           patch.asKey.init
         }

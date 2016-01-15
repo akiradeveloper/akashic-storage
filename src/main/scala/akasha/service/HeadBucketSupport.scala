@@ -14,10 +14,7 @@ trait HeadBucketSupport {
                  callerId: String) extends Task[Output[Unit]] with Reportable {
       def resource = Resource.forBucket(bucketName)
       def runOnce = {
-        val bucket = tree.findBucket(bucketName) match {
-          case Some(a) => a
-          case None => failWith(Error.NoSuchBucket())
-        }
+        val bucket = findBucket(tree, bucketName)
         // TODO check acl
         Ok()
           .withHeader("x-amz-request-id" -> requestId)

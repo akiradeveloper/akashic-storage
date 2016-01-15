@@ -1,5 +1,7 @@
 package akasha.service
 
+import akasha.patch.{Key, Bucket, Tree}
+
 object Error {
 
   sealed trait t
@@ -39,6 +41,18 @@ object Error {
     def requestId: String
     def resource: String
     def failWith(e: t) = throw Error.Exception(this, e)
+    def findBucket(tree: Tree, bucketName: String): Bucket = {
+      tree.findBucket(bucketName) match {
+        case Some(a) => a
+        case None => failWith(Error.NoSuchBucket())
+      }
+    }
+    def findKey(bucket: Bucket, keyName: String): Key = {
+      bucket.findKey(keyName) match {
+        case Some(a) => a
+        case None => failWith(Error.NoSuchKey())
+      }
+    }
   }
 
   def mkXML(o: WithMessage, resource: String, requestId: String) = {

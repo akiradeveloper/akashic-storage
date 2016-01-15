@@ -1,7 +1,8 @@
 package akasha.service
+
+import akasha.strings
 import io.finch.RequestReader
 
 object RequestId {
-  val TMPREQID = "TMPREQID"
-  val reader = RequestReader.value(TMPREQID)
+  val reader = RequestReader.value(strings.random(16))
 }

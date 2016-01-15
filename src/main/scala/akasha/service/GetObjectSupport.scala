@@ -35,14 +35,8 @@ trait GetObjectSupport {
     ) extends Task[Output[Buf]] with Reportable {
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
-        val bucket = tree.findBucket(bucketName) match {
-          case Some(a) => a
-          case None => failWith(Error.NoSuchBucket())
-        }
-        val key = bucket.findKey(keyName) match {
-          case Some(a) => a
-          case None => failWith(Error.NoSuchKey())
-        }
+        val bucket = findBucket(tree, bucketName)
+        val key = findKey(bucket, keyName)
         val version = key.findLatestVersion match {
           case Some(a) => a
           case None => failWith(Error.NoSuchKey())
