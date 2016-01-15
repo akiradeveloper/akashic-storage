@@ -1,4 +1,4 @@
-name := "akashic"
+name := "akashic.storage"
 
 version := "1.0"
 
