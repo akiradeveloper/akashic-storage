@@ -20,7 +20,9 @@ with PutObjectSupport
 with GetObjectSupport
 with DeleteObjectSupport
 with HeadBucketSupport
-with InitiateMultipartUploadSupport {
+with InitiateMultipartUploadSupport
+with UploadPartSupport
+with CompleteMultipartUploadSupport {
   Files.createDirectory(config.mountpoint.resolve("tree"))
   val tree = Tree(config.mountpoint.resolve("tree"))
 
@@ -60,7 +62,9 @@ with InitiateMultipartUploadSupport {
     PutObject.endpoint :+:
     DeleteObject.endpoint :+:
     HeadBucket.endpoint :+:
-    InitiateMultipartUpload.endpoint
+    InitiateMultipartUpload.endpoint :+:
+    UploadPart.endpoint :+:
+    CompleteMultipartUpload.endpoint
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>

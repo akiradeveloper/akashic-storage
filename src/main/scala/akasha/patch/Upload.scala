@@ -13,4 +13,7 @@ case class Upload(root: Path) extends Patch {
     acl.init
     meta.init
   }
+  def reservedVersionId: Int = {
+    root.toString.split("-")(0).toInt
+  }
 }

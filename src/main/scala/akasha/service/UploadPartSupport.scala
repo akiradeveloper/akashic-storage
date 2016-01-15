@@ -4,6 +4,7 @@ import akasha.{files, Server}
 import akasha.patch.{Commit, PatchLog}
 import io.finch._
 import akasha.service.Error.Reportable
+import org.apache.http.HttpHeaders
 
 trait UploadPartSupport {
   self: Server =>
@@ -38,7 +39,7 @@ trait UploadPartSupport {
         }
         Ok()
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
-          .withHeader("ETag" -> computedMD5)
+          .withHeader(HttpHeaders.ETAG -> computedMD5)
       }
     }
   }
