@@ -26,19 +26,22 @@ object Commit {
       }
     }
   }
-  case class RetryGeneric(makePath: () => Path)(fn: Patch => Unit) {
+  // used by multipart upload just to allocate empty directory
+  case class RetryGenericNoCommit(makePath: () => Path)(fn: Patch => Unit) {
     def run: Patch = {
       try {
         val patch = Patch(makePath())
         Files.createDirectory(patch.root)
         fn(patch)
-        patch.commit
         patch
       } catch {
         case e: FileAlreadyExistsException => run
         case e: Throwable => throw e
       }
     }
+  }
+  case class RetryGeneric(makePath: () => Path)(fn: Patch => Unit) {
+    def run = RetryGenericNoCommit(makePath) { patch => fn(patch); patch.commit }.run
   }
   def retry(to: PatchLog)(fn: Patch => Unit) = Retry(to)(fn).run
   private case class Retry(to: PatchLog)(fn: Patch => Unit) {

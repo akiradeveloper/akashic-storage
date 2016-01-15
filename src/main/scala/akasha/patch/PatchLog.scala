@@ -1,12 +1,15 @@
 package akasha.patch
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{FileAlreadyExistsException, Files, Path}
 
 import akasha.files
 
 case class PatchLog(root: Path) extends Patch {
-  def init: Unit = {
+  def init {
     Files.createDirectory(root)
+  }
+  def initAsUploadPart: Unit = {
+    Commit.once(root) { patch => }
   }
   def acquireNewLoc: Path = {
     val xs = files.children(root).map(files.basename(_).toInt)
