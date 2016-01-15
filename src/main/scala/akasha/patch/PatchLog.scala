@@ -8,9 +8,6 @@ case class PatchLog(root: Path) extends Patch {
   def init {
     Files.createDirectory(root)
   }
-  def initAsUploadPart: Unit = {
-    Commit.once(root) { patch => }
-  }
   def acquireNewLoc: Path = {
     val xs = files.children(root).map(files.basename(_).toInt)
     val newId = if (xs.isEmpty) {

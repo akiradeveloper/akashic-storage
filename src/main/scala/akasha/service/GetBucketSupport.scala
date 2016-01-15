@@ -125,7 +125,7 @@ trait GetBucketSupport {
             { for (g <- groups) yield g.toXML }
           </ListBucketResult>
         Ok(xml)
-          .withHeader("x-amz-requestId" -> requestId)
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
       }
     }
   }

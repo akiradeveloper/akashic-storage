@@ -20,4 +20,12 @@ case class Uploads(root: Path) {
     val uploadId = id + "-" + strings.random(16 - 1 - id.length)
     uploadId
   }
+  def findUpload(uploadId: String): Option[Upload] = {
+    val uploadPath = root.resolve(uploadId)
+    if (Files.exists(uploadPath) && Upload(uploadPath).committed) {
+      Some(Upload(uploadPath))
+    } else {
+      None
+    }
+  }
 }

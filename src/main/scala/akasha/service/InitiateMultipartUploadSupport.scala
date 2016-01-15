@@ -68,7 +68,7 @@ trait InitiateMultipartUploadSupport {
             <UploadId>{uploadId}</UploadId>
           </InitiateMultipartUploadResult>
         Ok(xml)
-          .withHeader("x-amz-request-id" -> requestId)
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
       }
     }
   }

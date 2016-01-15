@@ -17,7 +17,7 @@ trait HeadBucketSupport {
         val bucket = findBucket(tree, bucketName)
         // TODO check acl
         Ok()
-          .withHeader("x-amz-request-id" -> requestId)
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
       }
     }
   }

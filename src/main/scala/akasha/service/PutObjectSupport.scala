@@ -57,8 +57,8 @@ trait PutObjectSupport {
           version.data.asData.writeBytes(objectData)
         }
         Ok()
-          .withHeader("x-amz-request-id" -> requestId)
-          .withHeader("x-amz-version-id" -> "null")
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
+          .withHeader(X_AMZ_VERSION_ID -> "null")
           .withHeader("ETag" -> computedETag)
           // TODO Origin
       }

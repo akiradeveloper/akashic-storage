@@ -60,9 +60,9 @@ trait DeleteObjectSupport {
             )
           }
           NoContent()
-            .withHeader("x-amz-request-id" -> requestId)
-            .withHeader("x-amz-delete-marker" -> "true")
-            .withHeader("x-amz-version-id" -> (if (versioningEnabled) { patch.name } else { "null" }))
+            .withHeader(X_AMZ_REQUEST_ID -> requestId)
+            .withHeader(X_AMZ_DELETE_MARKER -> "true")
+            .withHeader(X_AMZ_VERSION_ID -> (if (versioningEnabled) { patch.name } else { "null" }))
         }
       }
     }

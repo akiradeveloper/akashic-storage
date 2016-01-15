@@ -33,7 +33,7 @@ trait PutBucketSupport {
         }
         if (!created) failWith(Error.BucketAlreadyExists())
         Ok()
-          .withHeader("x-amz-request-id" -> requestId)
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
       }
     }
   }

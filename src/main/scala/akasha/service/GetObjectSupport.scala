@@ -57,6 +57,7 @@ trait GetObjectSupport {
           .build
         Ok(buf).append(headers)
           .withContentType(contentType)
+          .withHeader(X_AMZ_REQUEST_ID -> requestId)
           .withHeader("Content-Length" -> buf.length.toString)
       }
     }
