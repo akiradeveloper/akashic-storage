@@ -6,12 +6,14 @@ case class Upload(root: Path) extends Patch {
   val parts = root.resolve("parts")
   def partPath(n: Int): Path = parts.resolve(n.toString)
   def part(n: Int) = PatchLog(partPath(n))
-  val acl = PatchLog(root.resolve("acl"))
-  val meta = PatchLog(root.resolve("meta"))
-  def init {
-    Files.createDirectory(root.resolve("parts"))
-    acl.init
+  val meta = Data(root.resolve("meta"))
+  val acl = Data(root.resolve("acl"))
+  override def init {
+    Files.createDirectory(parts)
+    Files.createDirectory(meta.root)
     meta.init
+    Files.createDirectory(acl.root)
+    acl.init
   }
   def reservedVersionId: Int = {
     root.toString.split("-")(0).toInt

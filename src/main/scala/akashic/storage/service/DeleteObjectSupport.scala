@@ -38,10 +38,12 @@ trait DeleteObjectSupport {
           val patch = Commit.retry(key.versions) { patch =>
             val version = patch.asVersion
             version.init
+
             // default acl
             Commit.retry(version.acl) { patch =>
               val dataPatch = patch.asData
               dataPatch.init
+
               dataPatch.writeBytes(Acl.t(callerId, Seq(
                 Acl.Grant(
                   Acl.ById(callerId),

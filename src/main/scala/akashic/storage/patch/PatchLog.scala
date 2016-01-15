@@ -4,10 +4,7 @@ import java.nio.file.{FileAlreadyExistsException, Files, Path}
 
 import akashic.storage.files
 
-case class PatchLog(root: Path) extends Patch {
-  def init {
-    Files.createDirectory(root)
-  }
+case class PatchLog(root: Path) {
   def acquireNewLoc: Path = {
     val xs = files.children(root).map(files.basename(_).toInt)
     val newId = if (xs.isEmpty) {

@@ -27,15 +27,18 @@ trait PutObjectSupport {
         val computedETag = files.computeMD5(objectData)
         val bucket = findBucket(tree, bucketName)
         Commit.once(bucket.keyPath(keyName)) { patch => 
-          patch.asKey.init
+          val keyPatch = patch.asKey
+          keyPatch.init
         }
         val key = bucket.findKey(keyName).get
         Commit.retry(key.versions) { patch =>
           val version = patch.asVersion
           version.init
+
           Commit.retry(version.acl) { patch =>
             val dataPatch = patch.asData
             dataPatch.init
+
             dataPatch.writeBytes(Acl.t(callerId, Seq(
               Acl.Grant(
                 Acl.ById(callerId),
@@ -43,6 +46,7 @@ trait PutObjectSupport {
               )
             )).toBytes)
           }
+          version.data.asData.writeBytes(objectData)
           version.meta.asData.writeBytes(
             Meta.t(
               isVersioned = false,
@@ -54,7 +58,6 @@ trait PutObjectSupport {
                 .build,
               xattrs = KVList.builder.build
             ).toBytes)
-          version.data.asData.writeBytes(objectData)
         }
         Ok()
           .withHeader(X_AMZ_REQUEST_ID -> requestId)

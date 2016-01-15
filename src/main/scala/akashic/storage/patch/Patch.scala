@@ -10,6 +10,7 @@ object Patch {
 
 trait Patch {
   def root: Path
+  def init {}
 
   def commitPath = root.resolve("commit")
 

@@ -12,9 +12,6 @@ import akashic.storage.patch.Commit.RetryGeneric
  *       partNumber
  */
 case class Uploads(root: Path) {
-  def init {
-    Files.createDirectory(root)
-  }
   def acquireNewUpload(id: String): String = {
     // e.g. 1-akiradeveloper (16 digits)
     val uploadId = id + "-" + strings.random(16 - 1 - id.length)

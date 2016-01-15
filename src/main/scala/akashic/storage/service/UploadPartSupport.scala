@@ -32,7 +32,10 @@ trait UploadPartSupport {
         Commit.once(part.root) { patch => }
         val computedMD5 = files.computeMD5(partData)
         Commit.retry(part) { patch =>
-          patch.asData.writeBytes(partData)
+          val dataPatch = patch.asData
+          dataPatch.init
+
+          dataPatch.writeBytes(partData)
         }
         Ok()
           .withHeader(X_AMZ_REQUEST_ID -> requestId)

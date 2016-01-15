@@ -46,7 +46,7 @@ trait GetObjectSupport {
 
         val meta = Meta.fromBytes(version.meta.readBytes)
         
-        val filePath = version.data.data
+        val filePath = version.data.filePath
         val objectData = version.data.readBytes
         val contentType = responseContentType <+ Some(files.detectContentType(filePath))
         val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")

@@ -29,7 +29,7 @@ trait InitiateMultipartUploadSupport {
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
         Commit.once(bucket.keyPath(keyName)) { patch =>
-          patch.asKey.init
+          patch.asKey
         }
         val key = bucket.findKey(keyName).get
         val reservedPatch = RetryGenericNoCommit(() => key.versions.acquireNewLoc) { patch =>
@@ -39,16 +39,14 @@ trait InitiateMultipartUploadSupport {
         Commit.once(key.uploads.root.resolve(uploadId)) { patch =>
           val upload = patch.asUpload
           upload.init
-          Commit.retry(upload.acl) { patch =>
-            val dataPatch = patch.asData
-            dataPatch.init
-            dataPatch.writeBytes(Acl.t(callerId, Seq(
+
+          upload.acl.writeBytes(Acl.t(callerId, Seq(
               Acl.Grant(
                 Acl.ById(callerId),
                 Acl.FullControl()
               )
             )).toBytes)
-          }
+
           upload.meta.asData.writeBytes(
             Meta.t(
               isVersioned = false,

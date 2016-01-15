@@ -17,8 +17,11 @@ trait PutBucketSupport {
         val created = Commit.once(tree.bucketPath(bucketName)) { patch =>
           val bucketPatch = patch.asBucket
           bucketPatch.init
+
           Commit.retry(bucketPatch.acl) { patch =>
             val dataPatch = patch.asData
+            dataPatch.init
+
             dataPatch.writeBytes(Acl.t(callerId, Seq(
               Acl.Grant(
                 Acl.ById(callerId),
@@ -28,6 +31,8 @@ trait PutBucketSupport {
           }
           Commit.retry(bucketPatch.versioning) { patch =>
             val dataPatch = patch.asData
+            dataPatch.init
+
             dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
           }
         }

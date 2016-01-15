@@ -6,17 +6,17 @@ import java.nio.file.Path
 import akashic.storage.files
 
 case class Data(root: Path) extends Patch {
+  override def init {}
   // FIXME rename to filePath
-  val data: Path = root.resolve("data")
-  def length: Long = files.fileSize(data)
+  val filePath: Path = root.resolve("file")
+  def length: Long = files.fileSize(filePath)
   def write(inp: InputStream) = ???
   def read: Path = ???
   def writeBytes(bytes: Array[Byte]) = {
-    files.writeBytes(data, bytes)
+    files.writeBytes(filePath, bytes)
   }
   def readBytes: Array[Byte] = {
-    files.readBytes(data)
+    files.readBytes(filePath)
   }
   def merge(files: Seq[Data]) = ???
-  def init {}
 }
