@@ -1,6 +1,6 @@
 package akasha.service
 
-import akasha.patch.{Key, Bucket, Tree}
+import akasha.patch.{Upload, Key, Bucket, Tree}
 
 object Error {
 
@@ -51,6 +51,12 @@ object Error {
       bucket.findKey(keyName) match {
         case Some(a) => a
         case None => failWith(Error.NoSuchKey())
+      }
+    }
+    def findUpload(key: Key, uploadId: String): Upload = {
+      key.uploads.findUpload(uploadId) match {
+        case Some(a) => a
+        case None => failWith(Error.NoSuchUpload())
       }
     }
   }

@@ -25,10 +25,7 @@ trait UploadPartSupport {
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
         val key = findKey(bucket, keyName)
-        val upload = key.uploads.findUpload(uploadId) match {
-          case Some(a) => a
-          case None => failWith(Error.NoSuchUpload())
-        }
+        val upload = findUpload(key, uploadId)
         val part: PatchLog = upload.part(partNumber)
         // similar to ensuring the existence of key directory
         // in the PutObject operation
