@@ -29,7 +29,8 @@ trait InitiateMultipartUploadSupport {
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
         Commit.once(bucket.keyPath(keyName)) { patch =>
-          patch.asKey
+          val keyPatch = patch.asKey
+          keyPatch.init
         }
         val key = bucket.findKey(keyName).get
         val reservedPatch = RetryGenericNoCommit(() => key.versions.acquireNewLoc) { patch =>
