@@ -18,6 +18,7 @@ trait DeleteObjectSupport {
                  versionId: Option[Int],
                  requestId: String,
                  callerId: String) extends Task[Output[Unit]] with Reportable {
+      def name = "DELETE Object"
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)

@@ -21,6 +21,7 @@ trait UploadPartSupport {
                  partData: Array[Byte],
                  requestId: String,
                  callerId: String) extends Task[Output[Unit]] with Reportable {
+      def name = "Upload Part"
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)

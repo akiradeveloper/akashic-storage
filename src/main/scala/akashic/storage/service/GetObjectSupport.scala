@@ -34,6 +34,7 @@ trait GetObjectSupport {
       requestId: String,
       callerid: String
     ) extends Task[Output[Buf]] with Reportable {
+      def name = "GET Object"
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)

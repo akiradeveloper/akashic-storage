@@ -12,6 +12,7 @@ trait HeadBucketSupport {
     case class t(bucketName: String,
                  requestId: String,
                  callerId: String) extends Task[Output[Unit]] with Reportable {
+      def name = "HEAD Bucket"
       def resource = Resource.forBucket(bucketName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)

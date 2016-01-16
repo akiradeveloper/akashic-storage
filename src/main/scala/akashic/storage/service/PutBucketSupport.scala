@@ -12,6 +12,7 @@ trait PutBucketSupport {
     val endpoint = matcher { a: t => a.run }
 
     case class t(bucketName: String, requestId: String, callerId: String) extends Task[Output[Unit]] with Reportable {
+      def name = "PUT Bucket"
       def resource = Resource.forBucket(bucketName)
       def runOnce = {
         val created = Commit.once(tree.bucketPath(bucketName)) { patch =>

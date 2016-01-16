@@ -27,6 +27,7 @@ trait GetBucketSupport {
                  prefix: Option[String],
                  requestId: String,
                  callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+      def name = "GET Bucket"
       def resource = Resource.forBucket(bucketName)
       def runOnce = {
         sealed trait Group {

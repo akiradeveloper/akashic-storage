@@ -30,6 +30,7 @@ trait InitiateMultipartUploadSupport {
                  contentDisposition: Option[String],
                  requestId: String,
                  callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+      def name = "Initiate Multipart Upload"
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
