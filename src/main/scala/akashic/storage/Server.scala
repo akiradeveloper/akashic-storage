@@ -57,16 +57,16 @@ with CompleteMultipartUploadSupport {
 
   val api =
     adminService :+:
-    GetService.endpoint :+:
-    GetBucket.endpoint :+:
-    GetObject.endpoint :+:
-    PutBucket.endpoint :+:
-    PutObject.endpoint :+:
-    DeleteObject.endpoint :+:
-    HeadBucket.endpoint :+:
-    InitiateMultipartUpload.endpoint :+:
-    UploadPart.endpoint :+:
-    CompleteMultipartUpload.endpoint
+    HeadBucket.endpoint :+: // HEAD /bucket
+    GetObject.endpoint :+: // GET /bucketName/keyName
+    GetBucket.endpoint :+: // GET /bucketName
+    GetService.endpoint :+: // GET /
+    UploadPart.endpoint :+: // PUT /bucketName/keyName?uploadId=***?partNumber=***
+    PutObject.endpoint :+: // PUT /bucketName/keyName
+    PutBucket.endpoint :+: // PUT /bucketName
+    InitiateMultipartUpload.endpoint :+: // POST /bucketName/keyName?uploads
+    CompleteMultipartUpload.endpoint :+: // POST /bucketName/keyName?uploadId=***
+    DeleteObject.endpoint // DELETE /bucket/keyName
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>

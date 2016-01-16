@@ -32,4 +32,5 @@ trait Patch {
   def asUpload = Upload(root)
   def asBucket = Bucket(root)
   def asKey = Key(root)
+  def asPart = Part(root)
 }

@@ -1,7 +1,7 @@
 package akashic.storage.service
 
 import akashic.storage.{files, Server}
-import akashic.storage.patch.{Commit, PatchLog}
+import akashic.storage.patch.{Part, Commit, PatchLog}
 import akashic.storage.service.Error.Reportable
 import io.finch._
 import org.apache.http.HttpHeaders
@@ -26,12 +26,15 @@ trait UploadPartSupport {
         val bucket = findBucket(tree, bucketName)
         val key = findKey(bucket, keyName)
         val upload = findUpload(key, uploadId)
-        val part: PatchLog = upload.part(partNumber)
         // similar to ensuring the existence of key directory
         // in the PutObject operation
-        Commit.once(part.root) { patch => }
+        Commit.once(upload.partPath(partNumber)) { patch =>
+          val partPatch = patch.asPart
+          partPatch.init
+        }
+        val part = upload.findPart(partNumber).get
         val computedMD5 = files.computeMD5(partData)
-        Commit.retry(part) { patch =>
+        Commit.retry(part.versions) { patch =>
           val dataPatch = patch.asData
           dataPatch.init
 

@@ -56,7 +56,7 @@ trait CompleteMultipartUploadSupport {
         val lastPartNumber = parts.last.partNumber
 
         for (Part(partNumber, eTag) <- parts) {
-          val uploadedPart: Path = upload.part(partNumber).get.map(_.asData.filePath) match {
+          val uploadedPart: Path = upload.findPart(partNumber).flatMap(_.versions.get).map(_.asData.filePath) match {
             case Some(a) => a
             case None => failWith(Error.InvalidPart())
           }
@@ -112,14 +112,14 @@ trait CompleteMultipartUploadSupport {
 
           files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
             for (part <- parts) {
-              f.write(upload.part(part.partNumber).get.get.asData.readBytes)
+              f.write(upload.findPart(part.partNumber).get.versions.get.get.asData.readBytes)
             }
           }
 
           versionPatch.commit
 
           <CompleteMultipartUploadResult>
-            <Location>{s"http://${config.ip}:${config.port}/${bucketName}/${URLEncoder.encode(keyName)}"}</Location>
+            <Location>{s"http://${address}/${bucketName}/${URLEncoder.encode(keyName)}"}</Location>
             <Bucket>{bucketName}</Bucket>
             <Key>{keyName}</Key>
             <ETag>{newETag}</ETag>
