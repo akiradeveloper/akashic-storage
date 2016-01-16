@@ -6,6 +6,7 @@ import akashic.storage.Server
 import akashic.storage.patch.Commit
 import akashic.storage.patch.Commit.RetryGenericNoCommit
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 
 import scala.xml.NodeSeq
@@ -13,14 +14,18 @@ import scala.xml.NodeSeq
 trait InitiateMultipartUploadSupport {
   self: Server =>
   object InitiateMultipartUpload {
-    val matcher = post(string / string ? params("uploads") ?
+    def paramNoValue(name: String): RequestReader[Option[String]] = RequestReader { req: Request =>
+      req.params.get(name)
+    }.should("be Some()")(a => a.isDefined)
+    val matcher = post(string / string ?
+      paramNoValue("uploads") ?
       headerOption("Content-Type") ?
       headerOption("Content-Disposition") ?
       RequestId.reader ?
       CallerId.reader).as[t]
     val endpoint = matcher { a: t => a.run }
     case class t(bucketName: String, keyName: String,
-                 uploads: Seq[String],
+                 uploads: Option[String],
                  contentType: Option[String],
                  contentDisposition: Option[String],
                  requestId: String,

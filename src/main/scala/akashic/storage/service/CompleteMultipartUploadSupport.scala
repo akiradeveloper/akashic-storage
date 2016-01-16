@@ -28,7 +28,8 @@ trait CompleteMultipartUploadSupport {
     case class t(bucketName: String, keyName: String,
                  uploadId: String,
                  data: String,
-                 requestId: String, callerId: String) extends Task[Output[Future[NodeSeq]]] with Reportable {
+                 requestId: String,
+                 callerId: String) extends Task[Output[Future[NodeSeq]]] with Reportable {
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         case class Part(partNumber: Int, eTag: String)
