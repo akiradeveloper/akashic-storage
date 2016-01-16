@@ -79,8 +79,10 @@ with CompleteMultipartUploadSupport {
       Output.Failure(cause, Status.fromCode(code))
   }
 
+  def address = s"${config.ip}:${config.port}"
+
   def run: ListeningServer = {
     implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-    Http.server.serve(s"${config.ip}:${config.port}", this.endpoint.toService)
+    Http.server.serve(s"${address}", this.endpoint.toService)
   }
 }

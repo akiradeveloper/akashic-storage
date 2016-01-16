@@ -1,11 +1,13 @@
 package akashic.storage
 
 import java.io.{FileInputStream, File}
+import java.nio.file.{Paths, Files, Path}
 
 import akashic.storage.admin.TestUsers
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.services.s3.model.S3Object
+import com.amazonaws.services.s3.model._
+import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
 import org.apache.commons.io.IOUtils
 
@@ -18,6 +20,13 @@ class AmazonSDKTest extends ServerTestBase {
     new File(loader.getResource(name).getFile)
   }
 
+  val LARGE_FILE_PATH = Paths.get("/tmp/akashic-storage-test-large-file")
+  def createLargeFile(path: Path): Unit = {
+    if (!Files.exists(path)) {
+      files.writeBytes(path, strings.random(32 * 1024 * 1024).map(_.toByte).toArray)
+    }
+  }
+
   def checkFileContent(actual: S3Object, expected: File) {
     assert(IOUtils.contentEquals(actual.getObjectContent, new FileInputStream(expected)))
   }
@@ -28,7 +37,7 @@ class AmazonSDKTest extends ServerTestBase {
     conf.setSignerOverride("S3SignerType") // force to use v2 signature. not supported in 1.9.7
 
     val cli = new AmazonS3Client(new BasicAWSCredentials(TestUsers.hoge.accessKey, TestUsers.hoge.secretKey), conf)
-    cli.setEndpoint(s"http://${server.config.ip}:${server.config.port}")
+    cli.setEndpoint(s"http://${server.address}")
     cli.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true))
 
     test(FixtureParam(cli))
@@ -40,7 +49,7 @@ class AmazonSDKTest extends ServerTestBase {
     import p._
 
     client.createBucket("myb1")
-    val postRes = Http(s"http://localhost:9000/myb1").method("HEAD").asString
+    val postRes = Http(s"http://${server.address}/myb1").method("HEAD").asString
     assert(postRes.code === 200)
 
     client.createBucket("myb2")
@@ -126,5 +135,94 @@ class AmazonSDKTest extends ServerTestBase {
     assert(client.listObjects("myb").getObjectSummaries.size === 0)
     client.putObject("myb", "a", f)
     assert(client.listObjects("myb").getObjectSummaries.size === 1)
+  }
+
+  test("multipart upload (lowlevel)") { p =>
+    import p._
+
+    client.createBucket("myb")
+
+    createLargeFile(LARGE_FILE_PATH)
+    val upFile = LARGE_FILE_PATH.toFile
+
+    val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
+    val initRes = client.initiateMultipartUpload(initReq)
+    assert(initRes.getBucketName === "myb")
+    assert(initRes.getKey === "myobj")
+    assert(initRes.getUploadId.length > 0)
+
+    import scala.collection.mutable
+    val partEtags = mutable.ListBuffer[PartETag]()
+    val contentLength = upFile.length
+
+    var i = 1
+    var filePos: Long = 0
+    while (filePos < contentLength) {
+      val partSize = Math.min(contentLength - filePos, 5 * 1024 * 1024)
+
+      val uploadReq = new UploadPartRequest()
+        .withBucketName("myb")
+        .withKey("myobj")
+        .withUploadId(initRes.getUploadId())
+        .withPartNumber(i)
+        .withFileOffset(filePos)
+        .withFile(upFile)
+        .withPartSize(partSize)
+
+      val res = client.uploadPart(uploadReq)
+      assert(res.getETag.size > 0)
+      assert(res.getPartNumber === i)
+      assert(res.getPartETag.getETag.size > 0)
+      assert(res.getPartETag.getPartNumber === i)
+
+      partEtags.add(res.getPartETag)
+
+      i += 1
+      filePos += partSize
+    }
+
+    val compReq = new CompleteMultipartUploadRequest(
+      "myb",
+      "myobj",
+      initRes.getUploadId(),
+      partEtags
+    )
+    val compRes = client.completeMultipartUpload(compReq)
+    assert(compRes.getETag.size > 0)
+    assert(compRes.getBucketName === "myb")
+    assert(compRes.getKey === "myobj")
+    assert(compRes.getVersionId === "null")
+    assert(compRes.getLocation === s"http://${server.address}/myb/myobj")
+
+    val obj = client.getObject("myb", "myobj")
+    checkFileContent(obj, upFile)
+  }
+
+  test("multipart upload (highlevel)") { p =>
+    import p._
+
+    client.createBucket("myb")
+
+    createLargeFile(LARGE_FILE_PATH)
+    val upFile = LARGE_FILE_PATH.toFile
+
+    val tmUp = new TransferManager(client)
+    val upload = tmUp.upload("myb", "myobj", upFile)
+    upload.waitForCompletion()
+    tmUp.shutdownNow(false) // shutdown s3 client = false
+
+    val obj = client.getObject("myb", "myobj")
+    checkFileContent(obj, upFile)
+
+    val tmDown = new TransferManager(client)
+    val downFile = Paths.get("/tmp/akashic-storage-test-large-file-download").toFile
+    val download = tmDown.download(new GetObjectRequest("myb", "myobj"), downFile)
+    download.waitForCompletion()
+    tmDown.shutdownNow(false)
+
+    assert(IOUtils.contentEquals(
+      Files.newInputStream(upFile.toPath),
+      Files.newInputStream(downFile.toPath)
+    ))
   }
 }
