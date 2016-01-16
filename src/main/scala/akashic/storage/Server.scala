@@ -6,8 +6,10 @@ import akashic.storage.admin._
 import akashic.storage.service._
 import akashic.storage.cleaner.{CleanerQueue, GarbageCan, TreeCompactor}
 import akashic.storage.patch.Tree
-import com.twitter.finagle.http.Status
-import com.twitter.finagle.{Http, ListeningServer}
+import com.twitter.util.Future
+import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.{Http, ListeningServer, SimpleFilter, Service}
+import com.twitter.finagle.transport.Transport
 import io.finch._
 
 import scala.xml.NodeSeq
@@ -83,6 +85,18 @@ with CompleteMultipartUploadSupport {
 
   def run: ListeningServer = {
     implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-    Http.server.serve(s"${address}", this.endpoint.toService)
+    val logFilter = new SimpleFilter[Request, Response] {
+      def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
+        println(req)
+        val res = service(req)
+        res.onSuccess(println(_))
+        res.onFailure(println(_))
+        res
+      }
+    }
+    val service = logFilter andThen this.endpoint.toService
+    Http.server
+      // .configured(Transport.Verbose(true))
+      .serve(s"${address}", service)
   }
 }

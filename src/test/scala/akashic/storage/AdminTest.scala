@@ -11,7 +11,7 @@ class AdminTest extends ServerTestBase {
     test(FixtureParam())
   }
 
-  val rootURL = s"http://${server.address}/admin/user"
+  def rootURL = s"http://${server.address}/admin/user"
 
   test("post -> get") { p =>
     val postRes = Http(rootURL).method("POST").asString
