@@ -13,14 +13,14 @@ import scala.xml.NodeSeq
 trait InitiateMultipartUploadSupport {
   self: Server =>
   object InitiateMultipartUpload {
-    val matcher = post(string / string ? param("uploads") ?
+    val matcher = post(string / string ? params("uploads") ?
       headerOption("Content-Type") ?
       headerOption("Content-Disposition") ?
       RequestId.reader ?
       CallerId.reader).as[t]
     val endpoint = matcher { a: t => a.run }
     case class t(bucketName: String, keyName: String,
-                 uploads: String,
+                 uploads: Seq[String],
                  contentType: Option[String],
                  contentDisposition: Option[String],
                  requestId: String,
