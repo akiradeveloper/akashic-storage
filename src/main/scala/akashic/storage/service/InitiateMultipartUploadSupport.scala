@@ -16,7 +16,7 @@ trait InitiateMultipartUploadSupport {
   object InitiateMultipartUpload {
     def paramNoValue(name: String): RequestReader[Option[String]] = RequestReader { req: Request =>
       req.params.get(name)
-    }.should("be Some()")(a => a.isDefined)
+    }.should("be no value")(_ == Some(""))
     val matcher = post(string / string ?
       paramNoValue("uploads") ?
       headerOption("Content-Type") ?
