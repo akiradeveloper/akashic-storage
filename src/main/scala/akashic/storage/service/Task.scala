@@ -4,14 +4,19 @@ trait Task[T] {
   def name: String
   def runOnce: T
   def run: T = {
+    val start = System.currentTimeMillis
+    var retry = 0
     println(s"-> ${name}")
     val a = try {
       runOnce
     } catch {
       case e: Error.Exception => throw e
-      case _: Throwable => runOnce
+      case _: Throwable =>
+        retry += 1
+        runOnce
     }
-    println(s"<- ${name}")
+    val end = System.currentTimeMillis
+    println(s"<- ${name} ${end-start}[ms] (${retry} retry)")
     a
   }
 }
