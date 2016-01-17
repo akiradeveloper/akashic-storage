@@ -5,6 +5,7 @@ import akashic.storage.Server
 import akashic.storage.service.Error.Reportable
 import akashic.storage.files
 import com.twitter.io.Buf
+import com.google.common.net.HttpHeaders._
 
 trait GetObjectSupport {
   self: Server =>
@@ -74,15 +75,19 @@ trait GetObjectSupport {
         } else {
           Buf.Empty
         }
-        
+
+        // TODO use this
         val headers = KVList.builder
-          .appendOpt("Content-Disposition", contentDisposition)
+          .appendOpt(CONTENT_DISPOSITION, contentDisposition)
           // TODO (others)
           .build
+
         Ok(buf).append(headers)
           .withContentType(contentType)
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
-          .withHeader("Content-Length" -> buf.length.toString)
+          .withHeader(ETAG -> meta.eTag)
+          .withHeader(CONTENT_LENGTH -> buf.length.toString)
+          // TODO Last-Modified
       }
     }
   }
