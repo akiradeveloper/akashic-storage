@@ -18,7 +18,8 @@ trait GetObjectSupport {
       paramOption("response-content-disposition") ?
       paramOption("response-content-encoding") ?
       RequestId.reader ?
-      CallerId.reader
+      CallerId.reader ?
+      RequestReader.value(false)
       ).as[GetObject.t]
    val endpoint = matcher { a: GetObject.t => a.run }
   }
@@ -32,7 +33,8 @@ trait GetObjectSupport {
       paramOption("response-content-disposition") ?
       paramOption("response-content-encoding") ?
       RequestId.reader ?
-      CallerId.reader
+      CallerId.reader ?
+      RequestReader.value(true)
       ).as[t]
     val endpoint = matcher { a: t => a.run }
 
@@ -46,7 +48,8 @@ trait GetObjectSupport {
       responseContentDisposition: Option[String],
       responseContentEncoding: Option[String],
       requestId: String,
-      callerid: String
+      callerid: String,
+      withContent: Boolean
     ) extends Task[Output[Buf]] with Reportable {
       def name = "GET Object"
       def resource = Resource.forObject(bucketName, keyName)
@@ -62,11 +65,16 @@ trait GetObjectSupport {
         val meta = Meta.fromBytes(version.meta.readBytes)
         
         val filePath = version.data.filePath
-        val objectData = version.data.readBytes
         val contentType = responseContentType <+ Some(files.detectContentType(filePath))
         val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
-        val buf = Buf.ByteArray.Owned(objectData)
+        val buf = if (withContent) {
+          val objectData = version.data.readBytes
+          Buf.ByteArray.Owned(objectData)
+        } else {
+          Buf.Empty
+        }
+        
         val headers = KVList.builder
           .appendOpt("Content-Disposition", contentDisposition)
           // TODO (others)
