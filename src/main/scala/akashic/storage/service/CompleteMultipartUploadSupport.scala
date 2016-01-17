@@ -38,6 +38,9 @@ trait CompleteMultipartUploadSupport {
         val key = findKey(bucket, keyName)
         val upload = findUpload(key, uploadId)
 
+        // uploadId = $versionId-$random (summed up in 16 chars)
+        val versionId = uploadId.split("-")(0).toInt
+
         val parts = Try {
           val xml = XML.loadString(data)
           (xml \ "Part").map { a =>
@@ -58,7 +61,7 @@ trait CompleteMultipartUploadSupport {
         val lastPartNumber = parts.last.partNumber
 
         for (Part(partNumber, eTag) <- parts) {
-          val uploadedPart: Path = upload.findPart(partNumber).flatMap(_.versions.get).map(_.asData.filePath) match {
+          val uploadedPart: Path = upload.findPart(partNumber).flatMap(_.versions.find).map(_.asData.filePath) match {
             case Some(a) => a
             case None => failWith(Error.InvalidPart())
           }
@@ -87,11 +90,9 @@ trait CompleteMultipartUploadSupport {
         val newETag = calcETag(parts.map(_.eTag))
 
         val mergeFut: Future[NodeSeq] = Future {
-          // uploadId = $versionId-$random (summed up in 16 chars)
-          val versionId = uploadId.split("-")(0).toInt
 
           // the directory is already made
-          val versionPatch: Version = key.versions.get(versionId).get.asVersion
+          val versionPatch: Version = key.versions.get(versionId).asVersion
 
           // we need to clean the directory
           // because this may be the second complete request
@@ -114,7 +115,7 @@ trait CompleteMultipartUploadSupport {
 
           files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
             for (part <- parts) {
-              f.write(upload.findPart(part.partNumber).get.versions.get.get.asData.readBytes)
+              f.write(upload.findPart(part.partNumber).get.versions.find.get.asData.readBytes)
             }
           }
 
@@ -137,6 +138,7 @@ trait CompleteMultipartUploadSupport {
         // TODO versionId (but what if on failure?)
         Ok(mergeFut)
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
+          .withHeader(X_AMZ_VERSION_ID -> "null")
       }
     }
   }

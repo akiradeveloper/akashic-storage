@@ -10,9 +10,9 @@ case class Key(root: Path) extends Patch {
     Files.createDirectory(uploads.root)
   }
   def findLatestVersion: Option[Version] = {
-    versions.get.map(_.asVersion)
+    versions.find.map(_.asVersion)
   }
   def findVersion(id: Int): Option[Version] = {
-    versions.get(id).map(_.asVersion)
+    versions.find(id).map(_.asVersion)
   }
 }

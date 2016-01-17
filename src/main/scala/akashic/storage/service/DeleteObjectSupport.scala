@@ -23,7 +23,7 @@ trait DeleteObjectSupport {
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
         val key = findKey(bucket, keyName)
-        val versioningEnabled = Versioning.fromBytes(bucket.versioning.get.get.asData.readBytes).enabled
+        val versioningEnabled = Versioning.fromBytes(bucket.versioning.find.get.asData.readBytes).enabled
 
         // x-amz-delete-marker
         // Specifies whether the versioned object that was permanently deleted was (true) or was not (false) a delete marker.

@@ -35,7 +35,7 @@ trait GetBucketSupport {
           def lastKeyName: String // last keyname in this group
         }
         case class Contents(version: Version) extends Group {
-          val acl = Acl.fromBytes(version.acl.get.get.asData.readBytes)
+          val acl = Acl.fromBytes(version.acl.find.get.asData.readBytes)
           val meta = Meta.fromBytes(version.meta.readBytes)
           val ownerId = acl.owner
           val key = version.key

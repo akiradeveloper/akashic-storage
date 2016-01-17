@@ -19,11 +19,11 @@ case class PatchLog(root: Path) {
     files.children(root).map(Patch(_)).filter(_.committed).sortBy(-1 * _.name.toInt)
   }
   // returns the newest version within committed
-  def get: Option[Patch] = {
+  def find: Option[Patch] = {
     val ls = listVersions
     ls.headOption
   }
-  def get(id: Int): Option[Patch] = {
+  def find(id: Int): Option[Patch] = {
     val path = root.resolve(id.toString)
     if (Files.exists(path) && Patch(path).committed) {
       Some(Patch(path))
@@ -31,4 +31,5 @@ case class PatchLog(root: Path) {
       None
     }
   }
+  def get(id: Int): Patch = Patch(root.resolve(id.toString))
 }
