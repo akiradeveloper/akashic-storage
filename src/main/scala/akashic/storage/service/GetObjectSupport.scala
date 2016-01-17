@@ -20,7 +20,8 @@ trait GetObjectSupport {
       paramOption("response-content-encoding") ?
       RequestId.reader ?
       CallerId.reader ?
-      RequestReader.value(false)
+      RequestReader.value(false) ?
+      RequestReader.value("Head Object")
       ).as[GetObject.t]
    val endpoint = matcher { a: GetObject.t => a.run }
   }
@@ -35,7 +36,8 @@ trait GetObjectSupport {
       paramOption("response-content-encoding") ?
       RequestId.reader ?
       CallerId.reader ?
-      RequestReader.value(true)
+      RequestReader.value(true) ?
+      RequestReader.value("Get Object")
       ).as[t]
     val endpoint = matcher { a: t => a.run }
 
@@ -50,9 +52,10 @@ trait GetObjectSupport {
       responseContentEncoding: Option[String],
       requestId: String,
       callerid: String,
-      withContent: Boolean
+      withContent: Boolean,
+      label: String
     ) extends Task[Output[Buf]] with Reportable {
-      def name = "GET Object"
+      def name = label
       def resource = Resource.forObject(bucketName, keyName)
       def runOnce = {
         val bucket = findBucket(tree, bucketName)
