@@ -24,7 +24,8 @@ with DeleteObjectSupport
 with HeadBucketSupport
 with InitiateMultipartUploadSupport
 with UploadPartSupport
-with CompleteMultipartUploadSupport {
+with CompleteMultipartUploadSupport
+with ListPartsSupport {
   Files.createDirectory(config.mountpoint.resolve("tree"))
   val tree = Tree(config.mountpoint.resolve("tree"))
 
@@ -57,6 +58,7 @@ with CompleteMultipartUploadSupport {
 
   val api =
     HeadBucket.endpoint              :+: // HEAD /bucket
+    ListParts.endpoint               :+: // GET /bucketName/keyname?uploadId=***
     GetObject.endpoint               :+: // GET /bucketName/keyName
     GetBucket.endpoint               :+: // GET /bucketName
     GetService.endpoint              :+: // GET /
