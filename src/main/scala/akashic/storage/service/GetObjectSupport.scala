@@ -8,6 +8,20 @@ import com.twitter.io.Buf
 
 trait GetObjectSupport {
   self: Server =>
+  object HeadObject {
+   val matcher = head(string / string ?
+      paramOption("versionId") ?
+      paramOption("response-content-type") ?
+      paramOption("response-content-language") ?
+      paramOption("response-expires") ?
+      paramOption("response-cache-control") ?
+      paramOption("response-content-disposition") ?
+      paramOption("response-content-encoding") ?
+      RequestId.reader ?
+      CallerId.reader
+      ).as[GetObject.t]
+   val endpoint = matcher { a: GetObject.t => a.run }
+  }
   object GetObject {
     val matcher = get(string / string ?
       paramOption("versionId") ?

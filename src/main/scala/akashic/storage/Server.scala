@@ -57,16 +57,17 @@ with ListPartsSupport {
     }
 
   val api =
-    HeadBucket.endpoint              :+: // HEAD /bucket
-    ListParts.endpoint               :+: // GET /bucketName/keyname?uploadId=***
-    GetObject.endpoint               :+: // GET /bucketName/keyName
-    GetBucket.endpoint               :+: // GET /bucketName
-    GetService.endpoint              :+: // GET /
-    UploadPart.endpoint              :+: // PUT /bucketName/keyName?uploadId=***?partNumber=***
-    PutObject.endpoint               :+: // PUT /bucketName/keyName
-    PutBucket.endpoint               :+: // PUT /bucketName
-    InitiateMultipartUpload.endpoint :+: // POST /bucketName/keyName?uploads
-    CompleteMultipartUpload.endpoint :+: // POST /bucketName/keyName?uploadId=***
+    HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
+    HeadBucket.endpoint              :+: // HEAD   /bucketName
+    ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
+    GetObject.endpoint               :+: // GET    /bucketName/keyName
+    GetBucket.endpoint               :+: // GET    /bucketName
+    GetService.endpoint              :+: // GET    /
+    UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObject.endpoint               :+: // PUT    /bucketName/keyName
+    PutBucket.endpoint               :+: // PUT    /bucketName
+    InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
+    CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
     DeleteObject.endpoint            :+: // DELETE /bucket/keyName
     adminService
 
