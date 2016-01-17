@@ -29,6 +29,6 @@ case class Upload(root: Path) extends Patch {
     }
   }
   def listParts: Seq[Part] = {
-    files.children(parts).map(Part(_)).filter(_.committed)
+    files.children(parts).map(Part(_)).sortBy(_.id).filter(_.committed)
   }
 }

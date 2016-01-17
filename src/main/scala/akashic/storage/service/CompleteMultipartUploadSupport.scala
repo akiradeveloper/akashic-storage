@@ -90,15 +90,12 @@ trait CompleteMultipartUploadSupport {
         val newETag = calcETag(parts.map(_.eTag))
 
         val mergeFut: Future[NodeSeq] = Future {
-
           // the directory is already made
           val versionPatch: Version = key.versions.get(versionId).asVersion
-
           // we need to clean the directory
           // because this may be the second complete request
           // (should purge the old stuffs)
           FileUtils.cleanDirectory(versionPatch.root.toFile)
-
           versionPatch.init
 
           val aclBytes: Array[Byte] = upload.acl.readBytes
@@ -122,7 +119,7 @@ trait CompleteMultipartUploadSupport {
           versionPatch.commit
 
           <CompleteMultipartUploadResult>
-            <Location>{s"http://${address}/${bucketName}/${URLEncoder.encode(keyName)}"}</Location>
+            <Location>{s"http://${address}/${bucketName}/${keyName}"}</Location>
             <Bucket>{bucketName}</Bucket>
             <Key>{keyName}</Key>
             <ETag>{newETag}</ETag>
