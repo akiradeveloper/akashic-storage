@@ -18,7 +18,7 @@ import io.finch._
 trait CompleteMultipartUploadSupport {
   self: Server =>
   object CompleteMultipartUpload {
-    val matcher = post(string / string ?
+    val matcher = post(string / string / paramExists("uploadId") ?
       param("uploadId") ?
       body ?
       RequestId.reader ?

@@ -9,7 +9,7 @@ import org.apache.http.HttpHeaders
 trait UploadPartSupport {
   self: Server =>
   object UploadPart {
-    val matcher = put(string / string ?
+    val matcher = put(string / string / paramExists("uploadId") / paramExists("partNumber") ?
       param("uploadId") ?
       param("partNumber").as[Int] ?
       binaryBody ?
