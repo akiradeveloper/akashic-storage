@@ -7,4 +7,6 @@ case class Part(root: Path) extends Patch {
   override def init = {
     Files.createDirectory(versions.root)
   }
+  def id = name.toInt
+  def find: Option[Data] = versions.find.map(_.asData)
 }

@@ -8,7 +8,7 @@ scalaVersion := "2.11.6"
 parallelExecution in Test := false
     
 resolvers += Resolver.sonatypeRepo("snapshots")
-    
+
 val finchV = "0.9.4-SNAPSHOT"
 
 libraryDependencies ++= Seq(

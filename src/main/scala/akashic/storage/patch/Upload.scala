@@ -2,6 +2,8 @@ package akashic.storage.patch
 
 import java.nio.file.{Files, Path}
 
+import akashic.storage.files
+
 case class Upload(root: Path) extends Patch {
   val parts = root.resolve("parts")
   def partPath(n: Int): Path = parts.resolve(n.toString)
@@ -25,5 +27,8 @@ case class Upload(root: Path) extends Patch {
     } else {
       None
     }
+  }
+  def listParts: Seq[Part] = {
+    files.children(parts).map(Part(_)).filter(_.committed)
   }
 }
