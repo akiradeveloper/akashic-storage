@@ -6,13 +6,11 @@ import akashic.storage.files
 
 case class Bucket(root: Path) extends Patch {
   val acl = PatchLog(root.resolve("acl"))
-  val cors = PatchLog(root.resolve("cors"))
   val versioning = PatchLog(root.resolve("versioning"))
   val keys: Path = root.resolve("keys")
   def keyPath(name: String): Path = keys.resolve(name)
   override def init {
     Files.createDirectory(acl.root)
-    Files.createDirectory(cors.root)
     Files.createDirectory(versioning.root)
     Files.createDirectory(keys)
   }
