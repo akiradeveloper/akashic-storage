@@ -1,10 +1,10 @@
-package akashic.storage.cleaner
+package akashic.storage.compactor
 
 import akashic.storage.patch.Tree
 import akashic.storage.Server
 
-case class TreeCompactor(tree: Tree, server: Server) extends Compactable {
+case class TreeCompactor(unwrap: Tree, server: Server) extends Compactable {
   def compact = {
-    Seq()
+    unwrap.listBuckets.map(BucketCompactor(_, server))
   }
 }

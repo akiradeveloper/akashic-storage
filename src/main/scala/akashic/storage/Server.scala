@@ -4,7 +4,7 @@ import java.nio.file.Files
 
 import akashic.storage.admin._
 import akashic.storage.service._
-import akashic.storage.cleaner.{CleanerQueue, GarbageCan, TreeCompactor}
+import akashic.storage.compactor.{CompactorQueue, GarbageCan, TreeCompactor}
 import akashic.storage.patch.Tree
 import com.twitter.util.Future
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -36,8 +36,8 @@ with ListPartsSupport {
   val garbageCan = GarbageCan(config.mountpoint.resolve("garbage"))
 
   // compact the store on reboot
-  val cleanerQueue = CleanerQueue()
-  cleanerQueue.queue(TreeCompactor(tree, this))
+  val compactorQueue = CompactorQueue()
+  compactorQueue.queue(TreeCompactor(tree, this))
 
   val adminService =
     post("admin" / "user") {

@@ -1,4 +1,4 @@
-package akashic.storage.cleaner
+package akashic.storage.compactor
 
 import akashic.storage.patch.Version
 import akashic.storage.Server

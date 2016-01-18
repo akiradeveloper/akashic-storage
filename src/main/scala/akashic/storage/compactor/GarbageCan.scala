@@ -1,4 +1,4 @@
-package akashic.storage.cleaner
+package akashic.storage.compactor
 
 import java.nio.file.{Files, Path}
 
