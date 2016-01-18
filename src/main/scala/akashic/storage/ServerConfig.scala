@@ -25,7 +25,9 @@ object ServerConfig {
     if (Files.exists(mp)) {
       files.purgeDirectory(mp)
     }
-    Files.createDirectory(mp)
+    if (!Files.exists(mp)) {
+      Files.createDirectory(mp)
+    }
 
     override def mountpoint = mp
     override def ip = config.getString("ip")
