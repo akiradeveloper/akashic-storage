@@ -7,13 +7,12 @@ import akashic.storage.admin.TestUsers
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   def makeConfig = ServerConfig.forConfig(ConfigFactory.load("test.conf"))
-  var server: Server = _
-  var finagleServer: ListeningServer = NullServer
 
+  var server: Server = _
   override def beforeEach {
     val config = makeConfig
     server = Server(config)
-    finagleServer = server.run
+    server.start
 
     // FIXME (should via HTTP)
     server.users.addUser(TestUsers.hoge)
@@ -22,8 +21,6 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   }
 
   override def afterEach {
-    // Await.ready(finagleServer.close())
-    finagleServer.close()
-    finagleServer = NullServer
+    server.stop
   }
 }

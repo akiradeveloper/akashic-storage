@@ -8,8 +8,9 @@ import akashic.storage.compactor.{CompactorQueue, GarbageCan, TreeCompactor}
 import akashic.storage.patch.Tree
 import com.twitter.util.Future
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.finagle.{Http, ListeningServer, SimpleFilter, Service}
+import com.twitter.finagle.{Http, NullServer, ListeningServer, SimpleFilter, Service}
 import com.twitter.finagle.transport.Transport
+import com.twitter.util.Await
 import io.finch._
 
 import scala.xml.NodeSeq
@@ -86,7 +87,8 @@ with ListPartsSupport {
 
   def address = s"${config.ip}:${config.port}"
 
-  def run: ListeningServer = {
+  var listeningServer: ListeningServer = NullServer
+  def start {
     implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
     val logFilter = new SimpleFilter[Request, Response] {
       def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
@@ -98,8 +100,13 @@ with ListPartsSupport {
       }
     }
     val service = logFilter andThen this.endpoint.toService
-    Http.server
+    listeningServer = Http.server
       // .configured(Transport.Verbose(true))
       .serve(s"${address}", service)
+  }
+
+  def stop {
+    Await.ready(listeningServer.close())
+    listeningServer = NullServer
   }
 }
