@@ -6,7 +6,7 @@ import java.nio.file.Path
 trait Compactable {
   def server: Server
   def compact: Iterable[Compactable]
-  def dispose(root: Path) = {
+  def dispose(root: Path) {
     server.garbageCan.add(root)
   }
 }
