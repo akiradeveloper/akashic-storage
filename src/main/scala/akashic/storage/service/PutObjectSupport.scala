@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.{files, Server}
 import akashic.storage.service.Error.Reportable
@@ -60,6 +61,9 @@ trait PutObjectSupport {
               xattrs = KVList.builder.build
             ).toBytes)
         }
+
+        compactorQueue.queue(KeyCompactor(key, self))
+
         Ok()
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
           .withHeader(X_AMZ_VERSION_ID -> "null")

@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import akashic.storage.compactor.PartCompactor
 import akashic.storage.{files, Server}
 import akashic.storage.patch.{Part, Commit, PatchLog}
 import akashic.storage.service.Error.Reportable
@@ -41,6 +42,9 @@ trait UploadPartSupport {
 
           dataPatch.writeBytes(partData)
         }
+
+        compactorQueue.queue(PartCompactor(part, self))
+
         Ok()
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
           .withHeader(HttpHeaders.ETAG -> computedMD5)

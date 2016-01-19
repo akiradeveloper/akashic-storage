@@ -12,6 +12,7 @@ case class PatchLogCompactor(unwrap: PatchLog, server: Server) extends Compactab
     }
     files.children(unwrap.root)
       .map(Patch(_))
+      .filter(_.committed)
       .filter(_.name.toInt < maxIdCommitted)
       .foreach(a => dispose(a.root))
     Seq()

@@ -3,6 +3,7 @@ package akashic.storage.service
 import java.net.URLEncoder
 import java.nio.file.Path
 
+import akashic.storage.compactor.KeyCompactor
 import akashic.storage.{files, Server}
 import akashic.storage.patch.{Commit, Patch, Version, Data}
 import akashic.storage.service.Error.Reportable
@@ -117,6 +118,8 @@ trait CompleteMultipartUploadSupport {
           }
 
           versionPatch.commit
+
+          compactorQueue.queue(KeyCompactor(key, self))
 
           <CompleteMultipartUploadResult>
             <Location>{s"http://${address}/${bucketName}/${keyName}"}</Location>

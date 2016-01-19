@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.service.Error.Reportable
 import io.finch._
@@ -62,6 +63,9 @@ trait DeleteObjectSupport {
               ).toBytes
             )
           }
+
+          compactorQueue.queue(KeyCompactor(key, self))
+
           NoContent()
             .withHeader(X_AMZ_REQUEST_ID -> requestId)
             .withHeader(X_AMZ_DELETE_MARKER -> "true")
