@@ -13,6 +13,12 @@ object Commit {
       Try {
         val patch = Patch(to)
         if (Files.exists(to) && !patch.committed) {
+          // this path is unlikely because Patches committed by Once are small
+          // such as creating key directory. Sleeping 1 second is enough long
+          // to wait for another process finishs commit in process.
+          Thread.sleep(1000)
+        }
+        if (Files.exists(to)) {
           files.purgeDirectory(to)
         }
         Files.createDirectory(patch.root)
