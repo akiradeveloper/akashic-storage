@@ -5,7 +5,6 @@ import akashic.storage.patch.Upload
 
 case class UploadCompactor(unwrap: Upload, server: Server) extends Compactable {
   override def compact = {
-    // compact old parts
-    Seq()
+    unwrap.listParts.map(PartCompactor(_, server))
   }
 }

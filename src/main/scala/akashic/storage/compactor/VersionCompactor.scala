@@ -5,6 +5,6 @@ import akashic.storage.Server
 
 case class VersionCompactor(unwrap: Version, server: Server) extends Compactable {
   def compact = {
-    Seq()
+    Seq(PatchLogCompactor(unwrap.acl, server))
   }
 }
