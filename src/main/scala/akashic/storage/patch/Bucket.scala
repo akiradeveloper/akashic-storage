@@ -22,7 +22,5 @@ case class Bucket(root: Path) extends Patch {
       None
     }
   }
-  def listKeys: Seq[Key] = {
-    files.children(keys).map(Key(_)).filter(_.committed)
-  }
+  def listKeys: Seq[Key] = files.children(keys).map(Key(_))
 }

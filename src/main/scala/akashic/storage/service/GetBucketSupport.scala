@@ -91,6 +91,7 @@ trait GetBucketSupport {
         }
        
         val groups: Seq[Contents] = bucket.listKeys
+          .filter(_.committed)
           .map(_.findLatestVersion)
           .filter(_.isDefined).map(_.get) // List[Version]
           .filter { version =>

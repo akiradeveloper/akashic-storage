@@ -36,7 +36,7 @@ trait GetServiceSupport {
           <ListAllMyBucketsResult>
             {Owner(callerId)}
             <Buckets>
-              {for (b <- tree.listBuckets) yield Bucket(b)}
+              {for (b <- tree.listBuckets.filter(_.committed)) yield Bucket(b)}
             </Buckets>
           </ListAllMyBucketsResult>
 

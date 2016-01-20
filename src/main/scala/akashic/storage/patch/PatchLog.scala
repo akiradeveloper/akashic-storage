@@ -15,12 +15,12 @@ case class PatchLog(root: Path) {
     root.resolve(newId.toString)
   }
   // return by descending order
-  def listVersions: Seq[Patch] = {
-    files.children(root).map(Patch(_)).filter(_.committed).sortBy(-1 * _.name.toInt)
+  def listPatches: Seq[Patch] = {
+    files.children(root).map(Patch(_)).sortBy(-1 * _.name.toInt)
   }
   // returns the newest version within committed
   def find: Option[Patch] = {
-    val ls = listVersions
+    val ls = listPatches.filter(_.committed)
     ls.headOption
   }
   def find(id: Int): Option[Patch] = {

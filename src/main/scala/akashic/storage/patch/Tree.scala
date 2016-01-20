@@ -14,7 +14,5 @@ case class Tree(root: Path) {
       None
     }
   }
-  def listBuckets: Seq[Bucket] = {
-    files.children(root).map(Bucket(_)).filter(_.committed)
-  }
+  def listBuckets: Iterable[Bucket] = files.children(root).map(Bucket(_))
 }
