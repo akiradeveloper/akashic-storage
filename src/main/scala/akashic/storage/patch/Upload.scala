@@ -18,7 +18,7 @@ case class Upload(root: Path) extends Patch {
     acl.init
   }
   def reservedVersionId: Int = {
-    files.basename(root).split("-")(0).toInt
+    name.split("-")(0).toInt
   }
   def findPart(partNumber: Int): Option[Part] = {
     val path = partPath(partNumber)
