@@ -18,7 +18,7 @@ object Commit {
           // to wait for another process finishs commit in process.
           Thread.sleep(1000)
         }
-        if (Files.exists(to)) {
+        if (Files.exists(to) && !patch.committed) {
           files.purgeDirectory(to)
         }
         Files.createDirectory(patch.root)

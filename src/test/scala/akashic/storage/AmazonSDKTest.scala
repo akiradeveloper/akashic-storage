@@ -111,15 +111,15 @@ class AmazonSDKTest extends ServerTestBase {
   test("overwrite") { p =>
     import p._
     client.createBucket("myb")
+    val bucket = server.tree.findBucket("myb").get
+
     val f1 = getTestFile("test.txt")
     client.putObject("myb", "myobj", f1)
+    val key = bucket.findKey("myobj").get
+    assert(key.findVersion(1).isDefined)
 
     val f2 = getTestFile("test.jpg")
     client.putObject("myb", "myobj", f2)
-
-    val bucket = server.tree.findBucket("myb").get
-    val key = bucket.findKey("myobj").get
-    assert(key.findVersion(1).isEmpty)
     assert(key.findVersion(2).isDefined)
     val obj2 = client.getObject("myb", "myobj")
     checkFileContent(obj2, f2)
@@ -257,9 +257,11 @@ class AmazonSDKTest extends ServerTestBase {
 
     val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
     val initRes = client.initiateMultipartUpload(initReq)
-    assert(key.findVersion(1).isEmpty)
+    assert(key.findVersion(1).isDefined)
 
     client.putObject("myb", "myobj", f)
+    Thread.sleep(100)
+    assert(key.findVersion(1).isEmpty)
     assert(Files.exists(key.versions.patchPath(2)))
     assert(key.findVersion(3).isDefined)
 
