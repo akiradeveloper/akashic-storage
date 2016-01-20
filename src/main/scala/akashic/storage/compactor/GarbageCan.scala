@@ -14,15 +14,6 @@ case class GarbageCan(root: Path) {
       case e: FileAlreadyExistsException => add(path)
       case e: Throwable => throw e
     }
-  }
-
-  // TODO run in background and periodically
-  // (no need to purge trashes on shutdown)
-  def cleanup {
-    // FIXME may try to delete non-existent directory
-    // in case other node has deleted it.
-    files.children(root).foreach { dir =>
-      files.purgeDirectory(dir)
-    }
+    files.purgeDirectory(newPath)
   }
 }
