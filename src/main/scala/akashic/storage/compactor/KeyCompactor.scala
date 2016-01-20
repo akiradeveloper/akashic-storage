@@ -16,9 +16,9 @@ case class KeyCompactor(unwrap: Key, server: Server) extends Compactable {
   def compact: Seq[Compactable] = {
     // remove committed uploads
     unwrap.uploads.listUploads.filter(_.committed).foreach { upload: Upload =>
-      val dest = unwrap.findVersion(upload.reservedVersionId).get
-      if (dest.committed) {
-        dispose(upload.root)
+      unwrap.findVersion(upload.reservedVersionId) match {
+        case Some(a) => dispose(upload.root)
+        case None =>
       }
     }
 

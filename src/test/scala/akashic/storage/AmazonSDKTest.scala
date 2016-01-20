@@ -251,7 +251,6 @@ class AmazonSDKTest extends ServerTestBase {
     client.createBucket("myb")
     val bucket = server.tree.findBucket("myb").get
 
-    // put
     client.putObject("myb", "myobj", f)
     val key = bucket.findKey("myobj").get
 
@@ -266,6 +265,7 @@ class AmazonSDKTest extends ServerTestBase {
     assert(key.findVersion(3).isDefined)
 
     client.putObject("myb", "myobj", f)
+    Thread.sleep(100)
     assert(Files.exists(key.versions.patchPath(2)))
     assert(key.findVersion(3).isEmpty)
     assert(key.findVersion(4).isDefined)
