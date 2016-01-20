@@ -1,9 +1,11 @@
 package akashic.storage.service
 
-trait Task[T] {
+trait Task[T] extends CallerIdAssertable {
   def name: String
   def runOnce: T
   def run: T = {
+    checkCallerId
+
     val start = System.currentTimeMillis
     var retry = 0
     println(s"-> ${name}")

@@ -51,7 +51,7 @@ trait GetObjectSupport {
       responseContentDisposition: Option[String],
       responseContentEncoding: Option[String],
       requestId: String,
-      callerid: String,
+      callerId: String,
       withContent: Boolean,
       label: String
     ) extends Task[Output[Buf]] with Reportable {
