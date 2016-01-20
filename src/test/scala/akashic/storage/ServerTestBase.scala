@@ -8,7 +8,6 @@ import akashic.storage.admin.TestUsers
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   def makeConfig = ServerConfig.forConfig(ConfigFactory.load("test.conf"))
 
-  var server: Server = _
   override def beforeEach {
     val config = makeConfig
     server = Server(config)
