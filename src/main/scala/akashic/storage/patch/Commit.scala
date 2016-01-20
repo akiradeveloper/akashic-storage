@@ -17,9 +17,10 @@ object Commit {
           // such as creating key directory. Sleeping 1 second is enough long
           // to wait for another process finishs commit in process.
           Thread.sleep(1000)
-        }
-        if (Files.exists(to) && !patch.committed) {
-          files.purgeDirectory(to)
+
+          if (!patch.committed) {
+            files.purgeDirectory(to)
+          }
         }
 
         Files.createDirectory(patch.root)
