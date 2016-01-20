@@ -21,11 +21,18 @@ object Commit {
         if (Files.exists(to) && !patch.committed) {
           files.purgeDirectory(to)
         }
+
         Files.createDirectory(patch.root)
         // As the previous line throws exception if the directory exists
         // only a process created the directory can reach this line.
-        fn(patch)
-        patch.commit
+        try {
+          fn(patch)
+          patch.commit
+        } catch {
+          case e: Throwable =>
+            files.purgeDirectory(patch.root)
+            throw e
+        }
       } match {
         case Success(a) => true
         case Failure(a) => false
@@ -38,8 +45,14 @@ object Commit {
       try {
         val patch = Patch(makePath())
         Files.createDirectory(patch.root)
-        fn(patch)
-        patch
+        try {
+          fn(patch)
+          patch
+        } catch {
+          case e: Throwable =>
+            files.purgeDirectory(patch.root)
+            throw e
+        }
       } catch {
         case e: FileAlreadyExistsException => run
         case e: Throwable => throw e
