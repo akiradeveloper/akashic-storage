@@ -15,18 +15,7 @@ import io.finch._
 
 import scala.xml.NodeSeq
 
-case class Server(config: ServerConfig)
-extends GetServiceSupport
-with GetBucketSupport
-with PutBucketSupport
-with PutObjectSupport
-with GetObjectSupport
-with DeleteObjectSupport
-with HeadBucketSupport
-with InitiateMultipartUploadSupport
-with UploadPartSupport
-with CompleteMultipartUploadSupport
-with ListPartsSupport {
+case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("tree"))
   val tree = Tree(config.mountpoint.resolve("tree"))
 
@@ -38,7 +27,7 @@ with ListPartsSupport {
 
   // compact the store on reboot
   val compactorQueue = CompactorQueue()
-  compactorQueue.queue(TreeCompactor(tree, this))
+  compactorQueue.queue(TreeCompactor(tree))
 
   val adminService =
     post("admin" / "user") {

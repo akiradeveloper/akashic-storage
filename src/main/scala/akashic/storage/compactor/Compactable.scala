@@ -1,10 +1,9 @@
 package akashic.storage.compactor
 
-import akashic.storage.Server
+import akashic.storage.server
 import java.nio.file.Path
 
 trait Compactable {
-  def server: Server
   def compact: Iterable[Compactable]
   def dispose(root: Path) {
     server.garbageCan.add(root)

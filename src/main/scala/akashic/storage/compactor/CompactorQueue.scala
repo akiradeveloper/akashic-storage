@@ -1,7 +1,7 @@
 package akashic.storage.compactor
 
 import java.util.concurrent.{TimeUnit, LinkedBlockingDeque, ThreadPoolExecutor}
-import akashic.storage.Server
+import akashic.storage.server
 
 case class CompactorQueue() {
   private val workQueue = new ThreadPoolExecutor(1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingDeque[Runnable]())

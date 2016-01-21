@@ -1,10 +1,10 @@
 package akashic.storage.compactor
 
 import akashic.storage.patch.Part
-import akashic.storage.Server
+import akashic.storage.server
 
-case class PartCompactor(unwrap: Part, server: Server) extends Compactable {
+case class PartCompactor(unwrap: Part) extends Compactable {
   def compact = {
-    Seq(PatchLogCompactor(unwrap.versions, server))
+    Seq(PatchLogCompactor(unwrap.versions))
   }
 }

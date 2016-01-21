@@ -2,14 +2,14 @@ package akashic.storage.compactor
 
 import akashic.storage.patch.{Version, Key, Upload}
 import akashic.storage.service.Meta
-import akashic.storage.{files, Server}
+import akashic.storage.{files, server}
 import scala.collection.mutable
 
-case class KeyCompactor(unwrap: Key, server: Server) extends Compactable {
+case class KeyCompactor(unwrap: Key) extends Compactable {
   def result = {
     val l = mutable.ListBuffer[Compactable]()
-    l ++= unwrap.versions.listPatches.map(_.asVersion).filter(_.committed).map(VersionCompactor(_, server))
-    l ++= unwrap.uploads.listUploads.filter(_.committed).map(UploadCompactor(_, server))
+    l ++= unwrap.versions.listPatches.map(_.asVersion).filter(_.committed).map(VersionCompactor(_))
+    l ++= unwrap.uploads.listUploads.filter(_.committed).map(UploadCompactor(_))
     l.toSeq
   }
 
