@@ -2,7 +2,7 @@
 
 cd ..
 sbt compile
-sbt -Dconfig.file=src/test/resources/test-local.conf "runMain akashic.storage.app.RunServer" &
+sbt -Dconfig.file=src/test/resources/test.conf "runMain akashic.storage.app.RunServer" &
 processId=$!
 echo server process id: $processId
 cd -
