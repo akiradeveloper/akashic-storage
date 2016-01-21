@@ -1,2 +1,2 @@
 cd s3-tests
-sh run
+sudo sh run
