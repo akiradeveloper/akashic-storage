@@ -9,6 +9,10 @@ jdk:
 scala:
   - 2.11.6
 sudo: required
+before_install:
+  - sudo apt-get -y -qq update
+install:
+  - sudo apt-get -y -qq install python-virtualenv
 script:
   - if [ "$TEST_KIND" = "sbt-test" ]; then sh travis_script/sbt-test.sh; fi
   - if [ "$TEST_KIND" = "s3-tests" ]; then sh travis_script/s3-tests.sh; fi
