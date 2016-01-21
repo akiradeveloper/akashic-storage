@@ -39,7 +39,7 @@ class McTest extends ServerTestBase {
     }
     FileUtils.cleanDirectory(confDirPath.toFile)
 
-    assert(mc(s"config host add ${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
+    assert(mc(s"config host add http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
     assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)
   }
 
