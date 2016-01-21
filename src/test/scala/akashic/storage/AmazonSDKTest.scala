@@ -14,23 +14,6 @@ import org.apache.commons.io.IOUtils
 import scalaj.http.Http
 
 class AmazonSDKTest extends ServerTestBase {
-
-  def getTestFile(name: String): File = {
-    val loader = getClass.getClassLoader
-    new File(loader.getResource(name).getFile)
-  }
-
-  val LARGE_FILE_PATH = Paths.get("/tmp/akashic-storage-test-large-file")
-  def createLargeFile(path: Path): Unit = {
-    if (!Files.exists(path)) {
-      files.writeBytes(path, strings.random(32 * 1024 * 1024).map(_.toByte).toArray)
-    }
-  }
-
-  def checkFileContent(actual: S3Object, expected: File) {
-    assert(IOUtils.contentEquals(actual.getObjectContent, new FileInputStream(expected)))
-  }
-
   case class FixtureParam(client: AmazonS3Client)
   override protected def withFixture(test: OneArgTest) = {
     val conf = new ClientConfiguration

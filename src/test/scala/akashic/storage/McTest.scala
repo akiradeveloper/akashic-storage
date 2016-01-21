@@ -51,21 +51,20 @@ class McTest extends ServerTestBase {
     assert(mc(s"ls ${alias}").!!.split("\n").length === 2)
   }
 
-  // test("cp file and cat") { _ =>
-  //   (mc(s"mb ${alias}/abc") !) orFail
-  //   val f = getTestFile("test.txt")
-  //
-  //   // by dir dest
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc") !) orFail
-  //
-  //   assert((mc(s"cat ${alias}/abc/test.txt") !!).trim === "We love Scala!")
-  //
-  //   // by explicit dest name
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/test2.txt") !) orFail
-  //
-  //   assert((mc(s"cat ${alias}/abc/test2.txt") !!).trim === "We love Scala!")
-  // }
-  //
+  test("cp file and cat") { _ =>
+    assert(mc(s"mb ${alias}/abc").! === 0)
+
+    val f = getTestFile("test.txt")
+
+    // by dir dest
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc").! === 0)
+    assert(mc(s"cat ${alias}/abc/test.txt").!!.trim === "We love Scala!")
+
+    // by explicit dest name
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/test2.txt").! === 0)
+    assert(mc(s"cat ${alias}/abc/test2.txt").!!.trim === "We love Scala!")
+  }
+
   // test("share (presigned get)") { _ =>
   //   (mc(s"mb ${alias}/abc") !) orFail
   //   val f = getTestFile("test.txt")
