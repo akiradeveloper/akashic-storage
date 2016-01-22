@@ -37,11 +37,16 @@ Vagrant.configure(2) do |config|
 
     if [ ! -e mc ]; then
       wget https://dl.minio.io/client/mc/release/linux-amd64/mc
-      sudo cp mc /usr/local/bin
-      sudo chmod +x /usr/local/bin/mc
+      sudo cp mc /usr/bin
+      sudo chmod +x /usr/bin/mc
     fi
-    /usr/local/bin/mc --help
+    mc --help
 
     sudo /etc/init.d/akashic-storage start
+    sleep 10
+
+    cd akashic-storage/installer
+    python setup-mc.py
+    cd -
   SHELL
 end
