@@ -11,6 +11,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", ip: "55.89.144.233"
   config.vm.network "public_network"
 
+  config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder "../", "/home/vagrant/akashic-storage"
 
   config.vm.provider "virtualbox" do |vb|
