@@ -83,12 +83,13 @@ object GetObject {
         // TODO (others)
         .build
 
+      println(dates.formatLastModified(files.lastDate(filePath)))
       Ok(buf).append(headers)
         .withContentType(contentType)
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
         .withHeader(ETAG -> meta.eTag)
         .withHeader(CONTENT_LENGTH -> buf.length.toString)
-        // TODO Last-Modified
+        .withHeader(LAST_MODIFIED -> dates.formatLastModified(files.lastDate(filePath)))
     }
   }
 }
