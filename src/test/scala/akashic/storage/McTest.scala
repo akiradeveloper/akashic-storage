@@ -65,6 +65,12 @@ class McTest extends ServerTestBase {
     assert(mc(s"cat ${alias}/abc/test2.txt").!!.trim === "We love Scala!")
   }
 
+  test("pipe and cat") { _ =>
+    assert(mc(s"mb ${alias}/abc").! === 0)
+    assert((Process("echo hoge") #| mc(s"pipe ${alias}/abc/hoge.txt")).! === 0)
+    assert(mc(s"cat ${alias}/abc/hoge.txt").!!.trim === "hoge")
+  }
+
   // test("share (presigned get)") { _ =>
   //   (mc(s"mb ${alias}/abc") !) orFail
   //   val f = getTestFile("test.txt")
@@ -76,21 +82,5 @@ class McTest extends ServerTestBase {
   //   val method = new HttpGet(url)
   //   val contents: String = IOUtils.toString(httpCli.execute(method).getEntity.getContent).trim
   //   assert(contents === "We love Scala!")
-  // }
-  //
-  // test("diff") { _ =>
-  //   val f = getTestFile("test.txt")
-  //
-  //   (mc(s"mb ${alias}/abc") !) orFail
-  //
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc") !) orFail
-  //
-  //   (mc(s"mb ${alias}/def") !) orFail
-  //
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/def") !) orFail
-  //
-  //   (mc(s"diff ${f.getAbsolutePath} ${alias}/abc/test.txt") !) orFail
-  //
-  //   (mc(s"diff ${alias}/abc/test.txt ${alias}/def/test.txt") !) orFail
   // }
 }
