@@ -5,6 +5,7 @@ if [ ! -e $NAME.jar ]; then
 fi 
 mkdir -p /opt/$NAME
 mkdir -p /opt/$NAME/jar
+mkdir -p /opt/$NAME/etc
 mkdir -p /var/log/$NAME
 cp $NAME.jar /opt/$NAME/jar
 if [ ! -e /opt/$NAME/etc/conf ]; then
@@ -13,3 +14,4 @@ else
   echo "/opt/$NAME/etc/conf exists. skipped [OK]" 
 fi
 cp $NAME /etc/init.d
+chmod +x /etc/init.d/$NAME
