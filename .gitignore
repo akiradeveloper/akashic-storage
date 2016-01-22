@@ -1,6 +1,9 @@
 *.class
 *.log
 
+# Project specific
+/installer/akashic-storage.jar
+
 # sbt specific
 .cache
 .history
@@ -11,6 +14,9 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+
+# Vagrant specific
+.vagrant
 
 # Scala-IDE specific
 .scala_dependencies
