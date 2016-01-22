@@ -24,7 +24,7 @@ Before launching your Vagrant environment, you must install [VirtualBox 5.x](htt
 Next you need compile jar file by simply executing `/installer/compile-jar.sh`.
 
 ```
-$ sh installer/compile-jar.sh
+$ cd installer; sh compile-jar.sh; cd -
 ```
 
 This will create `akashic-storage.jar` in `/installer` folder. This jar file will be used to provision Vagrant VM.
