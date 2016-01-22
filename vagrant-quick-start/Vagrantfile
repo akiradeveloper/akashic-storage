@@ -30,6 +30,9 @@ Vagrant.configure(2) do |config|
     if [ -e /usr/java/default ]; then
       echo "/usr/java/default exists [OK]"
     fi
+    cd akashic-storage/installer
+    sh install.sh
+    cd -
 
     if [ ! -e mc ]; then
       wget https://dl.minio.io/client/mc/release/linux-amd64/mc
@@ -37,10 +40,5 @@ Vagrant.configure(2) do |config|
       sudo chmod +x /usr/local/bin/mc
     fi
     /usr/local/bin/mc --help
-
-    cd akashic-storage/installer
-    # ruby install.rb
-    # ruby setup-mc.rb
-    cd -
   SHELL
 end
