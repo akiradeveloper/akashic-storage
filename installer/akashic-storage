@@ -6,7 +6,8 @@ CLASS_PATH=/opt/$NAME/jar/$NAME.jar
 LOG_OUT=/var/log/$NAME/daemon.log
 LOG_ERR=/var/log/$NAME/daemon.err
 PID=/var/run/$NAME.pid
-JSVC=jsvc -home $JAVA_HOME -cp $CLASS_PATH -user root -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID
+JSVC="jsvc -home $JAVA_HOME -cp $CLASS_PATH -user root -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID"
+echo JSVC: $JSVC
 CLASS=akashic.storage.app.ServerDaemon
 
 case $1 in
