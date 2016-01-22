@@ -43,6 +43,7 @@ Vagrant.configure(2) do |config|
 
     sudo /etc/init.d/akashic-storage start
     cd akashic-storage/installer
+    sleep 10
     python setup-mc.py
     cd -
   SHELL
