@@ -1,8 +1,10 @@
-name := "akashic.storage"
+name := "akashic-storage"
 
-version := "1.0"
+version := "0.1.0"
 
 scalaVersion := "2.11.6"
+
+test in assembly := {}
 
 // Each test suite can be run in parallel
 parallelExecution in Test := false
