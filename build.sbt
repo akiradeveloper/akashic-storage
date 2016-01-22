@@ -21,6 +21,7 @@ libraryDependencies ++= Seq(
   // "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
   "commons-io" % "commons-io" % "2.4",
   "commons-codec" % "commons-codec" % "1.10",
+  "commons-daemon" % "commons-daemon" % "1.0.15",
   // "org.apache.httpcomponents" % "httpclient" % "4.5",
   // "org.apache.httpcomponents" % "httpmime" % "4.5.1",
   "org.apache.tika" % "tika-core" % "1.10",

@@ -11,7 +11,7 @@ import org.scalatest._
 import akashic.storage.admin.TestUsers
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
-  def makeConfig = ServerConfig.forConfig(ConfigFactory.load("test.conf"))
+  def makeConfig = ServerConfig(ConfigFactory.load("test.conf"), init = true)
 
   override def beforeEach {
     val config = makeConfig
@@ -20,8 +20,6 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
 
     // FIXME (should via HTTP)
     server.users.addUser(TestUsers.hoge)
-
-    // Await.ready(finagleServer)
   }
 
   override def afterEach {

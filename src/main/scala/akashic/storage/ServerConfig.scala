@@ -11,18 +11,11 @@ trait ServerConfig {
 }
 
 object ServerConfig {
-  def forProduction = ???
-
-  def forTest = {
-    val configRoot = ConfigFactory.load
-    forConfig(configRoot)
-  }
-
-  def forConfig(configRoot: Config) = new ServerConfig {
+  def apply(configRoot: Config, init: Boolean) = new ServerConfig {
     val config = configRoot.getConfig("akashic.storage")
 
     val mp = Paths.get(config.getString("mountpoint"))
-    if (Files.exists(mp)) {
+    if (init && Files.exists(mp)) {
       files.purgeDirectory(mp)
     }
     if (!Files.exists(mp)) {
