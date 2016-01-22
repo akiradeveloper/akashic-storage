@@ -1,0 +1,35 @@
+#!/bin/sh
+
+NAME=akashic-storage
+JAVA_HOME=${JAVA_HOME-/usr/java/default}
+CLASS_PATH=/opt/$NAME/jar/$NAME.jar
+LOG_OUT=/var/log/$NAME/daemon.log
+LOG_ERR=/var/log/$NAME/daemon.err
+PID=/var/run/$NAME.pid
+JSVC=jsvc -home $JAVA_HOME -cp $CLASS_PATH -user root -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID
+CLASS=akashic.storage.app.ServerDaemon
+
+case $1 in
+  start)
+    echo "Starting $NAME..."
+    $JSVC $CLASS
+  ;;
+  stop)
+    echo "Stopping $NAME..."
+    $JSVC -stop $CLASS
+  ;;
+  restart)
+    if [ -f $PID ]; then
+      echo "Restarting $NAME..."
+      $JSVC -stop $CLASS
+      $JSVC $CLASS
+      echo "$NAME has restarted"
+    else
+      echo "Daemon not running, no action taken"
+    fi
+  ;;
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart}" >&2
+    exit 3
+  ;;
+esac
