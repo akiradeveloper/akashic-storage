@@ -7,6 +7,35 @@
 
 The software is built upon **finch** that is a sophisticated finagle-http wrapper in functional way. Therefore akashic-storage's all codebase is written in **Scala** with a taste of functional programming so it's readable, small and then solid.
 
-The goal is to provide a perfect on-premise S3 storage used world-wide. 
+The goal is to provide a perfect on-premise S3 storage used world-wide.
 
 ![Concept](https://rawgit.com/akiradeveloper/akashic-storage/develop/concept.svg)
+
+## Getting Started
+
+The easiest way to try out akashic-storage is to use [Vagrant](https://www.vagrantup.com) virtual machine. It will install everything you need and set up working akashic-storage service. You can find `Vagranfile` at `/vagrant-quick-start` folder.
+
+### First step
+
+Before launching your Vagrant environment, you must install [VirtualBox 5.x](https://www.virtualbox.org/wiki/Downloads) as [Vagrant](https://www.vagrantup.com/downloads.html). All of these software packages provide easy-to-use visual installers for all popular operating systems.
+
+### Compile jar file
+
+Next you need compile jar file by simply executing `/installer/compile-jar.sh`.
+
+```
+$ cd installer; sh compile-jar.sh; cd -
+```
+
+This will create `akashic-storage.jar` in `/installer` folder. This jar file will be used to provision Vagrant VM.
+
+### Boot up Vagrant
+
+Once you finish compiling jar file, you can now boot up your Vagrant.
+
+```
+$ cd vagrant-quick-start
+$ vagrant up
+```
+
+Now you can access akashic-storage at `http://localhost:10946` within Vagrant VM.
