@@ -32,7 +32,7 @@ object DeleteObject {
       // Returns the version ID of the delete marker created as a result of the DELETE operation.
       // If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
       if (versionId.isDefined) {
-        NoContent()
+        NoContent[Unit]
       } else {
         // simple DELETE
         val patch = Commit.retry(key.versions) { patch =>
@@ -64,7 +64,7 @@ object DeleteObject {
 
         server.compactorQueue.queue(KeyCompactor(key))
 
-        NoContent()
+        NoContent[Unit]
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
           .withHeader(X_AMZ_DELETE_MARKER -> "true")
           .withHeader(X_AMZ_VERSION_ID -> (if (versioningEnabled) { patch.name } else { "null" }))

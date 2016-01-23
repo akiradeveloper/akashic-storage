@@ -39,7 +39,7 @@ case class Server(config: ServerConfig) {
       Ok(result.xml)
     } :+:
     delete("admin" / "user" / string) { id: String =>
-      Output.Payload("", Status.NotImplemented)
+      Output.payload("", Status.NotImplemented)
     } :+:
     put("admin" / "user" / string ? body) { (id: String, body: String) =>
       UpdateUser.run(users, id, body)
@@ -66,12 +66,12 @@ case class Server(config: ServerConfig) {
       val withMessage = service.Error.withMessage(e)
       val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
       val cause = io.finch.Error(xml.toString)
-      Output.Failure(cause, Status.fromCode(withMessage.httpCode))
+      Output.failure(cause, Status.fromCode(withMessage.httpCode))
         .withHeader(("a", "b"))
     case admin.Error.Exception(e) =>
       val (code, message) = admin.Error.interpret(e)
       val cause = io.finch.Error(message)
-      Output.Failure(cause, Status.fromCode(code))
+      Output.failure(cause, Status.fromCode(code))
   }
 
   def address = s"${config.ip}:${config.port}"
