@@ -3,8 +3,8 @@ package akashic.storage.service
 import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.{HeaderList, files, server}
-import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
+import com.google.common.net.HttpHeaders._
 import io.finch._
 
 object PutObject {
@@ -64,7 +64,7 @@ object PutObject {
       Ok()
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
         .withHeader(X_AMZ_VERSION_ID -> "null")
-        .withHeader("ETag" -> computedETag)
+        .withHeader(ETAG -> quoteString(computedETag))
         // TODO Origin
     }
   }

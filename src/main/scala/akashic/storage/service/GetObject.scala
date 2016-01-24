@@ -3,7 +3,6 @@ package akashic.storage.service
 import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{HeaderList, server, files}
-import akashic.storage.service.Error.Reportable
 import com.twitter.io.Buf
 import com.google.common.net.HttpHeaders._
 
@@ -84,7 +83,7 @@ object GetObject {
       Ok(buf).append(headers)
         .withContentType(contentType)
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(ETAG -> meta.eTag)
+        .withHeader(ETAG -> quoteString(meta.eTag))
         .withHeader(CONTENT_LENGTH -> buf.length.toString)
         .withHeader(LAST_MODIFIED -> dates.formatLastModified(files.lastDate(filePath)))
     }

@@ -122,7 +122,7 @@ object CompleteMultipartUpload {
           <Location>{s"http://${server.address}/${bucketName}/${keyName}"}</Location>
           <Bucket>{bucketName}</Bucket>
           <Key>{keyName}</Key>
-          <ETag>{newETag}</ETag>
+          <ETag>{quoteString(newETag)}</ETag>
         </CompleteMultipartUploadResult>
       } handle {
         case e: Throwable =>

@@ -34,5 +34,6 @@ package object service {
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
 
+  def quoteString(raw: String): String = s""""${raw}""""
   val extractRequest = RequestReader { req: Request => req }
 }
