@@ -48,7 +48,7 @@ case class V2Common(method: String, resource: String, paramList: ParamList.t, he
       resource + params
     }
     val result = method + "\n" +
-      headerList.find("Content-MD5").getOrElse("") + "\n" +
+      headerList.find("Content-Md5").getOrElse("") + "\n" +
       headerList.find("Content-Type").getOrElse("").toLowerCase + "\n" +
       dateOrExpire + "\n" +
       cannonicalAmzHeaders +
