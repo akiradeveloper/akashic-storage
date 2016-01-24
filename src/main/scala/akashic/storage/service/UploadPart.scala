@@ -6,7 +6,7 @@ import akashic.storage.patch.{Part, Commit, PatchLog}
 import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
 import io.finch._
-import org.apache.http.HttpHeaders
+import com.google.common.net.HttpHeaders._
 
 object UploadPart {
   val matcher = put(string / string / paramExists("uploadId") / paramExists("partNumber") ?
@@ -45,7 +45,7 @@ object UploadPart {
 
       Ok()
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(HttpHeaders.ETAG -> computedMD5)
+        .withHeader(ETAG -> quoteString(computedMD5))
     }
   }
 }
