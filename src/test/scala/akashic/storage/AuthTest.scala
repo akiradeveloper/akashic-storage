@@ -4,6 +4,10 @@ import org.scalatest.FunSuite
 import akashic.storage.auth._
 
 class AuthTest extends FunSuite {
+
+  // example 1-3
+  // https://s3.amazonaws.com/doc/s3-developer-guide/RESTAuthentication.html
+
   val accessKey = "44CF9590006BF252F707"
   val secretKey = "OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV"
   val map1 = Map(accessKey -> secretKey)
@@ -47,19 +51,21 @@ class AuthTest extends FunSuite {
       ParamList.t(Seq(
         ("AWSAccessKeyId", accessKey),
         ("Expires", "1141889120"),
-        ("Signature", "vjbyPxybdZaNmGa%2ByT272YEAiv4%3D")
+        ("Signature", "vjbyPxybdZaNmGa+yT272YEAiv4=")
       )),
       HeaderList.empty,
       map1
     ).isDefined)
   }
 
+  // -----------------------------------------------------------------------------------------
+
   val map2 = Map("myid" -> "mykey")
 
   test("actual case1: bucket path") {
     assert(V2.doAuthorize(
       "PUT",
-      "/mybucket1",
+      "/mybucket1/",
       ParamList.empty,
       HeaderList.builder
         .append("Authorization", "AWS myid:EBrN3wP3EVWxYf3UhxVeBeVFFYI=")

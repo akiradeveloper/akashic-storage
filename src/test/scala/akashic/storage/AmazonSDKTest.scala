@@ -32,8 +32,6 @@ class AmazonSDKTest extends ServerTestBase {
     import p._
 
     client.createBucket("myb1")
-    val postRes = Http(s"http://${server.address}/myb1").method("HEAD").asString
-    assert(postRes.code === 200)
 
     client.createBucket("myb2")
     val res = client.listBuckets

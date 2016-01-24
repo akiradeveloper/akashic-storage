@@ -10,5 +10,8 @@ package object auth {
   }
   val getSecretKey: String => String = (accessKey: String) => doGetSecretKey(accessKey)
   def authorize(resource: String, req: Request): Option[String] =
-    Seq(V2.authorize(resource, req), V2Presigned.authorize(resource, req)).find(_.isDefined).flatten
+    Seq(V2.authorize(resource, req), V2Presigned.authorize(resource, req))
+      .find(_.isDefined)
+      .flatten
+      .flatMap(server.users.getId(_))
 }
