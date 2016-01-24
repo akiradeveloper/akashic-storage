@@ -2,7 +2,7 @@ package akashic.storage.service
 
 import java.nio.file.Path
 
-import akashic.storage.server
+import akashic.storage.{HeaderList, server}
 import akashic.storage.patch.Commit
 import akashic.storage.patch.Commit.RetryGenericNoCommit
 import akashic.storage.service.Error.Reportable
@@ -52,11 +52,11 @@ object InitiateMultipartUpload {
             isVersioned = false,
             isDeleteMarker = false,
             eTag = "",
-            attrs = KVList.builder
+            attrs = HeaderList.builder
               .appendOpt("Content-Type", contentType)
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
-            xattrs = KVList.builder.build
+            xattrs = HeaderList.builder.build
           ).toBytes)
       }
       val xml =

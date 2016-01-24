@@ -2,7 +2,7 @@ package akashic.storage.service
 
 import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
-import akashic.storage.{files, server}
+import akashic.storage.{HeaderList, files, server}
 import akashic.storage.service.Error.Reportable
 import io.finch._
 
@@ -52,11 +52,11 @@ object PutObject {
             isVersioned = false,
             isDeleteMarker = false,
             eTag = computedETag,
-            attrs = KVList.builder
+            attrs = HeaderList.builder
               .appendOpt("Content-Type", contentType)
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
-            xattrs = KVList.builder.build
+            xattrs = HeaderList.builder.build
           ).toBytes)
       }
 

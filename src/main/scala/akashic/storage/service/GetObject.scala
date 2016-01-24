@@ -1,9 +1,8 @@
 package akashic.storage.service
 
 import io.finch._
-import akashic.storage.server
+import akashic.storage.{HeaderList, server, files}
 import akashic.storage.service.Error.Reportable
-import akashic.storage.files
 import com.twitter.io.Buf
 import com.google.common.net.HttpHeaders._
 
@@ -78,7 +77,7 @@ object GetObject {
       }
 
       // TODO use this
-      val headers = KVList.builder
+      val headers = HeaderList.builder
         .appendOpt(CONTENT_DISPOSITION, contentDisposition)
         // TODO (others)
         .build

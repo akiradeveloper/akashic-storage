@@ -4,7 +4,7 @@ import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.service.Error.Reportable
 import io.finch._
-import akashic.storage.server
+import akashic.storage.{HeaderList, server}
 
 object DeleteObject {
   val matcher = delete(string / string ?
@@ -56,8 +56,8 @@ object DeleteObject {
               isVersioned = false,
               isDeleteMarker = true,
               eTag = "",
-              attrs = KVList.builder.build,
-              xattrs = KVList.builder.build
+              attrs = HeaderList.builder.build,
+              xattrs = HeaderList.builder.build
             ).toBytes
           )
         }

@@ -18,7 +18,7 @@ package object service {
   }
 
   implicit class _Output[A](unwrap: Output[A]) {
-    def append(list: KVList.t): Output[A] = list.unwrap.foldLeft(unwrap) { (acc, a) => acc.withHeader(a) }
+    def append(list: HeaderList.t): Output[A] = list.unwrap.foldLeft(unwrap) { (acc, a) => acc.withHeader(a) }
   }
 
   case class ParamExists(name: String) extends Endpoint[HNil] {

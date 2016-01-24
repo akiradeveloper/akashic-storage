@@ -1,8 +1,10 @@
-package akashic.storage.service
+package akashic.storage
+
+import com.twitter.finagle.http.Request
 
 import scala.collection.mutable
 
-object KVList {
+object HeaderList {
   case class t(unwrap: Seq[(String, String)]) {
     def find(k: String) = unwrap.find(_._1 == k).map(_._2)
   }
@@ -18,5 +20,8 @@ object KVList {
       this
     }
     def build = t(l)
+  }
+  def fromRequest(req: Request): t = {
+    t(req.headerMap.iterator.toSeq)
   }
 }
