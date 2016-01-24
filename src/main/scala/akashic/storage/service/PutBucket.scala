@@ -3,13 +3,14 @@ package akashic.storage.service
 import akashic.storage.server
 import akashic.storage.patch._
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 
 object PutBucket {
-  val matcher = put(string ? RequestId.reader ? CallerId.reader).as[t]
+  val matcher = put(string ? extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
 
-  case class t(bucketName: String, requestId: String, callerId: String) extends Task[Output[Unit]] with Reportable {
+  case class t(bucketName: String, req: Request) extends Task[Output[Unit]] {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

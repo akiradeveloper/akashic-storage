@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{HeaderList, server, files}
 import akashic.storage.service.Error.Reportable
@@ -15,8 +16,7 @@ object HeadObject {
     paramOption("response-cache-control") ?
     paramOption("response-content-disposition") ?
     paramOption("response-content-encoding") ?
-    RequestId.reader ?
-    CallerId.reader ?
+    extractRequest ?
     RequestReader.value(false) ?
     RequestReader.value("Head Object")
     ).as[GetObject.t]
@@ -31,8 +31,7 @@ object GetObject {
     paramOption("response-cache-control") ?
     paramOption("response-content-disposition") ?
     paramOption("response-content-encoding") ?
-    RequestId.reader ?
-    CallerId.reader ?
+    extractRequest ?
     RequestReader.value(true) ?
     RequestReader.value("Get Object")
     ).as[t]
@@ -47,11 +46,10 @@ object GetObject {
     responseCacheControl: Option[String],
     responseContentDisposition: Option[String],
     responseContentEncoding: Option[String],
-    requestId: String,
-    callerId: String,
+    req: Request,
     withContent: Boolean,
     label: String
-  ) extends Task[Output[Buf]] with Reportable {
+  ) extends Task[Output[Buf]] {
     def name = label
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

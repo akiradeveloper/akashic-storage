@@ -2,15 +2,16 @@ package akashic.storage.service
 
 import akashic.storage.service.Error.Reportable
 import akashic.storage.{server, files, patch}
+import com.twitter.finagle.http.Request
 import io.finch._
 
 import scala.xml.NodeSeq
 
 object GetService {
-  val matcher = get(/ ? RequestId.reader ? CallerId.reader).as[t]
+  val matcher = get(/ ? extractRequest).as[t]
   def endpoint: Endpoint[NodeSeq] = matcher { a: t => a.run }
 
-  case class t(requestId: String, callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+  case class t(req: Request) extends Task[Output[NodeSeq]] {
     def name = "GET Service"
     def resource = Resource.forRoot
 

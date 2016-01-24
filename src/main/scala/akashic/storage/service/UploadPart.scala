@@ -4,6 +4,7 @@ import akashic.storage.compactor.PartCompactor
 import akashic.storage.{files, server}
 import akashic.storage.patch.{Part, Commit, PatchLog}
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 import org.apache.http.HttpHeaders
 
@@ -12,14 +13,13 @@ object UploadPart {
     param("uploadId") ?
     param("partNumber").as[Int] ?
     binaryBody ?
-    RequestId.reader ? CallerId.reader).as[t]
+    extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,
                partData: Array[Byte],
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               req: Request) extends Task[Output[Unit]] {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

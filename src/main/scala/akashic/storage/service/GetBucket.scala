@@ -1,6 +1,7 @@
 package akashic.storage.service
 
 import akashic.storage.patch.Version
+import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{files, server}
 import akashic.storage.service.Error.Reportable
@@ -13,8 +14,7 @@ object GetBucket {
     paramOption("marker") ?
     paramOption("max-keys").as[Int] ?
     paramOption("prefix") ?
-    RequestId.reader ?
-    CallerId.reader
+    extractRequest
   ).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String,
@@ -23,8 +23,7 @@ object GetBucket {
                marker: Option[String],
                maxKeys: Option[Int],
                prefix: Option[String],
-               requestId: String,
-               callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+               req: Request) extends Task[Output[NodeSeq]] {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

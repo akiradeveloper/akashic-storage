@@ -1,15 +1,8 @@
 package akashic.storage
 
-import io.finch.RequestReader
+import com.twitter.finagle.http.Request
 
 package object auth {
-  val reader: RequestReader[String] = for {
-    v2Result <- V2.reader
-    v2PresignedResult <- V2Presigned.reader
-  } yield {
-    Seq(v2Result, v2PresignedResult).find(_.isDefined) match {
-      case Some(a) => a.get
-      case None => "" // not found
-    }
-  }
+  def authorize(resource: String, req: Request): Option[String] =
+    Seq(V2.authorize(resource, req), V2Presigned.authorize(resource, req)).find(_.isDefined).get
 }

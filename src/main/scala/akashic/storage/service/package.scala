@@ -2,6 +2,7 @@ package akashic.storage
 
 import akashic.storage.patch.Version
 import cats.Eval
+import com.twitter.finagle.http.Request
 import com.twitter.util.Future
 
 import io.finch._
@@ -32,4 +33,6 @@ package object service {
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
+
+  val extractRequest = RequestReader { req: Request => req }
 }

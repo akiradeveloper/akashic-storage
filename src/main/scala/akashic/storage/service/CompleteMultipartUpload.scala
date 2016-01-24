@@ -9,6 +9,7 @@ import akashic.storage.patch.{Commit, Patch, Version, Data}
 import akashic.storage.service.Error.Reportable
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
+import com.twitter.finagle.http.Request
 import com.twitter.util.Future
 import org.apache.commons.io.FileUtils
 
@@ -20,15 +21,13 @@ object CompleteMultipartUpload {
   val matcher = post(string / string / paramExists("uploadId") ?
     param("uploadId") ?
     body ?
-    RequestId.reader ?
-    CallerId.reader
+    extractRequest
   ).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                data: String,
-               requestId: String,
-               callerId: String) extends Task[Output[Future[NodeSeq]]] with Reportable {
+               req: Request) extends Task[Output[Future[NodeSeq]]] {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

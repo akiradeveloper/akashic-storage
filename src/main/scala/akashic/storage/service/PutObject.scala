@@ -4,6 +4,7 @@ import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.{HeaderList, files, server}
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 
 object PutObject {
@@ -12,15 +13,13 @@ object PutObject {
     binaryBody ?
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?
-    RequestId.reader ?
-    CallerId.reader).as[t]
+    extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                contentType: Option[String],
                contentDisposition: Option[String],
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               req: Request) extends Task[Output[Unit]] {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

@@ -1,10 +1,11 @@
 package akashic.storage.service
 
-trait Task[T] extends CallerIdAssertable {
+trait Task[T] extends RequestIdAllocable with Authorizable {
   def name: String
   def runOnce: T
   def run: T = {
-    checkCallerId
+    allocRequestId
+    authorize
 
     val start = System.currentTimeMillis
     var retry = 0

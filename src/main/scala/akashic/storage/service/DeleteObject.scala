@@ -3,20 +3,19 @@ package akashic.storage.service
 import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{HeaderList, server}
 
 object DeleteObject {
   val matcher = delete(string / string ?
     paramOption("versionId").as[Int] ?
-    RequestId.reader ?
-    CallerId.reader
+    extractRequest
   ).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                versionId: Option[Int],
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               req: Request) extends Task[Output[Unit]] {
     def name = "DELETE Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

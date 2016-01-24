@@ -2,14 +2,14 @@ package akashic.storage.service
 
 import akashic.storage.server
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 
 object HeadBucket {
-  val matcher = head(string ? RequestId.reader ? CallerId.reader).as[t]
+  val matcher = head(string ? extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String,
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               req: Request) extends Task[Output[Unit]] {
     def name = "HEAD Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

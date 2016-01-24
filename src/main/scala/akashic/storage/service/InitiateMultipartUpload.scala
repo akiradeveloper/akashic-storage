@@ -15,14 +15,12 @@ object InitiateMultipartUpload {
   val matcher = post(string / string / paramExists("uploads") ?
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?
-    RequestId.reader ?
-    CallerId.reader).as[t]
+    extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                contentType: Option[String],
                contentDisposition: Option[String],
-               requestId: String,
-               callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+               req: Request) extends Task[Output[NodeSeq]] {
     def name = "Initiate Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

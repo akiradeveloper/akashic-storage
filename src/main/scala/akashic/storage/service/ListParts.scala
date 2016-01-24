@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import akashic.storage.{files, server}
 import akashic.storage.service.Error.Reportable
+import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.patch.Part
 
@@ -12,14 +13,13 @@ object ListParts {
     param("uploadId") ?
     paramOption("part-number-marker").as[Int] ?
     paramOption("max-parts").as[Int] ?
-    RequestId.reader ?
-    CallerId.reader).as[t]
+    extractRequest).as[t]
   val endpoint = matcher { a: t => a.run }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumberMarker: Option[Int],
                maxParts: Option[Int],
-               requestId: String, callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+               req: Request) extends Task[Output[NodeSeq]] {
     def name = "List Parts"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
