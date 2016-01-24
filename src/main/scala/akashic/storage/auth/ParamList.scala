@@ -6,6 +6,7 @@ object ParamList {
   case class t(unwrap: Seq[(String, String)]) {
     def find(k: String) = unwrap.find(_._1 == k).map(_._2)
   }
+  val emtpy = t(Seq())
   def fromRequest(req: Request): t = {
     t(req.params.iterator.toSeq)
   }

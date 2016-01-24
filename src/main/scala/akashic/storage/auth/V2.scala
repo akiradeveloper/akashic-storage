@@ -12,10 +12,11 @@ object V2 {
       req.method.toString, 
       resource,
       ParamList.fromRequest(req),
-      HeaderList.fromRequest(req)
+      HeaderList.fromRequest(req),
+      getSecretKey
     )
   }
-  def doAuthorize(method: String, resource: String, paramList: ParamList.t, headerList: HeaderList.t): Option[String] = {
+  def doAuthorize(method: String, resource: String, paramList: ParamList.t, headerList: HeaderList.t, getSecretKeyFn: String => String): Option[String] = {
     Try {
       val authorization = headerList.find("Authorization").getOrElse("BANG!")
       val xs = authorization.split(" ")
@@ -27,8 +28,6 @@ object V2 {
       val signature = ys(1)
       require(signature != "")
 
-      val secretKey = getSecretKey(accessKey)
-
       val date = {
         headerList.find("x-amz-date") match {
           case Some(a) => ""
@@ -37,7 +36,7 @@ object V2 {
       }
       val alg = V2Common(method, resource, paramList, headerList)
       val stringToSign = alg.stringToSign(date)
-      val computed = alg.computeSignature(stringToSign, secretKey)
+      val computed = alg.computeSignature(stringToSign, getSecretKeyFn(accessKey))
       require(computed == signature)
       accessKey
     }.toOption

@@ -8,6 +8,7 @@ object HeaderList {
   case class t(unwrap: Seq[(String, String)]) {
     def find(k: String) = unwrap.find(_._1 == k).map(_._2)
   }
+  val empty = t(Seq())
   def builder: Builder = Builder()
   case class Builder() {
     private val l = mutable.ListBuffer[(String, String)]()
