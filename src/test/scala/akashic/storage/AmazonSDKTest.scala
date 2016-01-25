@@ -60,6 +60,15 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("put key delimited") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "a/b", f)
+    val obj = client.getObject("myb", "a/b")
+    checkFileContent(obj, f)
+  }
+
   test("put and get image object") { p =>
     import p._
 
