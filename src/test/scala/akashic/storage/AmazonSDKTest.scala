@@ -79,6 +79,17 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj, f)
   }
 
+  test("put 8mb file") { p =>
+    import p._
+    client.createBucket("myb")
+    val path = FILE_PATH_8MB
+    createLargeFile(path, 8)
+    val f = path.toFile
+    client.putObject("myb", "myobj", f)
+    val obj = client.getObject("myb", "myobj")
+    checkFileContent(obj, f)
+  }
+
   test("put and get several objects") { p =>
     import p._
 
@@ -149,8 +160,8 @@ class AmazonSDKTest extends ServerTestBase {
 
     client.createBucket("myb")
 
-    createLargeFile(LARGE_FILE_PATH)
-    val upFile = LARGE_FILE_PATH.toFile
+    createLargeFile(FILE_PATH_32MB, 32)
+    val upFile = FILE_PATH_32MB.toFile
 
     val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
     val initRes = client.initiateMultipartUpload(initReq)
@@ -210,8 +221,8 @@ class AmazonSDKTest extends ServerTestBase {
 
     client.createBucket("myb")
 
-    createLargeFile(LARGE_FILE_PATH)
-    val upFile = LARGE_FILE_PATH.toFile
+    createLargeFile(FILE_PATH_32MB, 32)
+    val upFile = FILE_PATH_32MB.toFile
 
     val tmUp = new TransferManager(client)
     val upload = tmUp.upload("myb", "myobj", upFile)

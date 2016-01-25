@@ -31,10 +31,11 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
     new File(loader.getResource(name).getFile)
   }
 
-  val LARGE_FILE_PATH = Paths.get("/tmp/akashic-storage-test-large-file")
-  def createLargeFile(path: Path): Unit = {
+  val FILE_PATH_8MB = Paths.get("/tmp/akashic-storage-test-file-8mb")
+  val FILE_PATH_32MB = Paths.get("/tmp/akashic-storage-test-file-32mb")
+  def createLargeFile(path: Path, sizeMB: Int): Unit = {
     if (!Files.exists(path)) {
-      files.writeBytes(path, strings.random(32 * 1024 * 1024).map(_.toByte).toArray)
+      files.writeBytes(path, strings.random(sizeMB * 1024 * 1024).map(_.toByte).toArray)
     }
   }
 
