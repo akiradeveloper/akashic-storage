@@ -6,9 +6,11 @@ import akashic.storage.admin._
 import akashic.storage.service._
 import akashic.storage.compactor.{CompactorQueue, GarbageCan, TreeCompactor}
 import akashic.storage.patch.Tree
+import com.twitter.finagle.Http.param.{MaxResponseSize, MaxRequestSize}
 import com.twitter.util.Future
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Http, NullServer, ListeningServer, SimpleFilter, Service}
+import com.twitter.conversions.storage._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Await
 import io.finch._
@@ -91,6 +93,8 @@ case class Server(config: ServerConfig) {
     val service = logFilter andThen this.endpoint.toService
     listeningServer = Http.server
       // .configured(Transport.Verbose(true))
+      .configured(MaxRequestSize(1.gigabytes))
+      .configured(MaxResponseSize(1.gigabytes))
       .serve(s"${address}", service)
   }
 
