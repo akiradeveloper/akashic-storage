@@ -82,7 +82,7 @@ class AmazonSDKTest extends ServerTestBase {
   test("put 8mb file") { p =>
     import p._
     client.createBucket("myb")
-    val path = FILE_PATH_8MB
+    val path = Paths.get("/tmp/akashic-storage-test-file-8mb")
     createLargeFile(path, 8)
     val f = path.toFile
     client.putObject("myb", "myobj", f)

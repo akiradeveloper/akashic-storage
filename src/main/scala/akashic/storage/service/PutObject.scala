@@ -9,7 +9,7 @@ import io.finch._
 
 object PutObject {
   val matcher = put(
-    string / string ?
+    keyMatcher ?
     binaryBody ?
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?

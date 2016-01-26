@@ -7,7 +7,7 @@ import com.twitter.io.Buf
 import com.google.common.net.HttpHeaders._
 
 object HeadObject {
- val matcher = head(string / string ?
+ val matcher = head(keyMatcher ?
     paramOption("versionId") ?
     paramOption("response-content-type") ?
     paramOption("response-content-language") ?
@@ -22,7 +22,7 @@ object HeadObject {
  val endpoint = matcher { a: GetObject.t => a.run }
 }
 object GetObject {
-  val matcher = get(string / string ?
+  val matcher = get(keyMatcher ?
     paramOption("versionId") ?
     paramOption("response-content-type") ?
     paramOption("response-content-language") ?

@@ -47,15 +47,15 @@ case class Server(config: ServerConfig) {
     }
 
   val api =
-    HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
     HeadBucket.endpoint              :+: // HEAD   /bucketName
-    ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
-    GetObject.endpoint               :+: // GET    /bucketName/keyName
-    GetBucket.endpoint               :+: // GET    /bucketName
+    HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
     GetService.endpoint              :+: // GET    /
-    UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
-    PutObject.endpoint               :+: // PUT    /bucketName/keyName
+    GetBucket.endpoint               :+: // GET    /bucketName
+    GetObject.endpoint               :+: // GET    /bucketName/keyName
+    ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
     PutBucket.endpoint               :+: // PUT    /bucketName
+    PutObject.endpoint               :+: // PUT    /bucketName/keyName
+    UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
     DeleteObject.endpoint            :+: // DELETE /bucket/keyName

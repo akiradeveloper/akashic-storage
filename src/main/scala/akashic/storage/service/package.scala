@@ -1,5 +1,7 @@
 package akashic.storage
 
+import java.net.URLEncoder
+
 import akashic.storage.patch.Version
 import cats.Eval
 import com.twitter.finagle.http.Request
@@ -36,4 +38,9 @@ package object service {
 
   def quoteString(raw: String): String = s""""${raw}""""
   val extractRequest = RequestReader { req: Request => req }
+
+  val keyMatcher = (string / io.finch.strings.map { a =>
+    println(a)
+    URLEncoder.encode(a.mkString("/"), "UTF-8")
+  })
 }
