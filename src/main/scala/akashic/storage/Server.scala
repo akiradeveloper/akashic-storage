@@ -54,11 +54,11 @@ case class Server(config: ServerConfig) {
     HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
     GetService.endpoint              :+: // GET    /
     GetBucket.endpoint               :+: // GET    /bucketName
-    GetObject.endpoint               :+: // GET    /bucketName/keyName
     ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
+    GetObject.endpoint               :+: // GET    /bucketName/keyName
     PutBucket.endpoint               :+: // PUT    /bucketName
-    PutObject.endpoint               :+: // PUT    /bucketName/keyName
     UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObject.endpoint               :+: // PUT    /bucketName/keyName
     InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
     DeleteObject.endpoint                // DELETE /bucket/keyName

@@ -9,7 +9,7 @@ import akashic.storage.patch.Part
 import scala.xml.NodeSeq
 
 object ListParts {
-  val matcher = get(string / string / paramExists("uploadId") ?
+  val matcher = get(keyMatcher / paramExists("uploadId") ?
     param("uploadId") ?
     paramOption("part-number-marker").as[Int] ?
     paramOption("max-parts").as[Int] ?
