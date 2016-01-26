@@ -1,6 +1,6 @@
 package akashic.storage
 
-import java.net.URLEncoder
+import java.net.{URLEncoder, URLDecoder}
 
 import akashic.storage.patch.Version
 import cats.Eval
@@ -39,8 +39,7 @@ package object service {
   def quoteString(raw: String): String = s""""${raw}""""
   val extractRequest = RequestReader { req: Request => req }
 
-  val keyMatcher = (string / io.finch.strings.map { a =>
-    println(a)
-    URLEncoder.encode(a.mkString("/"), "UTF-8")
-  })
+  def encodeKeyName(keyName: String): String = URLEncoder.encode(keyName, "UTF-8")
+  def decodeKeyName(keyName: String): String = URLDecoder.decode(keyName, "UTF-8")
+  val keyMatcher = string / io.finch.strings.map(a => encodeKeyName(a.mkString("/")))
 }
