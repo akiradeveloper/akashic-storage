@@ -139,7 +139,7 @@ object GetBucket {
           { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => NodeSeq.Empty } } 
           { marker match { case Some(a) => <Marker>{a}</Marker>; case None => NodeSeq.Empty } }
           { maxKeys match { case Some(a) => <MaxKeys>{a}</MaxKeys>; case None => NodeSeq.Empty } }
-          { delimiter match { case Some(a) if truncated => <NextMarker>{nextMarker}</NextMarker> } }
+          { delimiter match { case Some(a) if truncated => <NextMarker>{nextMarker}</NextMarker>; case None => NodeSeq.Empty } }
           <IsTruncated>{truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>
