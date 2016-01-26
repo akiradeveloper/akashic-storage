@@ -87,7 +87,7 @@ object GetBucket {
         }
       }
      
-      val groups: Seq[Contents] = bucket.listKeys
+      var groupsNonTruncated: Seq[Contents] = bucket.listKeys
         .filter(_.committed)
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
@@ -105,6 +105,10 @@ object GetBucket {
         case Some(a) => a
         case None => 1000 // dafault
       } 
+
+      // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
+      // So truncate the list after grouping into CommonPrefixes
+      val groups = groupsNonTruncated.take(len)
 
       val truncated = groups.size > len
 
