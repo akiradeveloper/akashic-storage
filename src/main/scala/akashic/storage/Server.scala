@@ -49,6 +49,7 @@ case class Server(config: ServerConfig) {
     }
 
   val api =
+    adminService                     :+:
     HeadBucket.endpoint              :+: // HEAD   /bucketName
     HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
     GetService.endpoint              :+: // GET    /
@@ -60,8 +61,7 @@ case class Server(config: ServerConfig) {
     UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
-    DeleteObject.endpoint            :+: // DELETE /bucket/keyName
-    adminService
+    DeleteObject.endpoint                // DELETE /bucket/keyName
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>
