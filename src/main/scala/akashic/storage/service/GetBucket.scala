@@ -4,7 +4,6 @@ import akashic.storage.patch.Version
 import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{files, server}
-import akashic.storage.service.Error.Reportable
 import scala.xml.NodeSeq
 
 object GetBucket {
@@ -50,27 +49,23 @@ object GetBucket {
           </Contents>
         }
         override def lastKeyName = key.name
+        def prefixBy(delimiter: String): String = {
+          val s = key.name
+          val t = s.split(delimiter)(0)
+          if (t == s) s else t + delimiter
+        }
       }
       // not used yet
       // FIXME use non empty list
-      case class CommonPrefixes(versions: List[Version], prefix: String) extends Group {
+      case class CommonPrefixes(members: Seq[Contents], prefix: String) extends Group {
         override def toXML = {
           <CommonPrefixes>
             <Prefix>{prefix}</Prefix>
           </CommonPrefixes>
         }
         override def lastKeyName = {
-          versions.last.key.name
+          members.last.key.name
         }
-      }
-      // FIXME (delim can be any words)
-      def computePrefix(s: String, delim: Char): String = {
-        val t = s.takeWhile(_ != delim)
-        // pure key name doesn't end with '/'
-        // a/a (-> a/)
-        // a (-> a)
-        val slash = if (t == s) { "" } else { "/" }
-        t + slash
       }
 
       val bucket = server.tree.findBucket(bucketName) match {
@@ -87,7 +82,7 @@ object GetBucket {
         }
       }
      
-      var groupsNonTruncated: Seq[Contents] = bucket.listKeys
+      val groups0: Seq[Contents] = bucket.listKeys
         .filter(_.committed)
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
@@ -100,7 +95,21 @@ object GetBucket {
         .applySome(marker) { a => b => a.dropWhile(_.key.name < b) }
         .applySome(prefix) { a => b => a.filter(_.key.name.startsWith(b)) }
         .map(Contents(_))
-        // TODO support delimiter. use CommonPrefixes
+
+      val groups1: Seq[Group] = if (delimiter.isEmpty) {
+        groups0
+      } else {
+        val deli = encodeKeyName(delimiter.get)
+        groups0.groupBy(_.prefixBy(deli)).toSeq // [prefix -> seq(contents)]
+          .sortBy(_._1) // sort by prefix
+          .map { case (prefix, members) =>
+            if (members.size > 1) {
+              CommonPrefixes(members, prefix.slice(0, prefix.size - deli.size))
+            } else {
+              members(0)
+            }
+          }
+      }
 
       val len = maxKeys match {
         case Some(a) => a
@@ -109,7 +118,7 @@ object GetBucket {
 
       // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
       // So truncate the list after grouping into CommonPrefixes
-      val groups = groupsNonTruncated.take(len)
+      val groups = groups1.take(len)
 
       val truncated = groups.size > len
 
