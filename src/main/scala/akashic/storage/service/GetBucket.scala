@@ -96,6 +96,7 @@ object GetBucket {
           !meta.isDeleteMarker
         }
         .sortBy(_.key.name) 
+        // [spec] Indicates where in the bucket listing begins. Marker is included in the response if it was sent with the request.
         .applySome(marker) { a => b => a.dropWhile(_.key.name < b) }
         .applySome(prefix) { a => b => a.filter(_.key.name.startsWith(b)) }
         .map(Contents(_))
@@ -112,7 +113,10 @@ object GetBucket {
 
       val truncated = groups.size > len
 
-      // not used
+      // [spec] This element is returned only if you have delimiter request parameter specified.
+      // If response does not include the NextMaker and it is truncated,
+      // you can use the value of the last Key in the response as the marker in the subsequent request
+      // to get the next set of object keys.
       val nextMarker = truncated match {
         case true => Some(groups.last.lastKeyName)
         case false => None
@@ -124,6 +128,9 @@ object GetBucket {
           { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => NodeSeq.Empty } } 
           { marker match { case Some(a) => <Marker>{a}</Marker>; case None => NodeSeq.Empty } }
           { maxKeys match { case Some(a) => <MaxKeys>{a}</MaxKeys>; case None => NodeSeq.Empty } }
+          // [spec] When response is truncated (the IsTruncated element value in the response is true),
+          // you can use the key name in this field as marker in the subsequent request to get next set of objects.
+          { delimiter match { case Some(a) if truncated => <NextMarker>{nextMarker}</NextMarker> } }
           <IsTruncated>{truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>
