@@ -51,8 +51,10 @@ object GetBucket {
         override def lastKeyName = key.name
         def prefixBy(delimiter: String): String = {
           val s = key.name
-          val t = s.split(delimiter)(0)
-          if (t == s) s else t + delimiter
+          s.indexOf(delimiter) match {
+            case -1 => s
+            case i => s.slice(0, i) + delimiter
+          }
         }
       }
       // not used yet
