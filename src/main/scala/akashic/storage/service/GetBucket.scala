@@ -5,13 +5,14 @@ import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{files, server}
 import scala.xml.NodeSeq
+import scala.util.Try
 
 object GetBucket {
   val matcher = get(string ?
     paramOption("delimiter") ?
     paramOption("encoding-type") ?
     paramOption("marker") ?
-    paramOption("max-keys").as[Int] ?
+    paramOption("max-keys") ?
     paramOption("prefix") ?
     extractRequest
   ).as[t]
@@ -20,7 +21,7 @@ object GetBucket {
                delimiter: Option[String],
                encodingType: Option[String],
                marker: Option[String],
-               maxKeys: Option[Int],
+               maxKeys: Option[String],
                prefix: Option[String],
                req: Request) extends Task[Output[NodeSeq]] {
     def name = "GET Bucket"
@@ -113,8 +114,18 @@ object GetBucket {
           }
       }
 
+      def parseMaxKeys(s: String): Int = {
+        if (s == "") {
+          failWith(Error.InvalidArgument())
+        }
+        Try(s.toInt).toOption match {
+          case Some(a) => a
+          case None => failWith(Error.InvalidArgument())
+        }
+      }
+
       val len = maxKeys match {
-        case Some(a) => a
+        case Some(a) => parseMaxKeys(a)
         case None => 1000 // dafault
       } 
 
@@ -122,15 +133,15 @@ object GetBucket {
 
       // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
       // So truncate the list after grouping into CommonPrefixes
-      val groups = groups1.take(len)
+      val groups: Seq[Group] = groups1.take(len)
 
       // [spec] This element is returned only if you have delimiter request parameter specified.
       // If response does not include the NextMaker and it is truncated,
       // you can use the value of the last Key in the response as the marker in the subsequent request
       // to get the next set of object keys.
       val nextMarker = truncated match {
-        case true => Some(groups.last.lastKeyName)
-        case false => None
+        case true if len > 0 => Some(groups(len-1).lastKeyName)
+        case _ => None
       }
 
       val xml = 

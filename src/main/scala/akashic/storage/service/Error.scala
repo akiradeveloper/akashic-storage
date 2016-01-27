@@ -22,6 +22,7 @@ object Error {
       case BucketAlreadyExists() => (409, "The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.")
       case MalformedXML() => (400, "The XML you provided was not well-formed or did not validate against our published schema.")
       case NotImplemented() => (501, "A header you provided implies functionality that is not implemented.")
+      case InvalidArgument() => (400, "Invalid Argument")
 
       case EntityTooSmall() => (400, "Your proposed upload is too smaller than the minimum allowed object size. Each part ...")
       case InvalidPart() => (400, "One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.")
@@ -83,6 +84,7 @@ object Error {
   case class IncorrectNumberOfFilesInPostRequest() extends t
   case class InlineDataTooLarge() extends t
 
+  case class InvalidArgument() extends t
   case class NotSignedUp() extends t
   case class InvalidToken() extends t
   case class ExpireToken() extends t
