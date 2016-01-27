@@ -116,11 +116,11 @@ object GetBucket {
         case None => 1000 // dafault
       } 
 
+      val truncated = groups1.size > len
+
       // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
       // So truncate the list after grouping into CommonPrefixes
       val groups = groups1.take(len)
-
-      val truncated = groups.size > len
 
       // [spec] This element is returned only if you have delimiter request parameter specified.
       // If response does not include the NextMaker and it is truncated,
