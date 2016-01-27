@@ -94,7 +94,7 @@ object GetBucket {
         }
         .sortBy(_.key.name) 
         // [spec] Indicates where in the bucket listing begins. Marker is included in the response if it was sent with the request.
-        .applySome(marker) { a => b => a.dropWhile(_.key.name < b) }
+        .applySome(marker) { a => b => a.dropWhile(_.key.name <= b) }
         .applySome(prefix) { a => b => a.filter(_.key.name.startsWith(b)) }
         .map(Contents(_))
 
