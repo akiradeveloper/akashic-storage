@@ -147,9 +147,10 @@ object GetBucket {
       val xml = 
         <ListBucketResult>
           <Name>{bucketName}</Name>
-          { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => NodeSeq.Empty } } 
-          { marker match { case Some(a) => <Marker>{a}</Marker>; case None => NodeSeq.Empty } }
-          { maxKeys match { case Some(a) => <MaxKeys>{a}</MaxKeys>; case None => NodeSeq.Empty } }
+          { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => <Prefix></Prefix> } }
+          { marker match { case Some(a) => <Marker>{a}</Marker>; case None => <Marker></Marker> } }
+          { maxKeys match { case Some(a) => <MaxKeys>{a}</MaxKeys>; case None => <MaxKeys>1000</MaxKeys> } }
+          { delimiter match { case Some(a) => <Delimiter>{a}</Delimiter>; case None => NodeSeq.Empty } }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
           { delimiter match { case Some(a) if truncated => <NextMarker>{nextMarker.get}</NextMarker>; case _ => NodeSeq.Empty } }
