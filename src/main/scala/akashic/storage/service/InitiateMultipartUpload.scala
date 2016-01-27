@@ -12,7 +12,7 @@ import io.finch._
 import scala.xml.NodeSeq
 
 object InitiateMultipartUpload {
-  val matcher = post(string / string / paramExists("uploads") ?
+  val matcher = post(keyMatcher / paramExists("uploads") ?
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?
     extractRequest).as[t]

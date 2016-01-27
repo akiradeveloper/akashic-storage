@@ -9,7 +9,7 @@ import io.finch._
 import com.google.common.net.HttpHeaders._
 
 object UploadPart {
-  val matcher = put(string / string / paramExists("uploadId") / paramExists("partNumber") ?
+  val matcher = put(keyMatcher / paramExists("uploadId") / paramExists("partNumber") ?
     param("uploadId") ?
     param("partNumber").as[Int] ?
     binaryBody ?

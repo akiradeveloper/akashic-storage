@@ -61,7 +61,8 @@ case class Server(config: ServerConfig) {
     PutObject.endpoint               :+: // PUT    /bucketName/keyName
     InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
-    DeleteObject.endpoint                // DELETE /bucket/keyName
+    AbortMultipartUpload.endpoint    :+: // DELETE /bucketName/keyName?uploadId=***
+    DeleteObject.endpoint                // DELETE /bucketName/keyName
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>
@@ -69,7 +70,6 @@ case class Server(config: ServerConfig) {
       val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
       val cause = io.finch.Error(xml.toString)
       Output.failure(cause, Status.fromCode(withMessage.httpCode))
-        .withHeader(("a", "b"))
     case admin.Error.Exception(e) =>
       val (code, message) = admin.Error.interpret(e)
       val cause = io.finch.Error(message)

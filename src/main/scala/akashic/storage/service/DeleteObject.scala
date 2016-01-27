@@ -8,7 +8,7 @@ import io.finch._
 import akashic.storage.{HeaderList, server}
 
 object DeleteObject {
-  val matcher = delete(string / string ?
+  val matcher = delete(keyMatcher ?
     paramOption("versionId").as[Int] ?
     extractRequest
   ).as[t]

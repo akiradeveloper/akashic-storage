@@ -18,7 +18,7 @@ import scala.xml.{XML, NodeSeq}
 import io.finch._
 
 object CompleteMultipartUpload {
-  val matcher = post(string / string / paramExists("uploadId") ?
+  val matcher = post(keyMatcher / paramExists("uploadId") ?
     param("uploadId") ?
     body ?
     extractRequest
