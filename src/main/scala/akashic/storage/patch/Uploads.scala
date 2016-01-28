@@ -3,17 +3,15 @@ package akashic.storage.patch
 import java.nio.file.{Files, Path}
 
 import akashic.storage.{files, strings}
-import akashic.storage.patch.Commit.RetryGeneric
 
 case class Uploads(root: Path) {
-  def acquireNewUpload(id: String): String = {
-    // e.g. 1-akiradeveloper (16 digits)
-    val uploadId = id + "-" + strings.random(16 - 1 - id.length)
+  def acquireNewUpload: String = {
+    val uploadId = strings.random(32)
     uploadId
   }
   def findUpload(uploadId: String): Option[Upload] = {
     val uploadPath = root.resolve(uploadId)
-    if (Files.exists(uploadPath) && Upload(uploadPath).committed) {
+    if (Files.exists(uploadPath)) {
       Some(Upload(uploadPath))
     } else {
       None

@@ -1,5 +1,7 @@
 package akashic.storage.service
 
+import java.nio.file.Files
+
 import akashic.storage.server
 import akashic.storage.patch._
 import akashic.storage.service.Error.Reportable
@@ -14,7 +16,12 @@ object PutBucket {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
-      val created = Commit.once(server.tree.bucketPath(bucketName)) { patch =>
+      val dest = server.tree.bucketPath(bucketName)
+
+      if (Files.exists(dest))
+        failWith(Error.BucketAlreadyExists())
+
+      Commit.once(dest) { patch =>
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
@@ -29,6 +36,7 @@ object PutBucket {
             )
           )).toBytes)
         }
+
         Commit.retry(bucketPatch.versioning) { patch =>
           val dataPatch = patch.asData
           dataPatch.init
@@ -36,7 +44,6 @@ object PutBucket {
           dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
         }
       }
-      if (!created) failWith(Error.BucketAlreadyExists())
       Ok()
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
     }

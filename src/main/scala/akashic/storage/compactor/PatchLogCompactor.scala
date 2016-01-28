@@ -12,7 +12,6 @@ case class PatchLogCompactor(unwrap: PatchLog) extends Compactable {
     }
     files.children(unwrap.root)
       .map(Patch(_))
-      .filter(_.committed)
       .filter(_.name.toInt < maxIdCommitted)
       .foreach(a => dispose(a.root))
     Seq()

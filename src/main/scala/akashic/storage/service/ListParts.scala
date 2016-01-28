@@ -38,7 +38,6 @@ object ListParts {
       }
 
       val emitList0 = upload.listParts
-        .filter(_.committed)
         .dropWhile (_.id < startNumber)
         .filter(_.find.isDefined) // having valid upload
 

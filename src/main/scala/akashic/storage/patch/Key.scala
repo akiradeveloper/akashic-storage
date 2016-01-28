@@ -3,16 +3,16 @@ package akashic.storage.patch
 import java.nio.file.{Files, Path}
 
 case class Key(root: Path) extends Patch {
-  val versions = PatchLog(root.resolve("versions"))
+  val versions = Versions(root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
   override def init {
     Files.createDirectory(versions.root)
     Files.createDirectory(uploads.root)
   }
   def findLatestVersion: Option[Version] = {
-    versions.find.map(_.asVersion)
+    versions.findLatestVersion
   }
   def findVersion(id: Int): Option[Version] = {
-    versions.find(id).map(_.asVersion)
+    versions.findVersion(id)
   }
 }

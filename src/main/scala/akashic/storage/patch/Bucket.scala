@@ -16,7 +16,7 @@ case class Bucket(root: Path) extends Patch {
   }
   def findKey(name: String): Option[Key] = {
     val path = keys.resolve(name)
-    if (Files.exists(path) && Key(path).committed) {
+    if (Files.exists(path)) {
       Some(Key(path))
     } else {
       None

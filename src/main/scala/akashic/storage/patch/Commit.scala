@@ -1,70 +1,52 @@
 package akashic.storage.patch
 
-import java.nio.file.{FileAlreadyExistsException, Files, Path}
+import java.nio.file._
 
-import akashic.storage.files
-
-import scala.util.{Failure, Success, Try}
+import akashic.storage.server
 
 object Commit {
+  private def preparePatch(fn: Patch => Unit): Patch = {
+    val patch = Patch(server.astral.alloc)
+    try {
+      fn(patch)
+    } catch {
+      case e: Throwable =>
+        server.astral.dispose(patch.root)
+        throw e
+    }
+    patch
+  }
+
   def once(to: Path)(fn: Patch => Unit) = Once(to)(fn).run
   private case class Once(to: Path)(fn: Patch => Unit) {
-    def run: Boolean = {
-      Try {
-        val patch = Patch(to)
-        if (Files.exists(to) && !patch.committed) {
-          // this path is unlikely because Patches committed by Once are small
-          // such as creating key directory. Sleeping 1 second is enough long
-          // to wait for another process finishs commit in process.
-          Thread.sleep(1000)
-
-          if (!patch.committed) {
-            files.purgeDirectory(to)
-          }
-        }
-
-        Files.createDirectory(patch.root)
-        // As the previous line throws exception if the directory exists
-        // only a process created the directory can reach this line.
-        try {
-          fn(patch)
-          patch.commit
-        } catch {
-          case e: Throwable =>
-            files.purgeDirectory(patch.root)
-            throw e
-        }
-      } match {
-        case Success(a) => true
-        case Failure(a) => false
-      }
+    def run {
+      if (Files.exists(to))
+        return
+      val src = preparePatch(fn)
+      Files.move(src.root, to)
+      assert(Files.exists(to))
     }
   }
-  // used by multipart upload just to allocate empty directory
-  case class RetryGenericNoCommit(makePath: () => Path)(fn: Patch => Unit) {
-    def run: Patch = {
+
+  def retry(alloc: () => Path)(fn: Patch => Unit) = Retry(alloc)(fn).run
+  def retry(to: PatchLog)(fn: Patch => Unit) = Retry(() => to.acquireNewLoc)(fn).run
+  private case class Retry(alloc: () => Path)(fn: Patch => Unit) {
+    def move(src: Patch): Patch = {
+      val dest = Patch(alloc())
       try {
-        val patch = Patch(makePath())
-        Files.createDirectory(patch.root)
-        try {
-          fn(patch)
-          patch
-        } catch {
-          case e: Throwable =>
-            files.purgeDirectory(patch.root)
-            throw e
-        }
+        Files.move(src.root, dest.root)
       } catch {
-        case e: FileAlreadyExistsException => run
-        case e: Throwable => throw e
+        case e: FileAlreadyExistsException =>
+          move(src)
+        case e: Throwable =>
+          throw e
       }
+      assert(Files.exists(dest.root))
+      dest
     }
-  }
-  case class RetryGeneric(makePath: () => Path)(fn: Patch => Unit) {
-    def run = RetryGenericNoCommit(makePath) { patch => fn(patch); patch.commit }.run
-  }
-  def retry(to: PatchLog)(fn: Patch => Unit) = Retry(to)(fn).run
-  private case class Retry(to: PatchLog)(fn: Patch => Unit) {
-    def run: Patch = RetryGeneric(() => to.acquireNewLoc)(fn).run
+    def run: Patch = {
+      val src = preparePatch(fn)
+      move(src)
+    }
   }
 }

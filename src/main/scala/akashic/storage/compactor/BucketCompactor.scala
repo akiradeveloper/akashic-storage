@@ -9,7 +9,7 @@ case class BucketCompactor(unwrap: Bucket) extends Compactable {
     val l = mutable.ListBuffer[Compactable]()
     l += PatchLogCompactor(unwrap.acl)
     l += PatchLogCompactor(unwrap.versioning)
-    l ++= unwrap.listKeys.filter(_.committed).map(KeyCompactor(_))
+    l ++= unwrap.listKeys.map(KeyCompactor(_))
     l.toSeq
   }
 }

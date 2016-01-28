@@ -36,9 +36,6 @@ object CompleteMultipartUpload {
       val key = findKey(bucket, keyName)
       val upload = findUpload(key, uploadId)
 
-      // uploadId = $versionId-$random (summed up in 16 chars)
-      val versionId = uploadId.split("-")(0).toInt
-
       val parts = Try {
         val xml = XML.loadString(data)
         (xml \ "Part").map { a =>
@@ -89,32 +86,30 @@ object CompleteMultipartUpload {
 
       val mergeFut: Future[NodeSeq] = Future {
         // the directory is already made
-        val versionPatch: Version = key.versions.get(versionId).asVersion
-        // we need to clean the directory
-        // because this may be the second complete request
-        // (should purge the old stuffs)
-        FileUtils.cleanDirectory(versionPatch.root.toFile)
-        versionPatch.init
+        Commit.retry(() => key.versions.acquireNewLoc) { patch =>
+          val versionPatch = patch.asVersion
+          versionPatch.init
 
-        val aclBytes: Array[Byte] = upload.acl.readBytes
-        Commit.retry(versionPatch.acl) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.init
+          val aclBytes: Array[Byte] = upload.acl.readBytes
+          Commit.retry(versionPatch.acl) { patch =>
+            val dataPatch = patch.asData
+            dataPatch.init
 
-          dataPatch.writeBytes(aclBytes)
-        }
+            dataPatch.writeBytes(aclBytes)
+          }
 
-        val oldMeta = Meta.fromBytes(upload.meta.readBytes)
-        val newMeta = oldMeta.copy(eTag = newETag)
-        versionPatch.meta.writeBytes(newMeta.toBytes)
+          val oldMeta = Meta.fromBytes(upload.meta.readBytes)
+          val newMeta = oldMeta.copy(eTag = newETag)
+          versionPatch.meta.writeBytes(newMeta.toBytes)
 
-        files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
-          for (part <- parts) {
-            f.write(upload.findPart(part.partNumber).get.versions.find.get.asData.readBytes)
+          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
+            for (part <- parts) {
+              f.write(upload.findPart(part.partNumber).get.versions.find.get.asData.readBytes)
+            }
           }
         }
 
-        versionPatch.commit
+        server.astral.dispose(upload.root)
 
         server.compactorQueue.queue(KeyCompactor(key))
 

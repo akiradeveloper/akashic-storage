@@ -34,7 +34,7 @@ object DeleteObject {
         NoContent[Unit]
       } else {
         // simple DELETE
-        val patch = Commit.retry(key.versions) { patch =>
+        val patch = Commit.retry(() => key.versions.acquireNewLoc) { patch =>
           val version = patch.asVersion
           version.init
 

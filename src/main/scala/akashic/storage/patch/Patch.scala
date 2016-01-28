@@ -12,20 +12,7 @@ trait Patch {
   def root: Path
   def init {}
 
-  def commitPath = root.resolve("commit")
-
-  // We assume file creation is atomic
-  def commit {
-    files.touch(commitPath)
-  }
-
-  def committed: Boolean = {
-    Files.exists(commitPath)
-  }
-
-  def name: String = {
-    files.basename(root)
-  }
+  def name: String = files.basename(root)
 
   def asData = Data(root)
   def asVersion = Version(root)

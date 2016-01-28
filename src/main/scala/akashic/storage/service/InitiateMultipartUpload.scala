@@ -1,11 +1,7 @@
 package akashic.storage.service
 
-import java.nio.file.Path
-
 import akashic.storage.{HeaderList, server}
 import akashic.storage.patch.Commit
-import akashic.storage.patch.Commit.RetryGenericNoCommit
-import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
 import io.finch._
 
@@ -30,10 +26,8 @@ object InitiateMultipartUpload {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      val reservedPatch = RetryGenericNoCommit(() => key.versions.acquireNewLoc) { patch =>
-        // no init. just allocate the dir
-      }.run
-      val uploadId = key.uploads.acquireNewUpload(reservedPatch.name)
+
+      val uploadId = key.uploads.acquireNewUpload
       Commit.once(key.uploads.root.resolve(uploadId)) { patch =>
         val upload = patch.asUpload
         upload.init

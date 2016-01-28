@@ -35,7 +35,7 @@ object GetService {
         <ListAllMyBucketsResult>
           {Owner(callerId)}
           <Buckets>
-            {for (b <- server.tree.listBuckets.filter(_.committed)) yield Bucket(b)}
+            {for (b <- server.tree.listBuckets) yield Bucket(b)}
           </Buckets>
         </ListAllMyBucketsResult>
 

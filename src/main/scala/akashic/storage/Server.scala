@@ -1,10 +1,10 @@
 package akashic.storage
 
-import java.nio.file.Files
+import java.nio.file.{Path, Files}
 
 import akashic.storage.admin._
 import akashic.storage.service._
-import akashic.storage.compactor.{CompactorQueue, GarbageCan, TreeCompactor}
+import akashic.storage.compactor.{CompactorQueue, TreeCompactor}
 import akashic.storage.patch.Tree
 import com.twitter.finagle.Http.param.{MaxResponseSize, MaxRequestSize}
 import com.twitter.util.Future
@@ -24,8 +24,8 @@ case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("admin"))
   val users = UserTable(config.mountpoint.resolve("admin"))
 
-  Files.createDirectory(config.mountpoint.resolve("garbage"))
-  val garbageCan = GarbageCan(config.mountpoint.resolve("garbage"))
+  Files.createDirectory(config.mountpoint.resolve("astral"))
+  val astral = Astral(config.mountpoint.resolve("astral"))
 
   // compact the store on reboot
   val compactorQueue = CompactorQueue()

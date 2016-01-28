@@ -14,25 +14,11 @@ case class PatchLog(root: Path) {
     }
     root.resolve(newId.toString)
   }
-  // return by descending order
-  def listPatches: Seq[Patch] = {
+  private def listPatches: Seq[Patch] = {
     files.children(root).map(Patch(_)).sortBy(-1 * _.name.toInt)
   }
-  def patchPath(id: Int): Path = {
-    root.resolve(id.toString)
-  }
-  // returns the newest version within committed
   def find: Option[Patch] = {
-    val ls = listPatches.filter(_.committed)
+    val ls = listPatches
     ls.headOption
   }
-  def find(id: Int): Option[Patch] = {
-    val path = patchPath(id)
-    if (Files.exists(path) && Patch(path).committed) {
-      Some(Patch(path))
-    } else {
-      None
-    }
-  }
-  def get(id: Int): Patch = Patch(patchPath(id))
 }

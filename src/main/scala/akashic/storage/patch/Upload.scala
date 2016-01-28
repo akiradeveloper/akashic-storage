@@ -17,12 +17,9 @@ case class Upload(root: Path) extends Patch {
     Files.createDirectory(acl.root)
     acl.init
   }
-  def reservedVersionId: Int = {
-    name.split("-")(0).toInt
-  }
   def findPart(partNumber: Int): Option[Part] = {
     val path = partPath(partNumber)
-    if (Files.exists(path) && Part(path).committed) {
+    if (Files.exists(path)) {
       Some(Part(path))
     } else {
       None
