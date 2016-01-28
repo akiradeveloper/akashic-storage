@@ -244,7 +244,7 @@ class AmazonSDKTest extends ServerTestBase {
     ))
   }
 
-  test("put -> initiate -> put -> put") { p =>
+  test("put -> put -> put") { p =>
     import p._
 
     val f = getTestFile("test.txt")
@@ -255,20 +255,15 @@ class AmazonSDKTest extends ServerTestBase {
     client.putObject("myb", "myobj", f)
     val key = bucket.findKey("myobj").get
 
-    val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
-    val initRes = client.initiateMultipartUpload(initReq)
-    assert(key.findVersion(1).isDefined)
+    client.putObject("myb", "myobj", f)
+    Thread.sleep(100)
+    assert(key.findVersion(1).isEmpty)
+    assert(key.findVersion(2).isDefined)
 
     client.putObject("myb", "myobj", f)
     Thread.sleep(100)
     assert(key.findVersion(1).isEmpty)
-    assert(Files.exists(key.versions.patchPath(2)))
+    assert(key.findVersion(2).isEmpty)
     assert(key.findVersion(3).isDefined)
-
-    client.putObject("myb", "myobj", f)
-    Thread.sleep(100)
-    assert(Files.exists(key.versions.patchPath(2)))
-    assert(key.findVersion(3).isEmpty)
-    assert(key.findVersion(4).isDefined)
   }
 }
