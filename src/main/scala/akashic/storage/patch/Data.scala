@@ -6,7 +6,6 @@ import java.nio.file.Path
 import akashic.storage.files
 
 case class Data(root: Path) extends Patch {
-  override def init {}
   // FIXME rename to filePath
   val filePath: Path = root.resolve("file")
   def length: Long = files.fileSize(filePath)

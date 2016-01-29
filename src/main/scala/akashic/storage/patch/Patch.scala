@@ -10,14 +10,12 @@ object Patch {
 
 trait Patch {
   def root: Path
-  def init {}
 
   def name: String = files.basename(root)
 
   def asData = Data(root)
-  def asVersion = Version(root)
-  def asUpload = Upload(root)
   def asBucket = Bucket(root)
   def asKey = Key(root)
-  def asPart = Part(root)
+  def asVersion = Version(root)
+  def asUpload = Upload(root)
 }

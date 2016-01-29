@@ -16,7 +16,6 @@ object GetService {
     def resource = Resource.forRoot
 
     def runOnce = {
-      println(s"callerId: ${callerId}")
       def Owner(callerId: String) = {
         <Owner>
           <ID>{callerId}</ID>

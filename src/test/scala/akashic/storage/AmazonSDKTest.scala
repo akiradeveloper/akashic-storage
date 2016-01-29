@@ -160,8 +160,9 @@ class AmazonSDKTest extends ServerTestBase {
 
     client.createBucket("myb")
 
-    createLargeFile(FILE_PATH_32MB, 32)
-    val upFile = FILE_PATH_32MB.toFile
+    val filePath = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(filePath, 32)
+    val upFile = filePath.toFile
 
     val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
     val initRes = client.initiateMultipartUpload(initReq)
@@ -221,8 +222,9 @@ class AmazonSDKTest extends ServerTestBase {
 
     client.createBucket("myb")
 
-    createLargeFile(FILE_PATH_32MB, 32)
-    val upFile = FILE_PATH_32MB.toFile
+    val filePath = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(filePath, 32)
+    val upFile = filePath.toFile
 
     val tmUp = new TransferManager(client)
     val upload = tmUp.upload("myb", "myobj", upFile)
@@ -242,28 +244,5 @@ class AmazonSDKTest extends ServerTestBase {
       Files.newInputStream(upFile.toPath),
       Files.newInputStream(downFile.toPath)
     ))
-  }
-
-  test("put -> put -> put") { p =>
-    import p._
-
-    val f = getTestFile("test.txt")
-
-    client.createBucket("myb")
-    val bucket = server.tree.findBucket("myb").get
-
-    client.putObject("myb", "myobj", f)
-    val key = bucket.findKey("myobj").get
-
-    client.putObject("myb", "myobj", f)
-    Thread.sleep(100)
-    assert(key.findVersion(1).isEmpty)
-    assert(key.findVersion(2).isDefined)
-
-    client.putObject("myb", "myobj", f)
-    Thread.sleep(100)
-    assert(key.findVersion(1).isEmpty)
-    assert(key.findVersion(2).isEmpty)
-    assert(key.findVersion(3).isDefined)
   }
 }

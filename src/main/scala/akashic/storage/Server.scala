@@ -4,7 +4,6 @@ import java.nio.file.{Path, Files}
 
 import akashic.storage.admin._
 import akashic.storage.service._
-import akashic.storage.compactor.{CompactorQueue, TreeCompactor}
 import akashic.storage.patch.Tree
 import com.twitter.finagle.Http.param.{MaxResponseSize, MaxRequestSize}
 import com.twitter.util.Future
@@ -26,10 +25,6 @@ case class Server(config: ServerConfig) {
 
   Files.createDirectory(config.mountpoint.resolve("astral"))
   val astral = Astral(config.mountpoint.resolve("astral"))
-
-  // compact the store on reboot
-  val compactorQueue = CompactorQueue()
-  compactorQueue.queue(TreeCompactor(tree))
 
   val adminService =
     post("admin" / "user") {

@@ -5,7 +5,7 @@ import java.nio.file.{Files, Path}
 case class Key(root: Path) extends Patch {
   val versions = Versions(root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
-  override def init {
+  def init {
     Files.createDirectory(versions.root)
     Files.createDirectory(uploads.root)
   }

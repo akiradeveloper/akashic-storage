@@ -19,7 +19,7 @@ object AbortMultipartUpload {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
       val upload = findUpload(key, uploadId)
-      server.astral.dispose(upload.root)
+      server.astral.free(upload.root)
       NoContent[Unit]
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
     }

@@ -10,6 +10,8 @@ import org.apache.commons.io.IOUtils
 import org.scalatest._
 import akashic.storage.admin.TestUsers
 
+import scala.util.Random
+
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   def makeConfig = ServerConfig(ConfigFactory.load("test.conf"), init = true)
 
@@ -31,11 +33,11 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
     new File(loader.getResource(name).getFile)
   }
 
-  val FILE_PATH_8MB = Paths.get("/tmp/akashic-storage-test-file-8mb")
-  val FILE_PATH_32MB = Paths.get("/tmp/akashic-storage-test-file-32mb")
   def createLargeFile(path: Path, sizeMB: Int): Unit = {
     if (!Files.exists(path)) {
-      files.writeBytes(path, strings.random(sizeMB * 1024 * 1024).map(_.toByte).toArray)
+      val result = new Array[Byte](sizeMB * 1024 * 1024)
+      new Random().nextBytes(result)
+      files.writeBytes(path, result)
     }
   }
 

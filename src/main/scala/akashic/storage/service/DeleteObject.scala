@@ -1,8 +1,6 @@
 package akashic.storage.service
 
-import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
-import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{HeaderList, server}
@@ -21,7 +19,7 @@ object DeleteObject {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
-      val versioningEnabled = Versioning.fromBytes(bucket.versioning.find.get.asData.readBytes).enabled
+      val versioningEnabled = Versioning.fromBytes(bucket.versioning.readBytes).enabled
 
       // x-amz-delete-marker
       // Specifies whether the versioned object that was permanently deleted was (true) or was not (false) a delete marker.
@@ -36,13 +34,10 @@ object DeleteObject {
         // simple DELETE
         val patch = Commit.retry(() => key.versions.acquireNewLoc) { patch =>
           val version = patch.asVersion
-          version.init
 
           // default acl
-          Commit.retry(version.acl) { patch =>
+          Commit.replace(version.acl) { patch =>
             val dataPatch = patch.asData
-            dataPatch.init
-
             dataPatch.writeBytes(Acl.t(callerId, Seq(
               Acl.Grant(
                 Acl.ById(callerId),
@@ -50,7 +45,7 @@ object DeleteObject {
               )
             )).toBytes)
           }
-          version.meta.asData.writeBytes(
+          version.meta.writeBytes(
             Meta.t(
               isVersioned = false,
               isDeleteMarker = true,
@@ -60,8 +55,6 @@ object DeleteObject {
             ).toBytes
           )
         }
-
-        server.compactorQueue.queue(KeyCompactor(key))
 
         NoContent[Unit]
           .withHeader(X_AMZ_REQUEST_ID -> requestId)

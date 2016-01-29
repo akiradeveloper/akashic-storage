@@ -11,7 +11,7 @@ object Commit {
       fn(patch)
     } catch {
       case e: Throwable =>
-        server.astral.dispose(patch.root)
+        server.astral.free(patch.root)
         throw e
     }
     patch
@@ -28,8 +28,16 @@ object Commit {
     }
   }
 
+  def replace(to: Data)(fn: Patch => Unit) = Replace(to)(fn).run
+  private case class Replace(to: Data)(fn: Patch => Unit) {
+    def run: Unit = {
+      val src = preparePatch(fn)
+      Files.move(src.root, to.root, StandardCopyOption.REPLACE_EXISTING)
+      assert(Files.exists(to.root))
+    }
+  }
+
   def retry(alloc: () => Path)(fn: Patch => Unit) = Retry(alloc)(fn).run
-  def retry(to: PatchLog)(fn: Patch => Unit) = Retry(() => to.acquireNewLoc)(fn).run
   private case class Retry(alloc: () => Path)(fn: Patch => Unit) {
     def move(src: Patch): Patch = {
       val dest = Patch(alloc())

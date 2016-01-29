@@ -39,7 +39,7 @@ object InitiateMultipartUpload {
             )
           )).toBytes)
 
-        upload.meta.asData.writeBytes(
+        upload.meta.writeBytes(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,

@@ -1,6 +1,5 @@
 package akashic.storage.service
 
-import akashic.storage.compactor.KeyCompactor
 import akashic.storage.patch.Commit
 import akashic.storage.{HeaderList, files, server}
 import com.twitter.finagle.http.Request
@@ -32,12 +31,9 @@ object PutObject {
       val key = bucket.findKey(keyName).get
       Commit.retry(() => key.versions.acquireNewLoc) { patch =>
         val version = patch.asVersion
-        version.init
 
-        Commit.retry(version.acl) { patch =>
+        Commit.replace(version.acl) { patch =>
           val dataPatch = patch.asData
-          dataPatch.init
-
           dataPatch.writeBytes(Acl.t(callerId, Seq(
             Acl.Grant(
               Acl.ById(callerId),
@@ -45,8 +41,8 @@ object PutObject {
             )
           )).toBytes)
         }
-        version.data.asData.writeBytes(objectData)
-        version.meta.asData.writeBytes(
+        version.data.writeBytes(objectData)
+        version.meta.writeBytes(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,
@@ -58,8 +54,6 @@ object PutObject {
             xattrs = HeaderList.builder.build
           ).toBytes)
       }
-
-      server.compactorQueue.queue(KeyCompactor(key))
 
       Ok()
         .withHeader(X_AMZ_REQUEST_ID -> requestId)

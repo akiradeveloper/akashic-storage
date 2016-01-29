@@ -3,7 +3,6 @@ package akashic.storage.service
 import java.net.URLEncoder
 import java.nio.file.Path
 
-import akashic.storage.compactor.KeyCompactor
 import akashic.storage.{files, server}
 import akashic.storage.patch.{Commit, Patch, Version, Data}
 import akashic.storage.service.Error.Reportable
@@ -56,7 +55,7 @@ object CompleteMultipartUpload {
       val lastPartNumber = parts.last.partNumber
 
       for (Part(partNumber, eTag) <- parts) {
-        val uploadedPart: Path = upload.findPart(partNumber).flatMap(_.versions.find).map(_.asData.filePath) match {
+        val uploadedPart: Path = upload.findPart(partNumber).map(_.unwrap.filePath) match {
           case Some(a) => a
           case None => failWith(Error.InvalidPart())
         }
@@ -88,13 +87,10 @@ object CompleteMultipartUpload {
         // the directory is already made
         Commit.retry(() => key.versions.acquireNewLoc) { patch =>
           val versionPatch = patch.asVersion
-          versionPatch.init
 
           val aclBytes: Array[Byte] = upload.acl.readBytes
-          Commit.retry(versionPatch.acl) { patch =>
+          Commit.replace(versionPatch.acl) { patch =>
             val dataPatch = patch.asData
-            dataPatch.init
-
             dataPatch.writeBytes(aclBytes)
           }
 
@@ -104,14 +100,13 @@ object CompleteMultipartUpload {
 
           files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
             for (part <- parts) {
-              f.write(upload.findPart(part.partNumber).get.versions.find.get.asData.readBytes)
+              // parts are all valid so we don't need to call findPart
+              f.write(upload.part(part.partNumber).unwrap.readBytes)
             }
           }
         }
 
-        server.astral.dispose(upload.root)
-
-        server.compactorQueue.queue(KeyCompactor(key))
+        server.astral.free(upload.root)
 
         <CompleteMultipartUploadResult>
           <Location>{s"http://${server.address}/${bucketName}/${keyName}"}</Location>

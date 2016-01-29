@@ -1,8 +1,7 @@
 package akashic.storage.service
 
-import akashic.storage.compactor.PartCompactor
 import akashic.storage.{files, server}
-import akashic.storage.patch.{Part, Commit, PatchLog}
+import akashic.storage.patch.Commit
 import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
 import io.finch._
@@ -26,22 +25,13 @@ object UploadPart {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
       val upload = findUpload(key, uploadId)
-      // similar to ensuring the existence of key directory
-      // in the PutObject operation
-      Commit.once(upload.partPath(partNumber)) { patch =>
-        val partPatch = patch.asPart
-        partPatch.init
-      }
-      val part = upload.findPart(partNumber).get
-      val computedMD5 = files.computeMD5(partData)
-      Commit.retry(part.versions) { patch =>
-        val dataPatch = patch.asData
-        dataPatch.init
 
+      val computedMD5 = files.computeMD5(partData)
+      val part = upload.part(partNumber)
+      Commit.replace(part.unwrap) { patch =>
+        val dataPatch = patch.asData
         dataPatch.writeBytes(partData)
       }
-
-      server.compactorQueue.queue(PartCompactor(part))
 
       Ok()
         .withHeader(X_AMZ_REQUEST_ID -> requestId)

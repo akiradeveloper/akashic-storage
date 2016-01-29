@@ -25,10 +25,8 @@ object PutBucket {
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
-        Commit.retry(bucketPatch.acl) { patch =>
+        Commit.replace(bucketPatch.acl) { patch =>
           val dataPatch = patch.asData
-          dataPatch.init
-
           dataPatch.writeBytes(Acl.t(callerId, Seq(
             Acl.Grant(
               Acl.ById(callerId),
@@ -37,10 +35,8 @@ object PutBucket {
           )).toBytes)
         }
 
-        Commit.retry(bucketPatch.versioning) { patch =>
+        Commit.replace(bucketPatch.versioning) { patch =>
           val dataPatch = patch.asData
-          dataPatch.init
-
           dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
         }
       }

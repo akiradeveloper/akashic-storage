@@ -1,10 +1,10 @@
 package akashic.storage.service
 
+import akashic.storage.patch.Part
 import akashic.storage.{files, server}
 import akashic.storage.service.Error.Reportable
 import com.twitter.finagle.http.Request
 import io.finch._
-import akashic.storage.patch.Part
 
 import scala.xml.NodeSeq
 
@@ -39,7 +39,6 @@ object ListParts {
 
       val emitList0 = upload.listParts
         .dropWhile (_.id < startNumber)
-        .filter(_.find.isDefined) // having valid upload
 
       val truncated = emitList0.size > listMaxLen
 
@@ -59,11 +58,11 @@ object ListParts {
       val initiatorId = ownerId
 
       def xmlPart(part: Part): NodeSeq = {
-        val filePath = part.find.get.filePath
+        val filePath = part.unwrap.filePath
         <Part>
           <PartNumber>{part.id}</PartNumber>
           <LastModified>{dates.format000Z(files.lastDate(filePath))}</LastModified>
-          <ETag>{files.computeMD5(part.find.get.filePath)}</ETag>
+          <ETag>{files.computeMD5(filePath)}</ETag>
           <Size>{files.fileSize(filePath)}</Size>
         </Part>
       }

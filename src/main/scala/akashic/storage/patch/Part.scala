@@ -1,12 +1,10 @@
 package akashic.storage.patch
 
-import java.nio.file.{Path, Files}
+import java.nio.file.Path
 
-case class Part(root: Path) extends Patch {
-  val versions = PatchLog(root.resolve("versions"))
-  override def init = {
-    Files.createDirectory(versions.root)
-  }
-  def id = name.toInt
-  def find: Option[Data] = versions.find.map(_.asData)
+object Part {
+  def apply(path: Path) = new Part(Data(path))
+}
+case class Part(unwrap: Data) {
+  def id = unwrap.name.toInt
 }
