@@ -57,7 +57,8 @@ case class Server(config: ServerConfig) {
     InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
     AbortMultipartUpload.endpoint    :+: // DELETE /bucketName/keyName?uploadId=***
-    DeleteObject.endpoint                // DELETE /bucketName/keyName
+    DeleteObject.endpoint            :+: // DELETE /bucketName/keyName
+    DeleteBucket.endpoint
 
   val endpoint = api.handle {
     case service.Error.Exception(context, e) =>

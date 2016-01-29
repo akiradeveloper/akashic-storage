@@ -117,11 +117,11 @@ class AmazonSDKTest extends ServerTestBase {
     val f1 = getTestFile("test.txt")
     client.putObject("myb", "myobj", f1)
     val key = bucket.findKey("myobj").get
-    assert(key.findVersion(1).isDefined)
+    val obj1 = client.getObject("myb", "myobj")
+    checkFileContent(obj1, f1)
 
     val f2 = getTestFile("test.jpg")
     client.putObject("myb", "myobj", f2)
-    assert(key.findVersion(2).isDefined)
     val obj2 = client.getObject("myb", "myobj")
     checkFileContent(obj2, f2)
   }

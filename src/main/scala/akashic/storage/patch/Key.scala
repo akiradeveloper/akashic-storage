@@ -16,4 +16,7 @@ case class Key(root: Path) extends Patch {
   def findVersion(id: Int): Option[Version] = {
     versions.findVersion(id)
   }
+  def deletable: Boolean = {
+    versions.listVersions.forall(_.deletable)
+  }
 }
