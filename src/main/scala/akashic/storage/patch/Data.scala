@@ -1,21 +1,23 @@
 package akashic.storage.patch
 
-import java.io.InputStream
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
 
 import akashic.storage.files
 
 case class Data(root: Path) extends Patch {
-  // FIXME rename to filePath
   val filePath: Path = root.resolve("file")
   def length: Long = files.fileSize(filePath)
-  def write(inp: InputStream) = ???
-  def read: Path = ???
-  def writeBytes(bytes: Array[Byte]) = {
+  def write(bytes: Array[Byte]) = {
     files.writeBytes(filePath, bytes)
   }
-  def readBytes: Array[Byte] = {
+  def read: Array[Byte] = {
     files.readBytes(filePath)
   }
-  def merge(files: Seq[Data]) = ???
+  def readOpt: Option[Array[Byte]] = {
+    if (Files.exists(root)) {
+      Some(read)
+    } else {
+      None
+    }
+  }
 }

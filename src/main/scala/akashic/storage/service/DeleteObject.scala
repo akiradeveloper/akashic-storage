@@ -19,7 +19,7 @@ object DeleteObject {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
-      val versioning = Versioning.fromBytes(bucket.versioning.readBytes).value
+      val versioning = Versioning.fromBytes(bucket.versioning.read).value
 
       // x-amz-delete-marker
       // Specifies whether the versioned object that was permanently deleted was (true) or was not (false) a delete marker.

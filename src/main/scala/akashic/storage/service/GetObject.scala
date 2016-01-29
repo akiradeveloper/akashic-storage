@@ -60,14 +60,14 @@ object GetObject {
       }
       // TODO if this is a delete marker?
 
-      val meta = Meta.fromBytes(version.meta.readBytes)
+      val meta = Meta.fromBytes(version.meta.read)
       
       val filePath = version.data.filePath
       val contentType = responseContentType <+ Some(files.detectContentType(filePath))
       val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
       val buf = if (withContent) {
-        val objectData = version.data.readBytes
+        val objectData = version.data.read
         Buf.ByteArray.Owned(objectData)
       } else {
         Buf.Empty

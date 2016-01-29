@@ -1,6 +1,6 @@
 package akashic.storage
 
-import java.nio.file.{FileAlreadyExistsException, Files, Path}
+import java.nio.file.{NoSuchFileException, FileAlreadyExistsException, Files, Path}
 
 // Astral is where everything is given birth and die
 case class Astral(root: Path) {
@@ -22,6 +22,7 @@ case class Astral(root: Path) {
       Files.move(path, newPath)
     } catch {
       case e: FileAlreadyExistsException => free(path)
+      case e: NoSuchFileException => return
       case e: Throwable => throw e
     }
     files.purgeDirectory(newPath)

@@ -32,8 +32,8 @@ object GetBucket {
         def lastKeyName: String // last keyname in this group
       }
       case class Contents(version: Version) extends Group {
-        val acl = Acl.fromBytes(version.acl.readBytes)
-        val meta = Meta.fromBytes(version.meta.readBytes)
+        val acl = Acl.fromBytes(version.acl.read)
+        val meta = Meta.fromBytes(version.meta.read)
         val ownerId = acl.owner
         val key = version.key
         override def toXML = {
@@ -89,7 +89,7 @@ object GetBucket {
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
         .filter { version =>
-          val meta = Meta.fromBytes(version.meta.readBytes)
+          val meta = Meta.fromBytes(version.meta.read)
           !meta.isDeleteMarker
         }
         .sortBy(_.key.name) 

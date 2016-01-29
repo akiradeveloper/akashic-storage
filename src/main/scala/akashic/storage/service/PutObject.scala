@@ -29,20 +29,20 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      Commit.retry(() => key.versions.acquireWriteDest) { patch =>
+      Commit.replace(key.versions.acquireWriteDest) { patch =>
         val version = patch.asVersion
 
-        Commit.replace(version.acl) { patch =>
+        Commit.replaceData(version.acl) { patch =>
           val dataPatch = patch.asData
-          dataPatch.writeBytes(Acl.t(callerId, Seq(
+          dataPatch.write(Acl.t(callerId, Seq(
             Acl.Grant(
               Acl.ById(callerId),
               Acl.FullControl()
             )
           )).toBytes)
         }
-        version.data.writeBytes(objectData)
-        version.meta.writeBytes(
+        version.data.write(objectData)
+        version.meta.write(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,

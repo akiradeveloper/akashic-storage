@@ -24,16 +24,16 @@ object Commit {
         return
       val src = preparePatch(fn)
       Files.move(src.root, to)
-      assert(Files.exists(to))
     }
   }
 
-  def replace(to: Data)(fn: Patch => Unit) = Replace(to)(fn).run
-  private case class Replace(to: Data)(fn: Patch => Unit) {
+  def replaceData(to: Data)(fn: Patch => Unit) = replace(to.root)(fn)
+  def replace(to: Path)(fn: Patch => Unit) = Replace(to)(fn).run
+  private case class Replace(to: Path)(fn: Patch => Unit) {
     def run: Unit = {
       val src = preparePatch(fn)
-      Files.move(src.root, to.root, StandardCopyOption.REPLACE_EXISTING)
-      assert(Files.exists(to.root))
+      server.astral.free(to)
+      Files.move(src.root, to)
     }
   }
 
@@ -49,7 +49,6 @@ object Commit {
         case e: Throwable =>
           throw e
       }
-      assert(Files.exists(dest.root))
       dest
     }
     def run: Patch = {

@@ -85,23 +85,23 @@ object CompleteMultipartUpload {
 
       val mergeFut: Future[NodeSeq] = Future {
         // the directory is already made
-        Commit.retry(() => key.versions.acquireWriteDest) { patch =>
+        Commit.replace(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
 
-          val aclBytes: Array[Byte] = upload.acl.readBytes
-          Commit.replace(versionPatch.acl) { patch =>
+          val aclBytes: Array[Byte] = upload.acl.read
+          Commit.replaceData(versionPatch.acl) { patch =>
             val dataPatch = patch.asData
-            dataPatch.writeBytes(aclBytes)
+            dataPatch.write(aclBytes)
           }
 
-          val oldMeta = Meta.fromBytes(upload.meta.readBytes)
+          val oldMeta = Meta.fromBytes(upload.meta.read)
           val newMeta = oldMeta.copy(eTag = newETag)
-          versionPatch.meta.writeBytes(newMeta.toBytes)
+          versionPatch.meta.write(newMeta.toBytes)
 
           files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
             for (part <- parts) {
               // parts are all valid so we don't need to call findPart
-              f.write(upload.part(part.partNumber).unwrap.readBytes)
+              f.write(upload.part(part.partNumber).unwrap.read)
             }
           }
         }

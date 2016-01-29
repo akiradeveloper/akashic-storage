@@ -25,9 +25,9 @@ object PutBucket {
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
-        Commit.replace(bucketPatch.acl) { patch =>
+        Commit.replaceData(bucketPatch.acl) { patch =>
           val dataPatch = patch.asData
-          dataPatch.writeBytes(Acl.t(callerId, Seq(
+          dataPatch.write(Acl.t(callerId, Seq(
             Acl.Grant(
               Acl.ById(callerId),
               Acl.FullControl()
@@ -35,9 +35,9 @@ object PutBucket {
           )).toBytes)
         }
 
-        Commit.replace(bucketPatch.versioning) { patch =>
+        Commit.replaceData(bucketPatch.versioning) { patch =>
           val dataPatch = patch.asData
-          dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
+          dataPatch.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
         }
       }
       Ok()

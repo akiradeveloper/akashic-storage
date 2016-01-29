@@ -28,9 +28,9 @@ object UploadPart {
 
       val computedMD5 = files.computeMD5(partData)
       val part = upload.part(partNumber)
-      Commit.replace(part.unwrap) { patch =>
+      Commit.replaceData(part.unwrap) { patch =>
         val dataPatch = patch.asData
-        dataPatch.writeBytes(partData)
+        dataPatch.write(partData)
       }
 
       Ok()

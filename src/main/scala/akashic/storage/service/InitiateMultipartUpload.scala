@@ -32,14 +32,14 @@ object InitiateMultipartUpload {
         val upload = patch.asUpload
         upload.init
 
-        upload.acl.writeBytes(Acl.t(callerId, Seq(
+        upload.acl.write(Acl.t(callerId, Seq(
             Acl.Grant(
               Acl.ById(callerId),
               Acl.FullControl()
             )
           )).toBytes)
 
-        upload.meta.writeBytes(
+        upload.meta.write(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,

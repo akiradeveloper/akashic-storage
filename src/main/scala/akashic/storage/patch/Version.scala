@@ -11,7 +11,7 @@ case class Version(root: Path) extends Patch {
   val acl = Data(root.resolve("acl"))
 
   def deletable: Boolean = {
-    val m = Meta.fromBytes(meta.readBytes)
+    val m = Meta.fromBytes(meta.read)
     if (m.isDeleteMarker) return false
     if (m.isVersioned) return false
     true
