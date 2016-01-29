@@ -19,7 +19,7 @@ object DeleteObject {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
-      val versioningEnabled = Versioning.fromBytes(bucket.versioning.readBytes).enabled
+      val versioning = Versioning.fromBytes(bucket.versioning.readBytes).value
 
       // x-amz-delete-marker
       // Specifies whether the versioned object that was permanently deleted was (true) or was not (false) a delete marker.
@@ -32,34 +32,42 @@ object DeleteObject {
         NoContent[Unit]
       } else {
         // simple DELETE
-        val patch = Commit.retry(() => key.versions.acquireNewLoc) { patch =>
-          val version = patch.asVersion
-
-          // default acl
-          Commit.replace(version.acl) { patch =>
-            val dataPatch = patch.asData
-            dataPatch.writeBytes(Acl.t(callerId, Seq(
-              Acl.Grant(
-                Acl.ById(callerId),
-                Acl.FullControl()
-              )
-            )).toBytes)
-          }
-          version.meta.writeBytes(
-            Meta.t(
-              isVersioned = false,
-              isDeleteMarker = true,
-              eTag = "",
-              attrs = HeaderList.builder.build,
-              xattrs = HeaderList.builder.build
-            ).toBytes
-          )
+        
+        versioning match {
+          case Versioning.UNVERSIONED =>
+            server.astral.free(key.versions.root.resolve("0"))
+          case Versioning.ENABLED =>
+            assert(false)
         }
+
+        // val patch = Commit.retry(() => key.versions.acquireNewLoc) { patch =>
+        //   val version = patch.asVersion
+        //
+        //   // default acl
+        //   Commit.replace(version.acl) { patch =>
+        //     val dataPatch = patch.asData
+        //     dataPatch.writeBytes(Acl.t(callerId, Seq(
+        //       Acl.Grant(
+        //         Acl.ById(callerId),
+        //         Acl.FullControl()
+        //       )
+        //     )).toBytes)
+        //   }
+        //   version.meta.writeBytes(
+        //     Meta.t(
+        //       isVersioned = false,
+        //       isDeleteMarker = true,
+        //       eTag = "",
+        //       attrs = HeaderList.builder.build,
+        //       xattrs = HeaderList.builder.build
+        //     ).toBytes
+        //   )
+        // }
 
         NoContent[Unit]
           .withHeader(X_AMZ_REQUEST_ID -> requestId)
-          .withHeader(X_AMZ_DELETE_MARKER -> "true")
-          .withHeader(X_AMZ_VERSION_ID -> (if (versioningEnabled) { patch.name } else { "null" }))
+          .withHeader(X_AMZ_DELETE_MARKER -> "false")
+          .withHeader(X_AMZ_VERSION_ID -> "null")
       }
     }
   }

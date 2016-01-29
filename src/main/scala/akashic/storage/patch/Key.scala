@@ -3,6 +3,7 @@ package akashic.storage.patch
 import java.nio.file.{Files, Path}
 
 case class Key(root: Path) extends Patch {
+  val bucket = Bucket(root.getParent.getParent)
   val versions = Versions(root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
   def init {

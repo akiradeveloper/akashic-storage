@@ -12,4 +12,5 @@ object Versioning {
 
   val UNVERSIONED = 0
   val ENABLED = 1
+  val SUSPENDED = 2
 }

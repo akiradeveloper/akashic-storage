@@ -29,7 +29,7 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      Commit.retry(() => key.versions.acquireNewLoc) { patch =>
+      Commit.retry(() => key.versions.acquireWriteDest) { patch =>
         val version = patch.asVersion
 
         Commit.replace(version.acl) { patch =>

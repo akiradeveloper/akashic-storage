@@ -5,7 +5,12 @@ import java.nio.file.{Files, Path}
 import akashic.storage.files
 
 case class Versions(root: Path) {
-  def acquireNewLoc: Path = {
+  def key = Key(root.getParent)
+  def acquireWriteDest: Path = {
+    // versioning disabled
+    root.resolve("0")
+  }
+  private def acquireNewLoc: Path = {
     val xs = files.children(root).map(files.basename(_).toInt)
     val newId = if (xs.isEmpty) {
       1
