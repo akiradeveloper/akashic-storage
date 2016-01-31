@@ -85,7 +85,7 @@ object CompleteMultipartUpload {
 
       val mergeFut: Future[NodeSeq] = Future {
         // the directory is already made
-        Commit.replace(key.versions.acquireWriteDest) { patch =>
+        Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
 
           val aclBytes: Array[Byte] = upload.acl.read

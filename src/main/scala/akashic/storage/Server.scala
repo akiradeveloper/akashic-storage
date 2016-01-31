@@ -4,7 +4,7 @@ import java.nio.file.{Path, Files}
 
 import akashic.storage.admin._
 import akashic.storage.service._
-import akashic.storage.patch.Tree
+import akashic.storage.patch.{Astral, Tree}
 import com.twitter.finagle.Http.param.{MaxResponseSize, MaxRequestSize}
 import com.twitter.util.Future
 import com.twitter.finagle.http.{Request, Response, Status}

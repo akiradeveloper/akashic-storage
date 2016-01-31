@@ -5,36 +5,27 @@ import java.nio.file._
 import akashic.storage.server
 
 object Commit {
-  private def preparePatch(fn: Patch => Unit): Patch = {
-    val patch = Patch(server.astral.alloc)
-    try {
-      fn(patch)
-    } catch {
-      case e: Throwable =>
-        server.astral.free(patch.root)
-        throw e
-    }
-    patch
+  // for file
+  def replaceData(to: Data)(fn: Data => Unit) = {
+    val from = server.astral.allocData(fn)
+    Files.move(from.root, to.root, StandardCopyOption.REPLACE_EXISTING)
   }
 
+  // for directory
   def once(to: Path)(fn: Patch => Unit) = Once(to)(fn).run
   private case class Once(to: Path)(fn: Patch => Unit) {
     def run {
       if (Files.exists(to))
         return
-      val src = preparePatch(fn)
+      val src = server.astral.allocDirectory(fn)
       Files.move(src.root, to)
     }
   }
 
-  def replaceData(to: Data)(fn: Patch => Unit) = replace(to.root)(fn)
-  def replace(to: Path)(fn: Patch => Unit) = Replace(to)(fn).run
-  private case class Replace(to: Path)(fn: Patch => Unit) {
-    def run: Unit = {
-      val src = preparePatch(fn)
-      server.astral.free(to)
-      Files.move(src.root, to)
-    }
+  def replaceDirectory(to: Patch)(fn: Patch => Unit) = {
+    server.astral.free(to)
+    val from = server.astral.allocDirectory(fn)
+    Files.move(from.root, to.root)
   }
 
   def retry(alloc: () => Path)(fn: Patch => Unit) = Retry(alloc)(fn).run
@@ -52,7 +43,7 @@ object Commit {
       dest
     }
     def run: Patch = {
-      val src = preparePatch(fn)
+      val src = server.astral.allocDirectory(fn)
       move(src)
     }
   }

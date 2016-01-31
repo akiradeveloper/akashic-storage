@@ -5,7 +5,7 @@ import java.nio.file.{Files, Path}
 import akashic.storage.files
 
 case class Data(root: Path) extends Patch {
-  val filePath: Path = root.resolve("file")
+  val filePath: Path = root
   def length: Long = files.fileSize(filePath)
   def write(bytes: Array[Byte]) = {
     files.writeBytes(filePath, bytes)

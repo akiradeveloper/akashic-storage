@@ -29,7 +29,7 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      Commit.replace(key.versions.acquireWriteDest) { patch =>
+      Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
         val version = patch.asVersion
 
         Commit.replaceData(version.acl) { patch =>

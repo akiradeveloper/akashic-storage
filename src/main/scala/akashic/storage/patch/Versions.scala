@@ -6,9 +6,9 @@ import akashic.storage.files
 
 case class Versions(root: Path) {
   def key = Key(root.getParent)
-  def acquireWriteDest: Path = {
+  def acquireWriteDest: Version = {
     // versioning disabled
-    root.resolve("0")
+    Version(root.resolve("0"))
   }
   private def acquireNewLoc: Path = {
     val xs = files.children(root).map(files.basename(_).toInt)
