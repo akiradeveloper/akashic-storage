@@ -4,7 +4,9 @@ import java.net.{URLEncoder, URLDecoder}
 
 import akashic.storage.patch.Version
 import cats.Eval
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
+import com.twitter.io.Buf
 import com.twitter.util.Future
 
 import io.finch._
@@ -31,6 +33,9 @@ package object service {
       else None
   }
   def paramExists(name: String): Endpoint[HNil] = ParamExists(name)
+
+  def mkString(stream: AsyncStream[Buf]): Future[String] =
+    stream.foldLeft("") { case (acc, x) => acc + Buf.Utf8.unapply(x).get }
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
