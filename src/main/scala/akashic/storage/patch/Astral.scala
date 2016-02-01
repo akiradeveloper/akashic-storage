@@ -19,7 +19,7 @@ case class Astral(root: Path) {
     data
   }
 
-  def allocDirectory[T <: Patch](fn: Patch => Unit): Patch = {
+  def allocDirectory(fn: Patch => Unit): Patch = {
     val newPath = root.resolve(strings.random(32))
     Files.createDirectory(newPath)
     val patch = Patch(newPath)
