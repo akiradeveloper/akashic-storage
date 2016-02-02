@@ -29,18 +29,18 @@ case class Server(config: ServerConfig) {
   val adminService =
     post("admin" / "user") {
       val result = MakeUser.run(users)
-      Ok(result.xml)
+      Ok(mkStream(result.xml))
     } :+:
     get("admin" / "user" / string) { id: String =>
       val result = GetUser.run(users, id)
-      Ok(result.xml)
+      Ok(mkStream(result.xml))
     } :+:
     delete("admin" / "user" / string) { id: String =>
       Output.payload("", Status.NotImplemented)
     } :+:
     put("admin" / "user" / string ? body) { (id: String, body: String) =>
       UpdateUser.run(users, id, body)
-      Ok("")
+      Ok()
     }
 
   val api =
@@ -89,7 +89,7 @@ case class Server(config: ServerConfig) {
     val service = logFilter andThen this.endpoint.toService
     listeningServer = Http.server
       // .configured(Transport.Verbose(true))
-      .configured(MaxRequestSize(Int.MaxValue.byte))
+      .configured(MaxRequestSize(Int.MaxValue.bytes))
       .withStreaming(true)
       .serve(s"${address}", service)
   }
