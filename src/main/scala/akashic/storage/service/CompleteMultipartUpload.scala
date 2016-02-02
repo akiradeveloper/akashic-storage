@@ -132,8 +132,7 @@ object CompleteMultipartUpload {
             requestId)
       }
 
-      val as: AsyncStream[Buf] = AsyncStream.fromFuture(mergeResult)
-        .map(a => Buf.Utf8(a.toString()))
+      val as: AsyncStream[Buf] = AsyncStream.fromFuture(mergeResult).map(mkBuf(_))
 
       // TODO versionId (but what if on failure?)
       Ok(as)
