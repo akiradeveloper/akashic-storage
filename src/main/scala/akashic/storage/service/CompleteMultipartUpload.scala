@@ -8,7 +8,9 @@ import akashic.storage.patch.{Commit, Patch, Version, Data}
 import akashic.storage.service.Error.Reportable
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
+import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.commons.io.FileUtils
 
@@ -19,14 +21,22 @@ import io.finch._
 object CompleteMultipartUpload {
   val matcher = post(keyMatcher / paramExists("uploadId") ?
     param("uploadId") ?
-    body ?
+    asyncBody ?
     extractRequest
-  ).as[t]
-  val endpoint = matcher { a: t => a.run }
+  )// .as[t]
+  //val endpoint = matcher { a:t => a.run }
+  val endpoint = matcher {
+    (bucketName: String, keyName: String,
+     uploadId: String,
+     data: AsyncStream[Buf],
+     req: Request) => for {
+      s <- mkString(data)
+    } yield t(bucketName, keyName, uploadId, s, req).run
+  }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                data: String,
-               req: Request) extends Task[Output[Future[NodeSeq]]] {
+               req: Request) extends Task[Output[AsyncStream[Buf]]] {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -83,7 +93,7 @@ object CompleteMultipartUpload {
       }
       val newETag = calcETag(parts.map(_.eTag))
 
-      val mergeFut: Future[NodeSeq] = Future {
+      val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
@@ -122,8 +132,11 @@ object CompleteMultipartUpload {
             requestId)
       }
 
+      val as: AsyncStream[Buf] = AsyncStream.fromFuture(mergeResult)
+        .map(a => Buf.Utf8(a.toString()))
+
       // TODO versionId (but what if on failure?)
-      Ok(mergeFut)
+      Ok(as)
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
         .withHeader(X_AMZ_VERSION_ID -> "null")
     }
