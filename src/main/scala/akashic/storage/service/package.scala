@@ -35,7 +35,10 @@ package object service {
   def paramExists(name: String): Endpoint[HNil] = ParamExists(name)
 
   def mkString(stream: AsyncStream[Buf]): Future[String] =
-    stream.foldLeft("") { case (acc, x) => acc + Buf.Utf8.unapply(x).get }
+    stream.foldLeft("") { (acc, x) => acc + Buf.Utf8.unapply(x).get }
+
+  def mkByteArray(stream: AsyncStream[Buf]): Future[Array[Byte]] =
+    stream.foldLeft(Array[Byte]()) { (acc, buf) => acc ++ Buf.ByteArray.Owned.extract(buf) }
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
