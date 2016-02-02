@@ -1,9 +1,10 @@
 package akashic.storage.service
 
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
 import io.finch._
 import akashic.storage.{HeaderList, server, files}
-import com.twitter.io.Buf
+import com.twitter.io.{Reader, Buf}
 import com.google.common.net.HttpHeaders._
 
 object HeadObject {
@@ -48,7 +49,7 @@ object GetObject {
     req: Request,
     withContent: Boolean,
     label: String
-  ) extends Task[Output[Buf]] {
+  ) extends Task[Output[AsyncStream[Buf]]] {
     def name = label
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -66,11 +67,11 @@ object GetObject {
       val contentType = responseContentType <+ Some(files.detectContentType(filePath))
       val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
-      val buf = if (withContent) {
-        val objectData = version.data.read
-        Buf.ByteArray.Owned(objectData)
+      val buf: AsyncStream[Buf] = if (withContent) {
+        val reader = Reader.fromFile(filePath.toFile)
+        AsyncStream.fromFuture(Reader.readAll(reader))
       } else {
-        Buf.Empty
+        AsyncStream.empty
       }
 
       // TODO use this
@@ -84,7 +85,7 @@ object GetObject {
         .withContentType(contentType)
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
         .withHeader(ETAG -> quoteString(meta.eTag))
-        .withHeader(CONTENT_LENGTH -> buf.length.toString)
+        .withHeader(CONTENT_LENGTH -> files.fileSize(filePath).toString)
         .withHeader(LAST_MODIFIED -> dates.formatLastModified(files.lastDate(filePath)))
     }
   }
