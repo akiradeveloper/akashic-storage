@@ -89,6 +89,7 @@ case class Server(config: ServerConfig) {
     val service = logFilter andThen this.endpoint.toService
     listeningServer = Http.server
       // .configured(Transport.Verbose(true))
+      .configured(MaxRequestSize(Int.MaxValue.byte))
       .withStreaming(true)
       .serve(s"${address}", service)
   }
