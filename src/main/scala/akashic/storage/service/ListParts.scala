@@ -14,7 +14,7 @@ object ListParts {
     paramOption("part-number-marker").as[Int] ?
     paramOption("max-parts").as[Int] ?
     extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val endpoint = matcher { a: t => a.run.map(mkStream) }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumberMarker: Option[Int],

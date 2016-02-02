@@ -12,7 +12,7 @@ object InitiateMultipartUpload {
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?
     extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val endpoint = matcher { a: t => a.run.map(mkStream) }
   case class t(bucketName: String, keyName: String,
                contentType: Option[String],
                contentDisposition: Option[String],

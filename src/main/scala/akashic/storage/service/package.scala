@@ -43,6 +43,7 @@ package object service {
     stream.foldLeft(Array[Byte]()) { (acc, buf) => acc ++ Buf.ByteArray.Owned.extract(buf) }
 
   def mkBuf(node: NodeSeq): Buf = Buf.Utf8(node.toString)
+  def mkStream(node: NodeSeq): AsyncStream[Buf] = AsyncStream.of(mkBuf(node))
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
