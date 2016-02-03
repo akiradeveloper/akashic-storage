@@ -8,7 +8,9 @@ import akashic.storage.patch.{Commit, Patch, Version, Data}
 import akashic.storage.service.Error.Reportable
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
+import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.commons.io.FileUtils
 
@@ -19,14 +21,22 @@ import io.finch._
 object CompleteMultipartUpload {
   val matcher = post(keyMatcher / paramExists("uploadId") ?
     param("uploadId") ?
-    body ?
+    asyncBody ?
     extractRequest
-  ).as[t]
-  val endpoint = matcher { a: t => a.run }
+  )// .as[t]
+  //val endpoint = matcher { a:t => a.run }
+  val endpoint = matcher {
+    (bucketName: String, keyName: String,
+     uploadId: String,
+     data: AsyncStream[Buf],
+     req: Request) => for {
+      s <- mkString(data)
+    } yield t(bucketName, keyName, uploadId, s, req).run
+  }
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                data: String,
-               req: Request) extends Task[Output[Future[NodeSeq]]] {
+               req: Request) extends Task[Output[AsyncStream[Buf]]] {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -69,24 +79,35 @@ object CompleteMultipartUpload {
       }
 
       // http://stackoverflow.com/questions/12186993/what-is-the-algorithm-to-compute-the-amazon-s3-etag-for-a-file-larger-than-5gb
-      def calcETag(md5s: Seq[String]): String = {
-        val bui = new StringBuilder
-        for (md5 <- md5s) {
-          bui.append(md5)
-        }
-        val hex = bui.toString
-        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
-        val hasher = Hashing.md5.newHasher
-        hasher.putBytes(raw)
-        val digest = hasher.hash.toString
-        digest + "-" + md5s.size
-      }
-      val newETag = calcETag(parts.map(_.eTag))
+//      def calcETag(md5s: Seq[String]): String = {
+//        val bui = new StringBuilder
+//        for (md5 <- md5s) {
+//          bui.append(md5)
+//        }
+//        val hex = bui.toString
+//        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
+//        val hasher = Hashing.md5.newHasher
+//        hasher.putBytes(raw)
+//        val digest = hasher.hash.toString
+//        digest + "-" + md5s.size
+//      }
+//      val newETag = calcETag(parts.map(_.eTag))
 
-      val mergeFut: Future[NodeSeq] = Future {
+      val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
+        var newETag = ""
+
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
+
+          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
+            for (part <- parts) {
+              // parts are all valid so we don't need to call findPart
+              f.write(upload.part(part.partNumber).unwrap.read)
+            }
+          }
+
+          newETag = files.computeMD5(versionPatch.data.filePath)
 
           val aclBytes: Array[Byte] = upload.acl.read
           Commit.replaceData(versionPatch.acl) { patch =>
@@ -97,13 +118,6 @@ object CompleteMultipartUpload {
           val oldMeta = Meta.fromBytes(upload.meta.read)
           val newMeta = oldMeta.copy(eTag = newETag)
           versionPatch.meta.write(newMeta.toBytes)
-
-          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
-            for (part <- parts) {
-              // parts are all valid so we don't need to call findPart
-              f.write(upload.part(part.partNumber).unwrap.read)
-            }
-          }
         }
 
         server.astral.free(upload.root)
@@ -122,8 +136,10 @@ object CompleteMultipartUpload {
             requestId)
       }
 
+      val as: AsyncStream[Buf] = AsyncStream.fromFuture(mergeResult).map(mkBuf(_))
+
       // TODO versionId (but what if on failure?)
-      Ok(mergeFut)
+      Ok(as)
         .withHeader(X_AMZ_REQUEST_ID -> requestId)
         .withHeader(X_AMZ_VERSION_ID -> "null")
     }

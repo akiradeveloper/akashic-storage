@@ -16,7 +16,7 @@ object GetBucket {
     paramOption("prefix") ?
     extractRequest
   ).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val endpoint = matcher { a: t => a.run.map(mkStream) }
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],

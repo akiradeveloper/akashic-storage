@@ -12,6 +12,8 @@ import com.twitter.util.Future
 import io.finch._
 import shapeless.HNil
 
+import scala.xml.NodeSeq
+
 package object service {
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
@@ -39,6 +41,9 @@ package object service {
 
   def mkByteArray(stream: AsyncStream[Buf]): Future[Array[Byte]] =
     stream.foldLeft(Array[Byte]()) { (acc, buf) => acc ++ Buf.ByteArray.Owned.extract(buf) }
+
+  def mkBuf(node: NodeSeq): Buf = Buf.Utf8(node.toString)
+  def mkStream(node: NodeSeq): AsyncStream[Buf] = AsyncStream.of(mkBuf(node))
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"

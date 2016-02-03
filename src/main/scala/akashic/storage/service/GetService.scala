@@ -9,7 +9,7 @@ import scala.xml.NodeSeq
 
 object GetService {
   val matcher = get(/ ? extractRequest).as[t]
-  def endpoint: Endpoint[NodeSeq] = matcher { a: t => a.run }
+  def endpoint = matcher { a: t => a.run.map(mkStream) }
 
   case class t(req: Request) extends Task[Output[NodeSeq]] {
     def name = "GET Service"

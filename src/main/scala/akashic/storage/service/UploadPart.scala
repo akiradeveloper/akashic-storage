@@ -3,7 +3,9 @@ package akashic.storage.service
 import akashic.storage.{files, server}
 import akashic.storage.patch.Commit
 import akashic.storage.service.Error.Reportable
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
+import com.twitter.io.Buf
 import io.finch._
 import com.google.common.net.HttpHeaders._
 
@@ -11,9 +13,18 @@ object UploadPart {
   val matcher = put(keyMatcher / paramExists("uploadId") / paramExists("partNumber") ?
     param("uploadId") ?
     param("partNumber").as[Int] ?
-    binaryBody ?
-    extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+    asyncBody ?
+    extractRequest)
+  val endpoint = matcher {
+    (bucketName: String, keyName: String,
+     uploadId: String,
+     partNumber: Int,
+     partData: AsyncStream[Buf],
+     req: Request) => for {
+      pd <- mkByteArray(partData)
+    } yield t(bucketName, keyName, uploadId, partNumber, pd, req).run
+  }
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,

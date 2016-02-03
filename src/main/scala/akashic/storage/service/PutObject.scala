@@ -2,18 +2,30 @@ package akashic.storage.service
 
 import akashic.storage.patch.Commit
 import akashic.storage.{HeaderList, files, server}
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.http.Request
 import com.google.common.net.HttpHeaders._
+import com.twitter.io.Buf
 import io.finch._
 
 object PutObject {
   val matcher = put(
     keyMatcher ?
-    binaryBody ?
+    asyncBody ?
     headerOption("Content-Type") ?
     headerOption("Content-Disposition") ?
-    extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+    extractRequest)
+  val endpoint = matcher {
+    (bucketName: String, keyName: String,
+     objectData: AsyncStream[Buf],
+     contentType: Option[String],
+     contentDisposition: Option[String],
+     req: Request) =>
+     for {
+      od <- mkByteArray(objectData)
+     } yield t(bucketName, keyName, od, contentType, contentDisposition, req).run
+  }
+
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                contentType: Option[String],

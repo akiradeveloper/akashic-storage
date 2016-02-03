@@ -28,6 +28,12 @@ class AmazonSDKTest extends ServerTestBase {
 
   import scala.collection.JavaConversions._
 
+  test("no buckets") { p =>
+    import p._
+    val res = client.listBuckets
+    assert(res.size == 0)
+  }
+
   test("add buckets") { p =>
     import p._
 
