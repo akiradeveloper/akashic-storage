@@ -79,24 +79,35 @@ object CompleteMultipartUpload {
       }
 
       // http://stackoverflow.com/questions/12186993/what-is-the-algorithm-to-compute-the-amazon-s3-etag-for-a-file-larger-than-5gb
-      def calcETag(md5s: Seq[String]): String = {
-        val bui = new StringBuilder
-        for (md5 <- md5s) {
-          bui.append(md5)
-        }
-        val hex = bui.toString
-        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
-        val hasher = Hashing.md5.newHasher
-        hasher.putBytes(raw)
-        val digest = hasher.hash.toString
-        digest + "-" + md5s.size
-      }
-      val newETag = calcETag(parts.map(_.eTag))
+//      def calcETag(md5s: Seq[String]): String = {
+//        val bui = new StringBuilder
+//        for (md5 <- md5s) {
+//          bui.append(md5)
+//        }
+//        val hex = bui.toString
+//        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
+//        val hasher = Hashing.md5.newHasher
+//        hasher.putBytes(raw)
+//        val digest = hasher.hash.toString
+//        digest + "-" + md5s.size
+//      }
+//      val newETag = calcETag(parts.map(_.eTag))
 
       val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
+        var newETag = ""
+
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
+
+          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
+            for (part <- parts) {
+              // parts are all valid so we don't need to call findPart
+              f.write(upload.part(part.partNumber).unwrap.read)
+            }
+          }
+
+          newETag = files.computeMD5(versionPatch.data.filePath)
 
           val aclBytes: Array[Byte] = upload.acl.read
           Commit.replaceData(versionPatch.acl) { patch =>
@@ -107,13 +118,6 @@ object CompleteMultipartUpload {
           val oldMeta = Meta.fromBytes(upload.meta.read)
           val newMeta = oldMeta.copy(eTag = newETag)
           versionPatch.meta.write(newMeta.toBytes)
-
-          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
-            for (part <- parts) {
-              // parts are all valid so we don't need to call findPart
-              f.write(upload.part(part.partNumber).unwrap.read)
-            }
-          }
         }
 
         server.astral.free(upload.root)
