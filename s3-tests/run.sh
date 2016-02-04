@@ -19,6 +19,8 @@ cd $CLONEDIR
 echo wait 30 seconds until server is up
 sleep 30 # tmp
 netstat -tanp
+cat ~/.boto
+mv boto.config ~/.boto
 S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests
 cd -
 
