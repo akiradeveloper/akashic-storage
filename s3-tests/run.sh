@@ -19,8 +19,8 @@ cp $CONFNAME $CLONEDIR
 cd $CLONEDIR
 ./bootstrap
 # FIXME should wait for the server to get ready
-echo wait 30 seconds until server is up
-sleep 30 # tmp
+echo wait 10 seconds until server is up
+sleep 10 # tmp
 netstat -tanp
 S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests
 cd -
