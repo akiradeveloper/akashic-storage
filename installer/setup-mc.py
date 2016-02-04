@@ -20,5 +20,4 @@ secretKey = elem.find("SecretKey").text
 print("AccessKey: %s" % accessKey)
 print("SecretKey: %s" % secretKey)
 
-os.system("mc config alias add akashic-storage http://%s" % dest)
-os.system("mc config host add http://%s %s %s S3v2" % (dest, accessKey, secretKey))
+os.system("mc config host akashic-storage add http://%s %s %s S3v2" % (dest, accessKey, secretKey))
