@@ -5,7 +5,7 @@ mv boto.config ~/.boto
 
 cd ..
 sbt compile
-sbt -Dconfig.file=src/test/resources/test.conf "runMain akashic.storage.app.RunServer" &
+sbt "runMain akashic.storage.app.RunServer" &
 processId=$!
 echo server process id: $processId
 cd -

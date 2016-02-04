@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import com.twitter.util.Await
 
 object RunServer extends App {
-  server = Server(ServerConfig(ConfigFactory.load, init=true))
+  server = Server(ServerConfig(ConfigFactory.load("test.conf"), init=true))
 
   // workaround
   server.users.addUser(TestUsers.hoge)
