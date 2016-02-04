@@ -1,5 +1,8 @@
 #!/bin/sh
 
+cat ~/.boto
+mv boto.config ~/.boto
+
 cd ..
 sbt compile
 sbt -Dconfig.file=src/test/resources/test.conf "runMain akashic.storage.app.RunServer" &
@@ -19,8 +22,6 @@ cd $CLONEDIR
 echo wait 30 seconds until server is up
 sleep 30 # tmp
 netstat -tanp
-cat ~/.boto
-mv boto.config ~/.boto
 S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests
 cd -
 
