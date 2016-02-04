@@ -53,6 +53,7 @@ case class V2Common(method: String, resource: String, paramList: ParamList.t, he
       dateOrExpire + "\n" +
       cannonicalAmzHeaders +
       cannonicalResource
+    println("StringToSign:")
     println(result)
     result
   }

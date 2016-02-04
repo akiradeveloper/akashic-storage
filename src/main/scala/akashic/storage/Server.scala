@@ -77,9 +77,25 @@ case class Server(config: ServerConfig) {
   var listeningServer: ListeningServer = NullServer
   def start {
     implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
+    def printHeaders(req: Request): Unit = {
+      def truncate(s: String): String = {
+        if (s.length < 30) {
+          s
+        } else {
+          s.take(30) + " (truncated)"
+        }
+      }
+      val str = req.headerMap.iterator
+        .map { case (k, v) => (k, truncate(v)) }
+        .map { case (k, v) => k + ":" + v }
+        .mkString("\n")
+      println(str)
+    }
     val logFilter = new SimpleFilter[Request, Response] {
       def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
+        println("------------------- START ----------------------")
         println(req)
+        printHeaders(req)
         val res = service(req)
         res.onSuccess(println(_))
         res.onFailure(println(_))
