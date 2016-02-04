@@ -19,7 +19,8 @@ class McTest extends ServerTestBase {
   val confDir = "/tmp/akashic-storage-mc"
 
   def mc(cmd: String) = {
-    val cmdline = s"mc --config-folder=${confDir} ${cmd}"
+    // val cmdline = s"mc --config-folder=${confDir} ${cmd}"
+    val cmdline = s"mc ${cmd}"
     println(cmdline)
     Process(cmdline)
   }
@@ -39,15 +40,15 @@ class McTest extends ServerTestBase {
     }
     FileUtils.cleanDirectory(confDirPath.toFile)
 
-    assert(mc(s"config host add http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
-    assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)
+    assert(mc(s"config host add ${alias} http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
+    // assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)
   }
 
   test("add buckets") { _ =>
     assert(mc(s"ls ${alias}").!!.split("\n").length === 1)
     assert(mc(s"mb ${alias}/abc").! === 0)
     assert(mc(s"ls ${alias}").!!.split("\n").length === 1)
-    assert(mc(s"mb ${alias}/DEF").! === 0)
+    assert(mc(s"mb ${alias}/def").! === 0)
     assert(mc(s"ls ${alias}").!!.split("\n").length === 2)
   }
 
