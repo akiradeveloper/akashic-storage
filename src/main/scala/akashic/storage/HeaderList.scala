@@ -23,6 +23,6 @@ object HeaderList {
     def build = t(l)
   }
   def fromRequest(req: HttpRequest): t = {
-    t(req.headers.map(a => (a.name, a.value)))
+    t(req.headers.map(a => (a.name, a.value)) ++ Seq(("Content-Type", req.entity.getContentType.mediaType.toString)))
   }
 }
