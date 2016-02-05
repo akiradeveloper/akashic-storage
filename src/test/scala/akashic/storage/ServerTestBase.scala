@@ -1,10 +1,9 @@
 package akashic.storage
 
 import java.io.{FileInputStream, File}
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path}
 
 import com.amazonaws.services.s3.model.S3Object
-import com.twitter.finagle.{NullServer, ListeningServer}
 import com.typesafe.config._
 import org.apache.commons.io.IOUtils
 import org.scalatest._

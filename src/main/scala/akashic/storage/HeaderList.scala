@@ -1,6 +1,6 @@
 package akashic.storage
 
-import com.twitter.finagle.http.Request
+import akka.http.scaladsl.model.HttpRequest
 
 import scala.collection.mutable
 
@@ -22,7 +22,7 @@ object HeaderList {
     }
     def build = t(l)
   }
-  def fromRequest(req: Request): t = {
-    t(req.headerMap.iterator.toSeq)
+  def fromRequest(req: HttpRequest): t = {
+    t(req.headers.map(a => (a.name, a.value)))
   }
 }

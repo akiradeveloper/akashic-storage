@@ -3,7 +3,9 @@ package akashic.storage.app
 import akashic.storage._
 import akashic.storage.admin.TestUsers
 import com.typesafe.config.ConfigFactory
-import com.twitter.util.Await
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object RunServer extends App {
   server = Server(ServerConfig(ConfigFactory.load("test.conf"), init=true))
@@ -15,6 +17,5 @@ object RunServer extends App {
   server.users.addUser(TestUsers.s3testsMain)
   server.users.addUser(TestUsers.s3testsAlt)
 
-  server.start
-  Await.ready(server.listeningServer)
+  Await.ready(server.start, Duration.Inf)
 }

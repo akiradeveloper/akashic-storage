@@ -1,13 +1,13 @@
 package akashic.storage.auth
 
 import akashic.storage.HeaderList
-import com.twitter.finagle.http.Request
+import akka.http.scaladsl.model.HttpRequest
 
 import scala.util.Try
 
 object V2Presigned {
-  def authorize(resource: String, req: Request): Option[String] = {
-    doAuthorize(req.method.toString, resource, ParamList.fromRequest(req), HeaderList.fromRequest(req), getSecretKey)
+  def authorize(resource: String, req: HttpRequest): Option[String] = {
+    doAuthorize(req.method.name, resource, ParamList.fromRequest(req), HeaderList.fromRequest(req), getSecretKey)
   }
   def doAuthorize(method: String, resource: String, paramList: ParamList.t, headerList: HeaderList.t, getSecretKeyFn: String => String): Option[String] = {
     Try {

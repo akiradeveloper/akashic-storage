@@ -2,14 +2,14 @@ package akashic.storage.auth
 
 import akashic.storage.HeaderList
 import akashic.storage.admin.TestUsers
-import com.twitter.finagle.http.Request
+import akka.http.scaladsl.model.HttpRequest
 
 import scala.util.Try
 
 object V2 {
-  def authorize(resource: String, req: Request): Option[String] = {
+  def authorize(resource: String, req: HttpRequest): Option[String] = {
     doAuthorize(
-      req.method.toString, 
+      req.method.name,
       resource,
       ParamList.fromRequest(req),
       HeaderList.fromRequest(req),
