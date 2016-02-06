@@ -10,7 +10,8 @@ import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import scala.xml.NodeSeq
 
 object GetService {
-  val route = (get & extractRequest).as(t)(_.run)
+  val matcher = get & extractRequest
+  val route = matcher.as(t)(_.run)
 
   case class t(req: HttpRequest) extends Task[Route] {
     def name = "GET Service"

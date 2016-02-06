@@ -22,6 +22,7 @@ case class Server(config: ServerConfig) {
   val astral = Astral(config.mountpoint.resolve("astral"))
 
   val route =
+    GetBucket.route ~
     GetService.route ~
     PutBucket.route ~
     PutObject.route
