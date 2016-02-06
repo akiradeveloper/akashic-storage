@@ -20,7 +20,7 @@ class McTest extends ServerTestBase {
 
   def mc(cmd: String) = {
     // val cmdline = s"mc --config-folder=${confDir} ${cmd}"
-    val cmdline = s"mc ${cmd}"
+    val cmdline = s"mc --debug ${cmd}"
     println(cmdline)
     Process(cmdline)
   }

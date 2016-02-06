@@ -4,12 +4,11 @@ trait Task[T] extends RequestIdAllocable with Authorizable {
   def name: String
   def runOnce: T
   def run: T = {
+    println(s"-> ${name}")
+    val start = System.currentTimeMillis
     allocRequestId
     authorize
-
-    val start = System.currentTimeMillis
     var retry = 0
-    println(s"-> ${name}")
     val a = try {
       runOnce
     } catch {
