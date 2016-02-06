@@ -28,7 +28,8 @@ case class Server(config: ServerConfig) {
     PutBucket.route ~
     PutObject.route ~
     DeleteBucket.route ~
-    DeleteObject.route
+    DeleteObject.route ~
+    InitiateMultipartUpload.route
 
   def address = s"${config.ip}:${config.port}"
 
