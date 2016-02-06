@@ -21,7 +21,9 @@ case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("astral"))
   val astral = Astral(config.mountpoint.resolve("astral"))
 
-  val route = GetService.route
+  val route =
+    GetService.route ~
+    PutBucket.route
 
   def address = s"${config.ip}:${config.port}"
 
