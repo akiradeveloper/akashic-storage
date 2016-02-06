@@ -7,16 +7,6 @@ import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
 
 package object service {
-  val route =
-    GetBucket.route ~
-    GetObject.route ~
-    GetService.route ~
-    PutBucket.route ~
-    PutObject.route ~
-    DeleteBucket.route ~
-    DeleteObject.route ~
-    InitiateMultipartUpload.route
-
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
     def `<+`(other: Option[A]): Option[A] = 
