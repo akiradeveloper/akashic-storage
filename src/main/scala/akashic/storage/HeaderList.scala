@@ -1,6 +1,6 @@
 package akashic.storage
 
-import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.{ContentTypes, ContentType, HttpRequest}
 
 import scala.collection.mutable
 
@@ -26,6 +26,11 @@ object HeaderList {
     def build = t(l)
   }
   def fromRequest(req: HttpRequest): t = {
-    t(req.headers.map(a => (a.name, a.value)) ++ Seq(("Content-Type", req.entity.getContentType.mediaType.toString)))
+    val base = req.headers.map(a => (a.name, a.value))
+    val l = req.entity.contentType match {
+      case ContentTypes.NoContentType => base
+      case a => ("Content-Type", a.value) +: base
+    }
+    t(l)
   }
 }
