@@ -42,7 +42,7 @@ object PutBucket {
       }
 
       val headers = ResponseHeaderList.builder
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
         .build
 
       complete(StatusCodes.OK, headers, HttpEntity.Empty)

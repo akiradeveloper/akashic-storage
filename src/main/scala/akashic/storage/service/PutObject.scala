@@ -53,8 +53,8 @@ object PutObject {
             isDeleteMarker = false,
             eTag = computedETag,
             attrs = HeaderList.builder
-              .appendOpt("Content-Type" -> contentType)
-              .appendOpt("Content-Disposition" -> contentDisposition)
+              .appendOpt("Content-Type", contentType)
+              .appendOpt("Content-Disposition", contentDisposition)
               .build,
             xattrs = HeaderList.builder
               .build
@@ -62,8 +62,8 @@ object PutObject {
       }
 
       val headers = ResponseHeaderList.builder
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(X_AMZ_VERSION_ID -> "null")
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(X_AMZ_VERSION_ID, "null")
         .withHeader(ETag(computedETag))
         .build
 

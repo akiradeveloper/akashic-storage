@@ -23,6 +23,7 @@ case class Server(config: ServerConfig) {
 
   val route =
     GetBucket.route ~
+    GetObject.route ~
     GetService.route ~
     PutBucket.route ~
     PutObject.route
