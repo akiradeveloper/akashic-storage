@@ -23,14 +23,7 @@ case class Server(config: ServerConfig) {
 
   val route =
     admin.route ~
-    GetBucket.route ~
-    GetObject.route ~
-    GetService.route ~
-    PutBucket.route ~
-    PutObject.route ~
-    DeleteBucket.route ~
-    DeleteObject.route ~
-    InitiateMultipartUpload.route
+    service.route
 
   def address = s"${config.ip}:${config.port}"
 
