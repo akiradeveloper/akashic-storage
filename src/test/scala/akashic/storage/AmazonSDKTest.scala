@@ -50,6 +50,14 @@ class AmazonSDKTest extends ServerTestBase {
     // assert(loc == "US")
   }
 
+  test("add -> delete bucket") { p =>
+    import p._
+    client.createBucket("myb")
+    client.deleteBucket("myb")
+    val res = client.listBuckets
+    assert(res.size == 0)
+  }
+
   test("put and get object") { p =>
     import p._
 

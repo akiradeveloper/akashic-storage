@@ -27,6 +27,7 @@ case class Server(config: ServerConfig) {
     GetService.route ~
     PutBucket.route ~
     PutObject.route ~
+    DeleteBucket.route ~
     DeleteObject.route
 
   def address = s"${config.ip}:${config.port}"
@@ -35,7 +36,7 @@ case class Server(config: ServerConfig) {
   implicit var mat: ActorMaterializer = _
 
   def start = {
-    system = ActorSystem()
+    system = ActorSystem("akashic-storage")
     mat = ActorMaterializer()
     Http().bindAndHandle(
       handler = Route.handlerFlow(route),
