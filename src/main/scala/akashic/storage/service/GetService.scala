@@ -2,7 +2,7 @@ package akashic.storage.service
 
 import akashic.storage.service.Error.Reportable
 import akashic.storage.{server, files, patch}
-import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
@@ -39,7 +39,11 @@ object GetService {
           </Buckets>
         </ListAllMyBucketsResult>
 
-      complete(xml)
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

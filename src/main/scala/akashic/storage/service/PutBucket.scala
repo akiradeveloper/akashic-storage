@@ -5,7 +5,7 @@ import java.nio.file.Files
 import akashic.storage.server
 import akashic.storage.patch._
 import akashic.storage.service.Error.Reportable
-import akka.http.scaladsl.model.{HttpEntity, HttpRequest}
+import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 
@@ -40,7 +40,12 @@ object PutBucket {
           dataPatch.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
         }
       }
-      complete(HttpEntity.Empty)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

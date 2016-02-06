@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   // "org.apache.httpcomponents" % "httpclient" % "4.5",
   // "org.apache.httpcomponents" % "httpmime" % "4.5.1",
   "org.apache.tika" % "tika-core" % "1.10",
-  // "com.google.guava" % "guava" % "18.0",
+  "com.google.guava" % "guava" % "18.0",
   "com.amazonaws" % "aws-java-sdk" % "1.10.49",
   "com.typesafe.slick" %% "slick" % "3.0.2",
   "org.xerial" % "sqlite-jdbc" % "3.7.2",
