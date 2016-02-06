@@ -10,8 +10,11 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 
 object PutBucket {
-  val route = (put & extractBucket & extractRequest).as(t)(_.run)
-
+  val matcher =
+    put &
+    extractBucket &
+    extractRequest
+  val route = matcher.as(t)(_.run)
   case class t(bucketName: String, req: HttpRequest) extends Task[Route] {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
