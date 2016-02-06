@@ -29,7 +29,7 @@ object HeaderList {
     val base = req.headers.map(a => (a.name, a.value))
     val l = req.entity.contentType match {
       case ContentTypes.NoContentType => base
-      case a => ("Content-Type", a.value) +: base
+      case a => ("Content-Type", a.mediaType.value) +: base
     }
     t(l)
   }
