@@ -12,11 +12,12 @@ object HeaderList {
   def builder: Builder = Builder()
   case class Builder() {
     private val l = mutable.ListBuffer[(String, String)]()
-    def append(k: String, v: String): this.type = { 
-      l += k -> v
+    def append(pair: (String, String)): this.type = {
+      l += pair
       this
     }
-    def appendOpt(k: String, v: Option[String]): this.type = {
+    def appendOpt(pair: (String, Option[String])): this.type = {
+      val (k, v) = pair
       if (v.isDefined) { l += k -> v.get }
       this
     }

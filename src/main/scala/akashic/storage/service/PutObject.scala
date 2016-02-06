@@ -53,10 +53,11 @@ object PutObject {
             isDeleteMarker = false,
             eTag = computedETag,
             attrs = HeaderList.builder
-              .appendOpt("Content-Type", contentType)
-              .appendOpt("Content-Disposition", contentDisposition)
+              .appendOpt("Content-Type" -> contentType)
+              .appendOpt("Content-Disposition" -> contentDisposition)
               .build,
-            xattrs = HeaderList.builder.build
+            xattrs = HeaderList.builder
+              .build
           ).toBytes)
       }
 
