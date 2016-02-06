@@ -26,7 +26,8 @@ case class Server(config: ServerConfig) {
     GetObject.route ~
     GetService.route ~
     PutBucket.route ~
-    PutObject.route
+    PutObject.route ~
+    DeleteObject.route
 
   def address = s"${config.ip}:${config.port}"
 
