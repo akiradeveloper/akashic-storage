@@ -23,7 +23,8 @@ case class Server(config: ServerConfig) {
 
   val adminRoute =
     MakeUser.route ~
-    GetUser.route
+    GetUser.route ~
+    UpdateUser.route
 
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
