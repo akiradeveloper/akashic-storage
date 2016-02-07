@@ -24,7 +24,6 @@ case class Server(config: ServerConfig) {
   val adminRoute =
     MakeUser.route
 
-  // HEAD   /bucketName
   // HEAD   /bucketName/keyName
 
 
@@ -35,6 +34,7 @@ case class Server(config: ServerConfig) {
     ListParts.route ~               // GET    /bucketName/keyname?uploadId=***
     GetObject.route ~               // GET    /bucketName/keyName
     GetService.route ~              // GET    /
+    HeadBucket.route ~              // HEAD   /bucketName
     PutBucket.route ~               // PUT    /bucketName
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     PutObject.route ~               // PUT    /bucketName/keyName
