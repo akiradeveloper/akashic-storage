@@ -7,9 +7,11 @@ import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.model.StatusCode
+import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("tree"))
@@ -44,9 +46,24 @@ case class Server(config: ServerConfig) {
     InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
 
-  val route =
+  val apiRoute =
     adminRoute ~
     serviceRoute
+
+  val errHandler = ExceptionHandler {
+    case service.Error.Exception(context, e) =>
+      val withMessage = service.Error.withMessage(e)
+      val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
+      val status = StatusCode.int2StatusCode(withMessage.httpCode)
+      complete(status, ResponseHeaderList.builder.build, xml)
+    case admin.Error.Exception(e) =>
+      val (code, message) = admin.Error.interpret(e)
+      val status = StatusCode.int2StatusCode(code)
+      complete(status, ResponseHeaderList.builder.build, message)
+  }
+
+  val route =
+    handleExceptions(errHandler) { apiRoute }
 
   def address = s"${config.ip}:${config.port}"
 
