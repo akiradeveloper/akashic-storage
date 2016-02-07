@@ -5,7 +5,7 @@ import java.net.{URLEncoder, URLDecoder}
 import akashic.storage.patch.Version
 import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive1, Directive, Route}
 
 package object service {
   // first appearance wins
@@ -25,8 +25,10 @@ package object service {
 
   def encodeKeyName(keyName: String): String = URLEncoder.encode(keyName, "UTF-8")
   def decodeKeyName(keyName: String): String = URLDecoder.decode(keyName, "UTF-8")
-  val extractBucket = path(Segment ~ (Slash | PathEnd))
-  val extractObject = path(Segment / Rest)
+  val extractBucket: Directive1[String] = path(Segment ~ (Slash | PathEnd))
+  val extractObject: Directive[(String, String)] = path(Segment / Rest).tmap {
+    case (bucketName: String, keyName: String) => (bucketName, encodeKeyName(keyName))
+  }
 
   type API = Task[Route]
 }
