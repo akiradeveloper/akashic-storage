@@ -24,19 +24,24 @@ case class Server(config: ServerConfig) {
   val adminRoute =
     MakeUser.route
 
+  // HEAD   /bucketName
+  // HEAD   /bucketName/keyName
+  // DELETE /bucketName/keyName?uploadId=***
+
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
   val serviceRoute =
-    GetBucket.route ~
-      GetObject.route ~
-      GetService.route ~
-      PutBucket.route ~
-      UploadPart.route ~
-      PutObject.route ~
-      DeleteBucket.route ~
-      DeleteObject.route ~
-      InitiateMultipartUpload.route ~
-      CompleteMultipartUpload.route
+    GetBucket.route ~               // GET    /bucketName
+    ListParts.route ~               // GET    /bucketName/keyname?uploadId=***
+    GetObject.route ~               // GET    /bucketName/keyName
+    GetService.route ~              // GET    /
+    PutBucket.route ~               // PUT    /bucketName
+    UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObject.route ~               // PUT    /bucketName/keyName
+    DeleteBucket.route ~            // DELETE /bucketName
+    DeleteObject.route ~            // DELETE /bucketName/keyName
+    InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
+    CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
 
   val route =
     adminRoute ~
