@@ -69,8 +69,8 @@ case class V2Common(req: HttpRequest, resource: String, paramList: ParamList.t, 
         dateOrExpire + "\n" +
         cannonicalAmzHeaders +
         cannonicalResource
-      println("StringToSign:")
-      println(result)
+      // println("StringToSign:")
+      // println(result)
       result
     }
   }
