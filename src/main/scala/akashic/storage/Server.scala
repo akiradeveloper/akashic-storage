@@ -22,7 +22,8 @@ case class Server(config: ServerConfig) {
   val astral = Astral(config.mountpoint.resolve("astral"))
 
   val adminRoute =
-    MakeUser.route
+    MakeUser.route ~
+    GetUser.route
 
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
