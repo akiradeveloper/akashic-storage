@@ -5,6 +5,7 @@ import java.net.{URLEncoder, URLDecoder}
 import akashic.storage.patch.Version
 import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 
 package object service {
   // first appearance wins
@@ -26,4 +27,6 @@ package object service {
   def decodeKeyName(keyName: String): String = URLDecoder.decode(keyName, "UTF-8")
   val extractBucket = path(Segment ~ (Slash | PathEnd))
   val extractObject = path(Segment / Rest)
+
+  type API = Task[Route]
 }

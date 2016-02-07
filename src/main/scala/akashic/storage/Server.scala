@@ -31,6 +31,7 @@ case class Server(config: ServerConfig) {
       GetObject.route ~
       GetService.route ~
       PutBucket.route ~
+      UploadPart.route ~
       PutObject.route ~
       DeleteBucket.route ~
       DeleteObject.route ~
