@@ -1,42 +1,36 @@
 package akashic.storage.service
 
 import java.net.URLEncoder
+
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
 import java.nio.file.Path
 
 import akashic.storage.{files, server}
 import akashic.storage.patch.{Commit, Patch, Version, Data}
-import akashic.storage.service.Error.Reportable
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
-import com.twitter.concurrent.AsyncStream
-import com.twitter.finagle.http.Request
-import com.twitter.io.Buf
-import com.twitter.util.Future
 import org.apache.commons.io.FileUtils
-
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import scala.xml.{XML, NodeSeq}
-import io.finch._
+import scala.concurrent.ExecutionContext.Implicits.global
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object CompleteMultipartUpload {
-  val matcher = post(keyMatcher / paramExists("uploadId") ?
-    param("uploadId") ?
-    asyncBody ?
+  val matcher =
+    post &
+    extractObject &
+    parameter("uploadId") &
+    entity(as[String]) &
     extractRequest
-  )// .as[t]
-  //val endpoint = matcher { a:t => a.run }
-  val endpoint = matcher {
-    (bucketName: String, keyName: String,
-     uploadId: String,
-     data: AsyncStream[Buf],
-     req: Request) => for {
-      s <- mkString(data)
-    } yield t(bucketName, keyName, uploadId, s, req).run
-  }
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                data: String,
-               req: Request) extends Task[Output[AsyncStream[Buf]]] {
+               req: HttpRequest) extends API {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -79,24 +73,22 @@ object CompleteMultipartUpload {
       }
 
       // http://stackoverflow.com/questions/12186993/what-is-the-algorithm-to-compute-the-amazon-s3-etag-for-a-file-larger-than-5gb
-//      def calcETag(md5s: Seq[String]): String = {
-//        val bui = new StringBuilder
-//        for (md5 <- md5s) {
-//          bui.append(md5)
-//        }
-//        val hex = bui.toString
-//        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
-//        val hasher = Hashing.md5.newHasher
-//        hasher.putBytes(raw)
-//        val digest = hasher.hash.toString
-//        digest + "-" + md5s.size
-//      }
-//      val newETag = calcETag(parts.map(_.eTag))
+      def calcETag(md5s: Seq[String]): String = {
+        val bui = new StringBuilder
+        for (md5 <- md5s) {
+          bui.append(md5)
+        }
+        val hex = bui.toString
+        val raw = BaseEncoding.base16.decode(hex.toUpperCase)
+        val hasher = Hashing.md5.newHasher
+        hasher.putBytes(raw)
+        val digest = hasher.hash.toString
+        digest + "-" + md5s.size
+      }
+      val newETag = calcETag(parts.map(_.eTag))
 
       val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
-        var newETag = ""
-
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = patch.asVersion
 
@@ -106,8 +98,6 @@ object CompleteMultipartUpload {
               f.write(upload.part(part.partNumber).unwrap.read)
             }
           }
-
-          newETag = files.computeMD5(versionPatch.data.filePath)
 
           val aclBytes: Array[Byte] = upload.acl.read
           Commit.replaceData(versionPatch.acl) { patch =>
@@ -128,20 +118,21 @@ object CompleteMultipartUpload {
           <Key>{keyName}</Key>
           <ETag>{quoteString(newETag)}</ETag>
         </CompleteMultipartUploadResult>
-      } handle {
+      } recoverWith {
         case e: Throwable =>
-          Error.mkXML(
+          val xml = Error.mkXML(
             Error.withMessage(Error.InternalError("merge parts failed")),
             resource,
             requestId)
+          Future(xml)
       }
 
-      val as: AsyncStream[Buf] = AsyncStream.fromFuture(mergeResult).map(mkBuf(_))
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(X_AMZ_VERSION_ID, "null")
+        .build
 
-      // TODO versionId (but what if on failure?)
-      Ok(as)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(X_AMZ_VERSION_ID -> "null")
+      complete(StatusCodes.OK, headers, mergeResult)
     }
   }
 }

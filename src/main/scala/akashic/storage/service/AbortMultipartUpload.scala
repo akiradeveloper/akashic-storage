@@ -1,17 +1,20 @@
 package akashic.storage.service
 
 import akashic.storage._
-import com.twitter.finagle.http.Request
-import io.finch._
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
 
 object AbortMultipartUpload {
-  val matcher = delete(keyMatcher / paramExists("uploadId") ?
-    param("uploadId") ?
-    extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    delete &
+    extractObject &
+    parameter("uploadId") &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String, uploadId: String,
-               req: Request) extends Task[Output[Unit]] {
+               req: HttpRequest) extends API {
     override def name: String = "Abort Multipart Upload"
     override def resource = Resource.forObject(bucketName, keyName)
 
@@ -20,8 +23,10 @@ object AbortMultipartUpload {
       val key = findKey(bucket, keyName)
       val upload = findUpload(key, uploadId)
       server.astral.free(upload.root)
-      NoContent[Unit]
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+      complete(StatusCodes.NoContent, headers, HttpEntity.Empty)
     }
   }
 }

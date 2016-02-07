@@ -1,19 +1,20 @@
 package akashic.storage.service
 
-import akashic.storage.patch.Commit
-import com.twitter.finagle.http.Request
-import io.finch._
-import akashic.storage.{HeaderList, server}
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akashic.storage.server
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 
 object DeleteObject {
-  val matcher = delete(keyMatcher ?
-    paramOption("versionId").as[Int] ?
+  val matcher =
+    delete &
+    extractObject &
+    parameters("versionId".as[Int]?) &
     extractRequest
-  ).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                versionId: Option[Int],
-               req: Request) extends Task[Output[Unit]] {
+               req: HttpRequest) extends API {
     def name = "DELETE Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -29,7 +30,7 @@ object DeleteObject {
       // Returns the version ID of the delete marker created as a result of the DELETE operation.
       // If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
       if (versionId.isDefined) {
-        NoContent[Unit]
+        complete(StatusCodes.NoContent)
       } else {
         // simple DELETE
         
@@ -64,10 +65,14 @@ object DeleteObject {
         //   )
         // }
 
-        NoContent[Unit]
-          .withHeader(X_AMZ_REQUEST_ID -> requestId)
-          .withHeader(X_AMZ_DELETE_MARKER -> "false")
-          .withHeader(X_AMZ_VERSION_ID -> "null")
+
+        val headers = ResponseHeaderList.builder
+          .withHeader(X_AMZ_REQUEST_ID, requestId)
+          .withHeader(X_AMZ_DELETE_MARKER, "false")
+          .withHeader(X_AMZ_VERSION_ID, "null")
+          .build
+
+        complete(StatusCodes.NoContent, headers, HttpEntity.Empty)
       }
     }
   }

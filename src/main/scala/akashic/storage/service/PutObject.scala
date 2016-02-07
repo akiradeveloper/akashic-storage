@@ -2,35 +2,28 @@ package akashic.storage.service
 
 import akashic.storage.patch.Commit
 import akashic.storage.{HeaderList, files, server}
-import com.twitter.concurrent.AsyncStream
-import com.twitter.finagle.http.Request
+import akka.http.scaladsl.model.headers.ETag
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders._
-import com.twitter.io.Buf
-import io.finch._
+import akka.http.scaladsl.server.Directives._
+import scala.collection.immutable
 
 object PutObject {
-  val matcher = put(
-    keyMatcher ?
-    asyncBody ?
-    headerOption("Content-Type") ?
-    headerOption("Content-Disposition") ?
-    extractRequest)
-  val endpoint = matcher {
-    (bucketName: String, keyName: String,
-     objectData: AsyncStream[Buf],
-     contentType: Option[String],
-     contentDisposition: Option[String],
-     req: Request) =>
-     for {
-      od <- mkByteArray(objectData)
-     } yield t(bucketName, keyName, od, contentType, contentDisposition, req).run
-  }
+  val matcher = put &
+    extractObject &
+    entity(as[Array[Byte]]) &
+    optionalHeaderValueByName("Content-Type") &
+    optionalHeaderValueByName("Content-Disposition") &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                contentType: Option[String],
                contentDisposition: Option[String],
-               req: Request) extends Task[Output[Unit]] {
+               req: HttpRequest) extends API {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -63,15 +56,18 @@ object PutObject {
               .appendOpt("Content-Type", contentType)
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
-            xattrs = HeaderList.builder.build
+            xattrs = HeaderList.builder
+              .build
           ).toBytes)
       }
 
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(X_AMZ_VERSION_ID -> "null")
-        .withHeader(ETAG -> quoteString(computedETag))
-        // TODO Origin
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(X_AMZ_VERSION_ID, "null")
+        .withHeader(ETag(computedETag))
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

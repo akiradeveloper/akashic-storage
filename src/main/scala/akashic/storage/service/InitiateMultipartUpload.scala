@@ -2,21 +2,25 @@ package akashic.storage.service
 
 import akashic.storage.{HeaderList, server}
 import akashic.storage.patch.Commit
-import com.twitter.finagle.http.Request
-import io.finch._
-
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import scala.xml.NodeSeq
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object InitiateMultipartUpload {
-  val matcher = post(keyMatcher / paramExists("uploads") ?
-    headerOption("Content-Type") ?
-    headerOption("Content-Disposition") ?
-    extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run.map(mkStream) }
+  val matcher =
+    post &
+    extractObject &
+    parameter("uploads").tflatMap(a => pass) & // FIXME not sure
+    optionalHeaderValueByName("Content-Type") &
+    optionalHeaderValueByName("Content-Disposition") &
+    extractRequest
+  val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                contentType: Option[String],
                contentDisposition: Option[String],
-               req: Request) extends Task[Output[NodeSeq]] {
+               req: HttpRequest) extends API {
     def name = "Initiate Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -57,8 +61,12 @@ object InitiateMultipartUpload {
           <Key>{keyName}</Key>
           <UploadId>{uploadId}</UploadId>
         </InitiateMultipartUploadResult>
-      Ok(xml)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

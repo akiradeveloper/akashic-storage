@@ -1,22 +1,30 @@
 package akashic.storage.service
 
 import akashic.storage.server
-import akashic.storage.service.Error.Reportable
-import com.twitter.finagle.http.Request
-import io.finch._
+import akka.http.scaladsl.model.{HttpRequest, HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
 
 object HeadBucket {
-  val matcher = head(string ? extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    head &
+    extractBucket &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String,
-               req: Request) extends Task[Output[Unit]] {
+               req: HttpRequest) extends API {
     def name = "HEAD Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
       // TODO check acl
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

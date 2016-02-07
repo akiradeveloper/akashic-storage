@@ -1,20 +1,15 @@
 package akashic.storage
 
-import java.nio.file.{Path, Files}
+import java.nio.file.Files
 
 import akashic.storage.admin._
 import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
-import com.twitter.finagle.Http.param.{MaxResponseSize, MaxRequestSize}
-import com.twitter.util.Future
-import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.finagle.{Http, NullServer, ListeningServer, SimpleFilter, Service}
-import com.twitter.conversions.storage._
-import com.twitter.finagle.transport.Transport
-import com.twitter.util.Await
-import io.finch._
-
-import scala.xml.NodeSeq
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
+import akka.http.scaladsl.server.Directives._
 
 case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("tree"))
@@ -26,92 +21,49 @@ case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("astral"))
   val astral = Astral(config.mountpoint.resolve("astral"))
 
-  val adminService =
-    post("admin" / "user") {
-      val result = MakeUser.run(users)
-      Ok(mkStream(result.xml))
-    } :+:
-    get("admin" / "user" / string) { id: String =>
-      val result = GetUser.run(users, id)
-      Ok(mkStream(result.xml))
-    } :+:
-    delete("admin" / "user" / string) { id: String =>
-      Output.payload("", Status.NotImplemented)
-    } :+:
-    put("admin" / "user" / string ? body) { (id: String, body: String) =>
-      UpdateUser.run(users, id, body)
-      Ok()
-    }
+  val adminRoute =
+    MakeUser.route ~
+    GetUser.route ~
+    UpdateUser.route
 
-  val api =
-    adminService                     :+:
-    HeadBucket.endpoint              :+: // HEAD   /bucketName
-    HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
-    GetService.endpoint              :+: // GET    /
-    GetBucket.endpoint               :+: // GET    /bucketName
-    ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
-    GetObject.endpoint               :+: // GET    /bucketName/keyName
-    PutBucket.endpoint               :+: // PUT    /bucketName
-    UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
-    PutObject.endpoint               :+: // PUT    /bucketName/keyName
-    InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
-    CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
-    AbortMultipartUpload.endpoint    :+: // DELETE /bucketName/keyName?uploadId=***
-    DeleteObject.endpoint            :+: // DELETE /bucketName/keyName
-    DeleteBucket.endpoint
+  // I couldn't place this in service package
+  // My guess is evaluation matters for the null pointer issue
+  val serviceRoute =
+    GetBucket.route ~               // GET    /bucketName
+    ListParts.route ~               // GET    /bucketName/keyname?uploadId=***
+    GetObject.route ~               // GET    /bucketName/keyName
+    GetService.route ~              // GET    /
+    HeadBucket.route ~              // HEAD   /bucketName
+    HeadObject.route ~              // HEAD   /bucketName/keyName
+    PutBucket.route ~               // PUT    /bucketName
+    UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObject.route ~               // PUT    /bucketName/keyName
+    DeleteBucket.route ~            // DELETE /bucketName
+    AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
+    DeleteObject.route ~            // DELETE /bucketName/keyName
+    InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
+    CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
 
-  val endpoint = api.handle {
-    case service.Error.Exception(context, e) =>
-      val withMessage = service.Error.withMessage(e)
-      val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
-      val cause = io.finch.Error(xml.toString)
-      Output.failure(cause, Status.fromCode(withMessage.httpCode))
-    case admin.Error.Exception(e) =>
-      val (code, message) = admin.Error.interpret(e)
-      val cause = io.finch.Error(message)
-      Output.failure(cause, Status.fromCode(code))
-  }
+  val route =
+    adminRoute ~
+    serviceRoute
 
   def address = s"${config.ip}:${config.port}"
 
-  var listeningServer: ListeningServer = NullServer
-  def start {
-    implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-    def printHeaders(req: Request): Unit = {
-      def truncate(s: String): String = {
-        if (s.length < 30) {
-          s
-        } else {
-          s.take(30) + " (truncated)"
-        }
-      }
-      val str = req.headerMap.iterator
-        .map { case (k, v) => (k, truncate(v)) }
-        .map { case (k, v) => k + ":" + v }
-        .mkString("\n")
-      println(str)
-    }
-    val logFilter = new SimpleFilter[Request, Response] {
-      def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
-        println("------------------- START ----------------------")
-        println(req)
-        printHeaders(req)
-        val res = service(req)
-        res.onSuccess(println(_))
-        res.onFailure(println(_))
-        res
-      }
-    }
-    val service = logFilter andThen this.endpoint.toService
-    listeningServer = Http.server
-      // .configured(Transport.Verbose(true))
-      .configured(MaxRequestSize(Int.MaxValue.bytes))
-      .withStreaming(true)
-      .serve(s"${address}", service)
+  implicit var system: ActorSystem = _
+  implicit var mat: ActorMaterializer = _
+
+  def start = {
+    system = ActorSystem("akashic-storage")
+    mat = ActorMaterializer()
+    Http().bindAndHandle(
+      handler = Route.handlerFlow(route),
+      interface = config.ip,
+      port = config.port)
   }
 
-  def stop {
-    Await.ready(listeningServer.close())
-    listeningServer = NullServer
+  def stop: Unit = {
+    system.shutdown
+    system.awaitTermination
   }
 }

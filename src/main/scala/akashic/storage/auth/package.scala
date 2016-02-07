@@ -1,7 +1,7 @@
 package akashic.storage
 
-import com.twitter.finagle.http.Request
 import akashic.storage.server
+import akka.http.scaladsl.model.HttpRequest
 
 package object auth {
   def doGetSecretKey(accessKey: String): String = {
@@ -9,7 +9,7 @@ package object auth {
     server.users.getUser(id).get.secretKey
   }
   val getSecretKey: String => String = (accessKey: String) => doGetSecretKey(accessKey)
-  def authorize(resource: String, req: Request): Option[String] =
+  def authorize(resource: String, req: HttpRequest): Option[String] =
     Seq(V2.authorize(resource, req), V2Presigned.authorize(resource, req))
       .find(_.isDefined)
       .flatten

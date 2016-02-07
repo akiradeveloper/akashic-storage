@@ -2,24 +2,26 @@ package akashic.storage.service
 
 import akashic.storage.patch.Part
 import akashic.storage.{files, server}
-import akashic.storage.service.Error.Reportable
-import com.twitter.finagle.http.Request
-import io.finch._
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
 
 import scala.xml.NodeSeq
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object ListParts {
-  val matcher = get(keyMatcher / paramExists("uploadId") ?
-    param("uploadId") ?
-    paramOption("part-number-marker").as[Int] ?
-    paramOption("max-parts").as[Int] ?
-    extractRequest).as[t]
-  val endpoint = matcher { a: t => a.run.map(mkStream) }
+  val matcher =
+    get &
+    extractObject &
+    parameters("uploadId", "part-number-marker".as[Int]?, "max-parts".as[Int]?) &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumberMarker: Option[Int],
                maxParts: Option[Int],
-               req: Request) extends Task[Output[NodeSeq]] {
+               req: HttpRequest) extends API {
     def name = "List Parts"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -88,8 +90,12 @@ object ListParts {
           { for (part <- emitList) yield xmlPart(part) }
         </ListPartsResult>
 
-      Ok(xml)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

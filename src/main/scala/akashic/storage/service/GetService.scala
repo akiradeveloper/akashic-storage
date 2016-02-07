@@ -2,16 +2,18 @@ package akashic.storage.service
 
 import akashic.storage.service.Error.Reportable
 import akashic.storage.{server, files, patch}
-import com.twitter.finagle.http.Request
-import io.finch._
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 import scala.xml.NodeSeq
 
 object GetService {
-  val matcher = get(/ ? extractRequest).as[t]
-  def endpoint = matcher { a: t => a.run.map(mkStream) }
+  val matcher = get & extractRequest
+  val route = matcher.as(t)(_.run)
 
-  case class t(req: Request) extends Task[Output[NodeSeq]] {
+  case class t(req: HttpRequest) extends API {
     def name = "GET Service"
     def resource = Resource.forRoot
 
@@ -38,8 +40,11 @@ object GetService {
           </Buckets>
         </ListAllMyBucketsResult>
 
-      Ok(xml)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

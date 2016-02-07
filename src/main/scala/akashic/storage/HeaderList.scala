@@ -1,6 +1,6 @@
 package akashic.storage
 
-import com.twitter.finagle.http.Request
+import akka.http.scaladsl.model.{ContentTypes, ContentType, HttpRequest}
 
 import scala.collection.mutable
 
@@ -12,17 +12,20 @@ object HeaderList {
   def builder: Builder = Builder()
   case class Builder() {
     private val l = mutable.ListBuffer[(String, String)]()
-    def append(k: String, v: String): this.type = { 
+    def append(k: String, v: String): this.type = {
       l += k -> v
       this
     }
-    def appendOpt(k: String, v: Option[String]): this.type = {
-      if (v.isDefined) { l += k -> v.get }
+    def appendOpt(k: String, ov: Option[String]): this.type = {
+      ov match {
+        case Some(v) => l += k -> v
+        case None =>
+      }
       this
     }
     def build = t(l)
   }
-  def fromRequest(req: Request): t = {
-    t(req.headerMap.iterator.toSeq)
+  def fromRequest(req: HttpRequest): t = {
+    t(req.headers.map(a => (a.name, a.value)))
   }
 }

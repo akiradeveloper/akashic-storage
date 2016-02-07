@@ -1,29 +1,28 @@
 package akashic.storage.service
 
 import akashic.storage.patch.Version
-import com.twitter.finagle.http.Request
-import io.finch._
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.server.Directives._
 import akashic.storage.{files, server}
+import akka.http.scaladsl.server.Route
 import scala.xml.NodeSeq
 import scala.util.Try
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object GetBucket {
-  val matcher = get(string ?
-    paramOption("delimiter") ?
-    paramOption("encoding-type") ?
-    paramOption("marker") ?
-    paramOption("max-keys") ?
-    paramOption("prefix") ?
+  val matcher =
+    get &
+    extractBucket &
+    parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys"?, "prefix"?) &
     extractRequest
-  ).as[t]
-  val endpoint = matcher { a: t => a.run.map(mkStream) }
+  val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],
                marker: Option[String],
                maxKeys: Option[String],
                prefix: Option[String],
-               req: Request) extends Task[Output[NodeSeq]] {
+               req: HttpRequest) extends API {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
@@ -156,8 +155,12 @@ object GetBucket {
           <IsTruncated>{truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>
-      Ok(xml)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

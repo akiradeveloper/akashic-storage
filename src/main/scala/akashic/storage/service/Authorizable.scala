@@ -1,12 +1,12 @@
 package akashic.storage.service
 
-import com.twitter.finagle.http.Request
 import akashic.storage.auth
 import akashic.storage.server
+import akka.http.scaladsl.model.HttpRequest
 
 trait Authorizable extends Error.Reportable {
   def resource: String
-  def req: Request
+  def req: HttpRequest
   var callerId: String = ""
   def authorize = {
     auth.authorize(resource, req) match {

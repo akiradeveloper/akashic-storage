@@ -2,34 +2,27 @@ package akashic.storage.service
 
 import akashic.storage.{files, server}
 import akashic.storage.patch.Commit
-import akashic.storage.service.Error.Reportable
-import com.twitter.concurrent.AsyncStream
-import com.twitter.finagle.http.Request
-import com.twitter.io.Buf
-import io.finch._
+import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
+import akka.http.scaladsl.model.headers.ETag
+import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders._
+import akka.http.scaladsl.server.Directives._
 
 object UploadPart {
-  val matcher = put(keyMatcher / paramExists("uploadId") / paramExists("partNumber") ?
-    param("uploadId") ?
-    param("partNumber").as[Int] ?
-    asyncBody ?
-    extractRequest)
-  val endpoint = matcher {
-    (bucketName: String, keyName: String,
-     uploadId: String,
-     partNumber: Int,
-     partData: AsyncStream[Buf],
-     req: Request) => for {
-      pd <- mkByteArray(partData)
-    } yield t(bucketName, keyName, uploadId, partNumber, pd, req).run
-  }
+  val matcher =
+    put &
+    extractObject &
+    parameters("uploadId", "partNumber".as[Int]) &
+    entity(as[Array[Byte]]) &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,
                partData: Array[Byte],
-               req: Request) extends Task[Output[Unit]] {
+               req: HttpRequest) extends API {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
@@ -44,9 +37,12 @@ object UploadPart {
         dataPatch.write(partData)
       }
 
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(ETAG -> quoteString(computedMD5))
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(ETag(computedMD5))
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }
