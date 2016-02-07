@@ -35,7 +35,8 @@ case class Server(config: ServerConfig) {
       PutObject.route ~
       DeleteBucket.route ~
       DeleteObject.route ~
-      InitiateMultipartUpload.route
+      InitiateMultipartUpload.route ~
+      CompleteMultipartUpload.route
 
   val route =
     adminRoute ~
