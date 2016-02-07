@@ -15,7 +15,7 @@ object PutBucket {
     extractBucket &
     extractRequest
   val route = matcher.as(t)(_.run)
-  case class t(bucketName: String, req: HttpRequest) extends Task[Route] {
+  case class t(bucketName: String, req: HttpRequest) extends API {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

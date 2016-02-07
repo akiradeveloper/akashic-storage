@@ -34,7 +34,7 @@ object GetObject {
     responseContentDisposition: Option[String],
     responseContentEncoding: Option[String],
     req: HttpRequest
-  ) extends Task[Route] {
+  ) extends API {
     def name = "GET (or HEAD) Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

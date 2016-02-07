@@ -14,7 +14,7 @@ object DeleteObject {
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                versionId: Option[Int],
-               req: HttpRequest) extends Task[Route] {
+               req: HttpRequest) extends API {
     def name = "DELETE Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

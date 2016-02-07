@@ -22,7 +22,7 @@ object GetBucket {
                marker: Option[String],
                maxKeys: Option[String],
                prefix: Option[String],
-               req: HttpRequest) extends Task[Route] {
+               req: HttpRequest) extends API {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

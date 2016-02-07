@@ -20,7 +20,7 @@ object InitiateMultipartUpload {
   case class t(bucketName: String, keyName: String,
                contentType: Option[String],
                contentDisposition: Option[String],
-               req: HttpRequest) extends Task[Route] {
+               req: HttpRequest) extends API {
     def name = "Initiate Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

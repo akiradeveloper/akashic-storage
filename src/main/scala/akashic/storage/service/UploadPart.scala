@@ -22,7 +22,7 @@ object UploadPart {
                uploadId: String,
                partNumber: Int,
                partData: Array[Byte],
-               req: HttpRequest) extends Task[Route] {
+               req: HttpRequest) extends API {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

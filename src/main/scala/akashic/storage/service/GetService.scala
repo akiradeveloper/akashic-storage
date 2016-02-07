@@ -13,7 +13,7 @@ object GetService {
   val matcher = get & extractRequest
   val route = matcher.as(t)(_.run)
 
-  case class t(req: HttpRequest) extends Task[Route] {
+  case class t(req: HttpRequest) extends API {
     def name = "GET Service"
     def resource = Resource.forRoot
 
