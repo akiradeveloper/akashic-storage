@@ -24,9 +24,6 @@ case class Server(config: ServerConfig) {
   val adminRoute =
     MakeUser.route
 
-  // HEAD   /bucketName/keyName
-
-
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
   val serviceRoute =
@@ -35,6 +32,7 @@ case class Server(config: ServerConfig) {
     GetObject.route ~               // GET    /bucketName/keyName
     GetService.route ~              // GET    /
     HeadBucket.route ~              // HEAD   /bucketName
+    HeadObject.route ~              // HEAD   /bucketName/keyName
     PutBucket.route ~               // PUT    /bucketName
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     PutObject.route ~               // PUT    /bucketName/keyName

@@ -10,9 +10,17 @@ import com.google.common.net.HttpHeaders._
 
 import akka.http.scaladsl.server.Directives._
 
-object GetObject {
+object HeadObject {
   val matcher =
-    get &
+    head &
+    GetObject.matcherCommon
+
+  val route =
+    matcher.as(GetObject.t)(_.run)
+}
+
+object GetObject {
+  val matcherCommon =
     extractObject &
     parameters(
       "versionId"?,
@@ -23,6 +31,11 @@ object GetObject {
       "response-content-disposition"?,
       "response-content-encoding"?) &
     extractRequest
+
+  val matcher =
+    get &
+    matcherCommon
+
   val route = matcher.as(t)(_.run)
   case class t(
     bucketName: String, keyName: String,
