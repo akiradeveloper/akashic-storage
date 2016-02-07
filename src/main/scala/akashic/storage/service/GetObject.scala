@@ -14,8 +14,9 @@ object HeadObject {
     GetObject.matcherCommon &
     provide("HEAD Object")
 
-  // message bodies on responses to HEAD requests
-  // TODO comment ported from akka-s3 but no evidence found
+  // (from description on transparant-head-requests)
+  // Note that, even when this setting is off the server will never send
+  // out message bodies on responses to HEAD requests.
   val route =
     matcher.as(GetObject.t)(_.run)
 }
