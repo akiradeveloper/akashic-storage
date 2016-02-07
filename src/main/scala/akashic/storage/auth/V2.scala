@@ -8,15 +8,8 @@ import scala.util.Try
 
 object V2 {
   def authorize(resource: String, req: HttpRequest): Option[String] = {
-    doAuthorize(
-      req.method.name,
-      resource,
-      ParamList.fromRequest(req),
-      HeaderList.fromRequest(req),
-      getSecretKey
-    )
-  }
-  def doAuthorize(method: String, resource: String, paramList: ParamList.t, headerList: HeaderList.t, getSecretKeyFn: String => String): Option[String] = {
+    val paramList = ParamList.fromRequest(req)
+    val headerList = HeaderList.fromRequest(req)
     Try {
       val authorization = headerList.find("Authorization").getOrElse("BANG!")
       val xs = authorization.split(" ")
@@ -34,10 +27,10 @@ object V2 {
           case None => headerList.find("Date").get
         }
       }
-      val alg = V2Common(method, resource, paramList, headerList)
+      val alg = V2Common(req, resource, paramList, headerList)
       val stringToSign = alg.stringToSign(date)
-      val computed = alg.computeSignature(stringToSign, getSecretKeyFn(accessKey))
-      require(computed == signature)
+      val computed = stringToSign.map(alg.computeSignature(_, getSecretKey(accessKey)))
+      require(computed.exists(_ == signature))
       accessKey
     }.toOption
   }

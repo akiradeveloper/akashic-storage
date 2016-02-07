@@ -26,11 +26,6 @@ object HeaderList {
     def build = t(l)
   }
   def fromRequest(req: HttpRequest): t = {
-    val base = req.headers.map(a => (a.name, a.value))
-    val l = req.entity.contentType match {
-      case ContentTypes.NoContentType => base
-      case a => ("Content-Type", a.mediaType.value) +: base
-    }
-    t(l)
+    t(req.headers.map(a => (a.name, a.value)))
   }
 }

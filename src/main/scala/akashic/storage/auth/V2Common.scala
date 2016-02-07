@@ -1,10 +1,13 @@
 package akashic.storage.auth
 
 import akashic.storage.HeaderList
+import akka.http.scaladsl.model.{ContentTypes, HttpRequest}
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.HmacUtils
 
-case class V2Common(method: String, resource: String, paramList: ParamList.t, headerList: HeaderList.t) {
+case class V2Common(req: HttpRequest, resource: String, paramList: ParamList.t, headerList: HeaderList.t) {
+  val method = req.method.name
+
   // http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
   val subresources = Set("cors", "acl", "lifecycle", "location", "logging", "notification", "partNumber", "policy", "requestPayment", "torrent", "uploadId", "uploads", "versionId", "versioning", "versions", "website")
   // response-* to override the response header
@@ -14,11 +17,7 @@ case class V2Common(method: String, resource: String, paramList: ParamList.t, he
   def computeSignature(stringToSign: String, secretKey: String): String = {
     Base64.encodeBase64String(HmacUtils.hmacSha1(secretKey.getBytes, stringToSign.getBytes("UTF-8")))
   }
-  def stringToSign(dateOrExpire: String): String = {
-    val contentType = headerList.find("Content-Type") match {
-      case Some(a) => a.toLowerCase
-      case None => ""
-    }
+  def stringToSign(dateOrExpire: String): Stream[String] = {
     val cannonicalAmzHeaders: String = {
       headerList.unwrap
         .filter(_._1.toLowerCase.startsWith("x-amz-"))
@@ -47,14 +46,28 @@ case class V2Common(method: String, resource: String, paramList: ParamList.t, he
         }
       resource + params
     }
-    val result = method + "\n" +
-      headerList.find("Content-Md5").getOrElse("") + "\n" +
-      headerList.find("Content-Type").getOrElse("").toLowerCase + "\n" +
-      dateOrExpire + "\n" +
-      cannonicalAmzHeaders +
-      cannonicalResource
-    println("StringToSign:")
-    println(result)
-    result
+
+    // Workaround:
+    // akka-http appends charset to the Content-Type
+    // when the request from client lacks it.
+    // e.g. text/plain -> text/plain; charset=UTF-8
+    // This corrupts S3 authentication scheme so as the workaround
+    // we check with both w/ or wo charset
+    val contentTypes = req.entity.contentType match {
+      case ContentTypes.NoContentType => Stream("", "")
+      case a => Stream(a.value, a.mediaType.value)
+    }
+    contentTypes map { contentType: String =>
+      val result =
+        method + "\n" +
+        headerList.find("Content-Md5").getOrElse("") + "\n" +
+        contentType.toLowerCase + "\n" +
+        dateOrExpire + "\n" +
+        cannonicalAmzHeaders +
+        cannonicalResource
+      println("StringToSign:")
+      println(result)
+      result
+    }
   }
 }
