@@ -11,7 +11,8 @@ import akka.http.scaladsl.server.Directives._
 object HeadObject {
   val matcher =
     head &
-    GetObject.matcherCommon
+    GetObject.matcherCommon &
+    provide("HEAD Object")
 
   // message bodies on responses to HEAD requests
   // TODO comment ported from akka-s3 but no evidence found
@@ -34,7 +35,8 @@ object GetObject {
 
   val matcher =
     get &
-    matcherCommon
+    matcherCommon &
+    provide("GET Object")
 
   val route = matcher.as(t)(_.run)
   case class t(
@@ -46,9 +48,10 @@ object GetObject {
     responseCacheControl: Option[String],
     responseContentDisposition: Option[String],
     responseContentEncoding: Option[String],
-    req: HttpRequest
+    req: HttpRequest,
+    _name: String
   ) extends API {
-    def name = "GET (or HEAD) Object"
+    def name = _name
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
