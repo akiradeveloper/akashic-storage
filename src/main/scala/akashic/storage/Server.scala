@@ -26,7 +26,7 @@ case class Server(config: ServerConfig) {
 
   // HEAD   /bucketName
   // HEAD   /bucketName/keyName
-  // DELETE /bucketName/keyName?uploadId=***
+
 
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
@@ -39,6 +39,7 @@ case class Server(config: ServerConfig) {
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     PutObject.route ~               // PUT    /bucketName/keyName
     DeleteBucket.route ~            // DELETE /bucketName
+    AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
     DeleteObject.route ~            // DELETE /bucketName/keyName
     InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
