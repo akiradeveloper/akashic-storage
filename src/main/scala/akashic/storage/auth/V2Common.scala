@@ -48,14 +48,18 @@ case class V2Common(req: HttpRequest, resource: String, paramList: ParamList.t, 
     }
 
     // Workaround:
+    // - mediaType.value
     // akka-http appends charset to the Content-Type
     // when the request from client lacks it.
     // e.g. text/plain -> text/plain; charset=UTF-8
     // This corrupts S3 authentication scheme so as the workaround
     // we check with both w/ or wo charset
+    // - "" (empty string)
+    // even though the client doesn't specify the Content-Type
+    // akka-http sometimes infer the Content-Type as octet-stream
     val contentTypes = req.entity.contentType match {
-      case ContentTypes.NoContentType => Stream("", "")
-      case a => Stream(a.value, a.mediaType.value)
+      case ContentTypes.NoContentType => Stream("", "", "")
+      case a => Stream(a.value, a.mediaType.value, "")
     }
     contentTypes map { contentType: String =>
       val result =
