@@ -2,10 +2,8 @@ package akashic.storage.service
 
 import akashic.storage.{HeaderList, server, files}
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import akka.http.scaladsl.model.headers.ETag
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders._
 
 import akka.http.scaladsl.server.Directives._
@@ -15,6 +13,8 @@ object HeadObject {
     head &
     GetObject.matcherCommon
 
+  // message bodies on responses to HEAD requests
+  // TODO comment ported from akka-s3 but no evidence found
   val route =
     matcher.as(GetObject.t)(_.run)
 }
