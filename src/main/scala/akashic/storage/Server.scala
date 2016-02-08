@@ -8,10 +8,11 @@ import akashic.storage.patch.{Astral, Tree}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes, StatusCode}
-import akka.http.scaladsl.server.{ExceptionHandler, Route}
+import akka.http.scaladsl.server.{Directive0, ExceptionHandler, Route}
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.util.ByteString
 
 case class Server(config: ServerConfig) {
   Files.createDirectory(config.mountpoint.resolve("tree"))
@@ -69,8 +70,15 @@ case class Server(config: ServerConfig) {
     handleExceptions(adminErrHandler) { adminRoute } ~
     handleExceptions(serviceErrHandler) { serviceRoute }
 
+  val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
+  val unmatchRoute =
+    // We need to extract entity to consume the payload
+    // otherwise client never knows the end of connection.
+    ignoreEntity { complete(StatusCodes.BadRequest, HttpEntity.Empty) }
+
   val route =
-    apiRoute
+    apiRoute ~
+    unmatchRoute
 
   def address = s"${config.ip}:${config.port}"
 
