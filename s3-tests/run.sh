@@ -22,7 +22,7 @@ cd $CLONEDIR
 echo wait 10 seconds until server is up
 sleep 10 # tmp
 netstat -tanp
-S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests
+S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests $@
 cd -
 
 echo successfully run and shut down the server
