@@ -35,7 +35,7 @@ object DeleteMultipleObjects {
             case NodeSeq.Empty => None
             case a => Some(a.text.toInt)
           }
-          ObjectToDelete(key, versionId)
+          ObjectToDelete(encodeKeyName(key), versionId)
         }
         Input(false, objects)
       } match {
@@ -45,7 +45,7 @@ object DeleteMultipleObjects {
       val bucket = findBucket(server.tree, bucketName)
 
       sealed trait DeleteResult { def toXML: NodeSeq }
-      case class DeletedResult(key: String,
+      case class DeletedResult(keyName: String,
                                // VersionId for the versioned object in the case of a versioned delete.
                                versionId: Option[Int],
                                // DeleteMarker:
@@ -57,20 +57,20 @@ object DeleteMultipleObjects {
                                deleteMarker: Option[Int]) extends DeleteResult {
         override def toXML: NodeSeq = {
           <Deleted>
-            <Key>{key}</Key>
+            <Key>{decodeKeyName(keyName)}</Key>
             { versionId match { case Some(a) => <VersionId>{a}</VersionId>; case None => NodeSeq.Empty } }
             { deleteMarker match { case Some(a) => <DeleteMarker>true</DeleteMarker>; case None => NodeSeq.Empty } }
             { deleteMarker match { case Some(a) => <DeleteMarkerVersionId>{a}</DeleteMarkerVersionId>; case None => NodeSeq.Empty } }
           </Deleted>
         }
       }
-      case class FailedResult(key: String,
+      case class FailedResult(keyName: String,
                               versionId: Option[Int] ,
                               code: String, // AccessDenied or InternalError
                               message: String) extends DeleteResult {
         override def toXML: NodeSeq = {
           <Error>
-            <Key>{key}</Key>
+            <Key>{decodeKeyName(keyName)}</Key>
             { versionId match { case Some(a) => <VersionId>{a}</VersionId>; case None => NodeSeq.Empty } }
             <Code>{code}</Code>
             <Message>{message}</Message>

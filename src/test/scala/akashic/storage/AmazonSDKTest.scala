@@ -6,6 +6,7 @@ import java.nio.file.{Paths, Files, Path}
 import akashic.storage.admin.TestUsers
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion
 import com.amazonaws.services.s3.model._
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
@@ -167,6 +168,28 @@ class AmazonSDKTest extends ServerTestBase {
     assert(client.listObjects("myb").getObjectSummaries.size === 0)
     client.putObject("myb", "a", f)
     assert(client.listObjects("myb").getObjectSummaries.size === 1)
+  }
+
+  test("multiple delete") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "myobj1", f)
+    client.putObject("myb", "a/b", f)
+    client.putObject("myb", "c/d/e", f)
+    assert(client.listObjects("myb").getObjectSummaries.size === 3)
+
+    val req = new DeleteObjectsRequest("myb")
+    req.setKeys(Seq(new KeyVersion("myobj1"), new KeyVersion("c/d/e")))
+    val result = client.deleteObjects(req)
+    assert(result.getDeletedObjects.get(1).getKey == "c/d/e")
+    assert(result.getDeletedObjects.size === 2)
+    assert(result.getDeletedObjects.forall(!_.isDeleteMarker))
+    // hmm... the SDK should use Option. returning null is bewildering
+    assert(result.getDeletedObjects.forall(_.getDeleteMarkerVersionId === null))
+
+    assert(client.listObjects("myb").getObjectSummaries.size === 1)
+    assert(client.listObjects("myb").getObjectSummaries.get(0).getKey === "a/b")
   }
 
   test("multipart upload (lowlevel)") { p =>
