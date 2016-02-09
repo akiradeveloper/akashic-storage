@@ -84,10 +84,10 @@ object DeleteMultipleObjects {
         try {
           val key = bucket.findKey(keyName) match {
             case Some(a) => a
-            case None => throw DeleteError(true)
+            case None => throw DeleteError(accessDenied = true)
           }
-          // TODO key.delete
-          DeletedResult(keyName, versionId, None)
+          val deleteResult = DeleteObject.deleteObject(bucket, key, versionId)
+          DeletedResult(keyName, versionId, deleteResult)
         } catch {
           case DeleteError(true) => FailedResult(keyName, versionId, "AccessDenied", "Access Denied")
           case _: Throwable => FailedResult(keyName, versionId, "InternalError", "Internal Error")
