@@ -37,7 +37,7 @@ object GetBucket {
         val key = version.key
         override def toXML = {
           <Contents>
-            <Key>{key.name}</Key>
+            <Key>{decodeKeyName(key.name)}</Key>
             <LastModified>{dates.format000Z(files.lastDate(version.root))}</LastModified>
             <ETag>{meta.eTag}</ETag>
             <Size>{version.data.length}</Size>

@@ -58,7 +58,7 @@ object InitiateMultipartUpload {
       val xml =
         <InitiateMultipartUploadResult>
           <Bucket>{bucketName}</Bucket>
-          <Key>{keyName}</Key>
+          <Key>{decodeKeyName(keyName)}</Key>
           <UploadId>{uploadId}</UploadId>
         </InitiateMultipartUploadResult>
 
