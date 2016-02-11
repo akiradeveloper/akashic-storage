@@ -2,34 +2,75 @@ package akashic.storage.admin
 
 import java.nio.file.{Files, Path}
 
-import akashic.storage.strings
+import akashic.storage.patch.{Data, Commit}
+import akashic.storage.{files, strings}
 
-import scala.slick.driver.SQLiteDriver.simple._
-
-case class UserTableDef(tag: Tag) extends Table[User.t](tag, "USER") {
-  def id = column[String]("ID", O.PrimaryKey)
-  def accessKey = column[String]("ACCESSKEY")
-  def secretKey = column[String]("SECRETKEY")
-  def name = column[String]("NAME")
-  def email = column[String]("EMAIL")
-  def displayName = column[String]("DISPLAYNAME")
-  def * = (id, accessKey, secretKey, name, email, displayName) <>((User.t.apply _).tupled, User.t.unapply _)
-}
+import scala.pickling.Defaults._
+import scala.pickling.binary._
 
 case class UserTable(root: Path) {
-  val dbPath = root.resolve("db.sqlite")
+  val dbPath = root.resolve("db")
+  val dbData: Data = Data(dbPath)
+  var updateTime: Long = -1L
+  var db: InMem = InMem(Map(), Map())
+  dbData.write(db.toByteArray)
 
-  val users = TableQuery[UserTableDef]
-
-  private val db = {
-    val url = dbPath.toString
-    val ret = Database.forURL(s"jdbc:sqlite:${url}", driver = "org.sqlite.JDBC")
-    if (!Files.exists(dbPath)) {
-      ret withSession { implicit session =>
-        users.ddl.create
+  object InMem {
+    def apply(ls: Iterable[User.t]): InMem = {
+      val newUserMap = ls.map(a => (a.id, a)).toMap
+      val newIdMap = newUserMap.map {
+        case (id, user) => (user.accessKey, id)
+      }
+      InMem(newUserMap, newIdMap)
+    }
+  }
+  case class InMem(
+    userMap: Map[String, User.t], // id -> User
+    idMap: Map[String, String] // accessKey -> id
+  ){
+    def add(user: User.t): InMem = add(user.id, user)
+    def add(id: String, user: User.t): InMem = {
+      val newUserMap = userMap + (id -> user)
+      InMem(newUserMap.values)
+    }
+    def remove(id: String): InMem = {
+      val newUserMap = userMap - id
+      InMem(newUserMap.values)
+    }
+    def toByteArray = {
+      userMap.values.toSeq.pickle.value
+    }
+    def commit {
+      Commit.replaceData(dbData) { data: Data =>
+        data.write(toByteArray)
       }
     }
-    ret
+  }
+
+  private def reload = {
+    val pTime = files.lastDate(dbPath).getTime
+    updateTime = -1L // WA to always reload
+    if (updateTime < pTime) {
+      val list = BinaryPickle(dbData.read).unpickle[Seq[User.t]]
+      val userMap = list.map(a => (a.id, a)).toMap
+      db = InMem(userMap.values)
+      updateTime = pTime
+    }
+  }
+
+  def getId(accessKey: String): Option[String] = {
+    reload
+    db.idMap.get(accessKey)
+  }
+
+  def getUser(id: String): Option[User.t] = {
+    reload
+    db.userMap.get(id)
+  }
+
+  def addUser(user: User.t): Unit = {
+    reload
+    db.add(user).commit
   }
 
   private def mkRandUser: User.t = {
@@ -43,35 +84,15 @@ case class UserTable(root: Path) {
     )
   }
 
-  def addUser(user: User.t): Unit = {
-    db withSession { implicit session =>
-      users.insert(user)
-    }
-  }
-
   def mkUser: User.t = {
-    db withSession { implicit session =>
-      val newUser = mkRandUser
-      users.insert(newUser)
-      newUser
-    }
-  }
-
-  def getId(accessKey: String): Option[String] = {
-    db.withSession { implicit session =>
-      users.where(_.accessKey === accessKey).list.headOption.map(_.id)
-    }
-  }
-
-  def getUser(id: String): Option[User.t] = {
-    db.withSession { implicit session =>
-      users.where(_.id === id).list.headOption
-    }
+    val newUser = mkRandUser
+    reload
+    db.add(newUser).commit
+    newUser
   }
 
   def updateUser(id: String, user: User.t): Unit = {
-    db withSession { implicit session =>
-      users.where(_.id === id).update(user)
-    }
+    reload
+    db.remove(id).add(user).commit
   }
 }
