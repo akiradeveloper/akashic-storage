@@ -49,7 +49,7 @@ case class UserTable(root: Path) {
 
   private def reload = {
     val pTime = files.lastDate(dbPath).getTime
-    updateTime = -1L // WA to always reload
+    // updateTime = -1L // WA to always reload
     if (updateTime < pTime) {
       val list = BinaryPickle(dbData.read).unpickle[Seq[User.t]]
       val userMap = list.map(a => (a.id, a)).toMap
@@ -70,7 +70,8 @@ case class UserTable(root: Path) {
 
   def addUser(user: User.t): Unit = {
     reload
-    db.add(user).commit
+    db = db.add(user) // this is WA
+    db.commit
   }
 
   private def mkRandUser: User.t = {
