@@ -88,12 +88,14 @@ case class UserTable(root: Path) {
   def mkUser: User.t = {
     val newUser = mkRandUser
     reload
-    db.add(newUser).commit
+    db = db.add(newUser)
+    db.commit
     newUser
   }
 
   def updateUser(id: String, user: User.t): Unit = {
     reload
-    db.remove(id).add(user).commit
+    db = db.remove(id).add(user)
+    db.commit
   }
 }
