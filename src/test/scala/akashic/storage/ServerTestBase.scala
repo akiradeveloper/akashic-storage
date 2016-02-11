@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils
 import org.scalatest._
 import akashic.storage.admin.TestUsers
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.Random
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
@@ -17,7 +19,7 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   override def beforeEach {
     val config = makeConfig
     server = Server(config)
-    server.start
+    Await.ready(server.start, Duration.Inf)
 
     // FIXME (should via HTTP)
     server.users.addUser(TestUsers.hoge)
