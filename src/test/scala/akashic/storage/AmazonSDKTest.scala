@@ -305,4 +305,34 @@ class AmazonSDKTest extends ServerTestBase {
     assert(res.code === 200)
     assert(IOUtils.contentEquals(IOUtils.toInputStream(res.body), new FileInputStream(f)))
   }
+
+  test("presigned put (or upload)") { p =>
+    val cli = p.client
+    cli.createBucket("myb")
+
+    val expires = new java.util.Date()
+    var msec = expires.getTime()
+    msec += 1000 * 60 * 60 // 1 hour.
+    expires.setTime(msec)
+
+    val f = getTestFile("test.txt")
+    val contentType = "text/plain"
+
+    val req = new GeneratePresignedUrlRequest("myb", "a/b")
+    req.setMethod(HttpMethod.PUT)
+    req.setExpiration(expires)
+    req.setContentType(contentType)
+    val url = cli.generatePresignedUrl(req)
+    println(url.toString)
+
+    val res = Http(url.toString)
+      .header("Content-Type", contentType)
+      .postData(Files.readAllBytes(f.toPath))
+      .method("PUT").asString
+
+    assert(res.code === 200)
+
+    val obj = cli.getObject("myb", "a/b")
+    checkFileContent(obj, f)
+  }
 }
