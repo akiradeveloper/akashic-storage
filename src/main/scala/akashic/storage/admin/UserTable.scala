@@ -41,15 +41,25 @@ case class UserTable(root: Path) {
       userMap.values.toSeq.pickle.value
     }
     def commit {
-      Commit.replaceData(dbData) { data: Data =>
-        data.write(toByteArray)
+      val p = files.lastDate(dbPath).getTime
+      var q = p
+      var firstTime = true
+      while (p == q) {
+        if (!firstTime) {
+          Thread.sleep(1000)
+        }
+        firstTime = false
+        Commit.replaceData(dbData) { data: Data =>
+          data.write(toByteArray)
+        }
+        q = files.lastDate(dbPath).getTime
       }
+      assert(files.lastDate(dbPath).getTime > p)
     }
   }
 
   private def reload = {
     val pTime = files.lastDate(dbPath).getTime
-    // updateTime = -1L // WA to always reload
     if (updateTime < pTime) {
       val list = BinaryPickle(dbData.read).unpickle[Seq[User.t]]
       val userMap = list.map(a => (a.id, a)).toMap
@@ -70,8 +80,7 @@ case class UserTable(root: Path) {
 
   def addUser(user: User.t): Unit = {
     reload
-    db = db.add(user) // this is WA
-    db.commit
+    db.add(user).commit
   }
 
   private def mkRandUser: User.t = {
@@ -88,14 +97,12 @@ case class UserTable(root: Path) {
   def mkUser: User.t = {
     val newUser = mkRandUser
     reload
-    db = db.add(newUser)
-    db.commit
+    db.add(newUser).commit
     newUser
   }
 
   def updateUser(id: String, user: User.t): Unit = {
     reload
-    db = db.remove(id).add(user)
-    db.commit
+    db.remove(id).add(user).commit
   }
 }
