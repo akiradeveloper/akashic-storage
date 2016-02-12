@@ -1,10 +1,10 @@
 package akashic.storage
 
-import java.io.{FileInputStream, File}
+import java.io.{StringBufferInputStream, FileInputStream, File}
 import java.nio.file.{Paths, Files, Path}
 
 import akashic.storage.admin.TestUsers
-import com.amazonaws.ClientConfiguration
+import com.amazonaws.{HttpMethod, ClientConfiguration}
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion
 import com.amazonaws.services.s3.model._
@@ -281,5 +281,28 @@ class AmazonSDKTest extends ServerTestBase {
       Files.newInputStream(upFile.toPath),
       Files.newInputStream(downFile.toPath)
     ))
+  }
+
+  test("presigend get") { p =>
+    val cli = p.client
+
+    cli.createBucket("myb")
+    val f = getTestFile("test.txt")
+    cli.putObject("myb", "a/b", f)
+
+    val expires = new java.util.Date()
+    var msec = expires.getTime()
+    msec += 1000 * 60 * 60; // 1 hour.
+    expires.setTime(msec)
+
+    val generatePresignedUrlRequest = new GeneratePresignedUrlRequest("myb", "a/b")
+    generatePresignedUrlRequest.setMethod(HttpMethod.GET)
+    generatePresignedUrlRequest.setExpiration(expires)
+    val url = cli.generatePresignedUrl(generatePresignedUrlRequest)
+    println(url.toString)
+
+    val res = Http(url.toString).method("GET").asString
+    assert(res.code === 200)
+    assert(IOUtils.contentEquals(IOUtils.toInputStream(res.body), new FileInputStream(f)))
   }
 }
