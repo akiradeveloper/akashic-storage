@@ -72,16 +72,15 @@ class McTest extends ServerTestBase {
     assert(mc(s"cat ${alias}/abc/hoge.txt").!!.trim === "hoge")
   }
 
-  // test("share (presigned get)") { _ =>
-  //   (mc(s"mb ${alias}/abc") !) orFail
-  //   val f = getTestFile("test.txt")
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc") !) orFail
-  //
-  //   val httpCli = HttpClients.createDefault
-  //   val url: String = (mc(s"share ${alias}/abc/test.txt") !!).split("\n")(1).split("URL: ")(1)
-  //
-  //   val method = new HttpGet(url)
-  //   val contents: String = IOUtils.toString(httpCli.execute(method).getEntity.getContent).trim
-  //   assert(contents === "We love Scala!")
-  // }
+  test("share (presigned get)") { _ =>
+    assert(mc(s"mb ${alias}/abc").! === 0)
+    val f = getTestFile("test.txt")
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc").! === 0)
+
+    val url = (mc(s"share download ${alias}/abc/test.txt").!!).split("\n")(2).split("Share: ")(1)
+    println(url)
+    val res = Http(url).method("GET").asString
+
+    assert(res.body === "We love Scala!")
+  }
 }
