@@ -32,7 +32,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk" % "1.10.49",
   "com.typesafe.slick" %% "slick" % "3.0.2",
   "org.xerial" % "sqlite-jdbc" % "3.7.2",
-  "org.scalaj" %% "scalaj-http" % "2.2.0"
+  "org.apache.httpcomponents" % "httpclient" % "4.5",
+  "org.apache.httpcomponents" % "httpmime" % "4.5.1"
+  // "org.scalaj" %% "scalaj-http" % "2.2.0"
   // "com.github.scopt" %% "scopt" % "3.3.0",
   // "ch.qos.logback" % "logback-classic" % "1.1.2"
 )

@@ -10,9 +10,14 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion
 import com.amazonaws.services.s3.model._
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
+import org.apache.commons.codec.digest.HmacUtils
 import org.apache.commons.io.IOUtils
+import org.apache.http.client.methods.{HttpPut, HttpGet, HttpPost}
+import org.apache.http.entity.FileEntity
+import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.impl.client.HttpClients
 
-import scalaj.http.Http
+import scala.xml.XML
 
 class AmazonSDKTest extends ServerTestBase {
   case class FixtureParam(client: AmazonS3Client)
@@ -301,9 +306,9 @@ class AmazonSDKTest extends ServerTestBase {
     val url = cli.generatePresignedUrl(generatePresignedUrlRequest)
     println(url.toString)
 
-    val res = Http(url.toString).method("GET").asString
-    assert(res.code === 200)
-    assert(IOUtils.contentEquals(IOUtils.toInputStream(res.body), new FileInputStream(f)))
+    val res = HttpClients.createDefault.execute(new HttpGet(url.toString))
+    assert(res.getStatusLine.getStatusCode === 200)
+    assert(IOUtils.contentEquals(res.getEntity.getContent, new FileInputStream(f)))
   }
 
   test("presigned put (or upload)") { p =>
@@ -325,14 +330,52 @@ class AmazonSDKTest extends ServerTestBase {
     val url = cli.generatePresignedUrl(req)
     println(url.toString)
 
-    val res = Http(url.toString)
-      .header("Content-Type", contentType)
-      .postData(Files.readAllBytes(f.toPath))
-      .method("PUT").asString
+    val putReq = new HttpPut(url.toString)
+    putReq.setHeader("Content-Type", contentType)
+    putReq.setEntity(new FileEntity(f))
 
-    assert(res.code === 200)
+    val putRes = HttpClients.createDefault.execute(putReq)
+    assert(putRes.getStatusLine.getStatusCode === 200)
 
     val obj = cli.getObject("myb", "a/b")
+    checkFileContent(obj, f)
+  }
+
+  test("post object and get") { p =>
+    val cli = p.client
+    cli.createBucket("mybucket")
+
+    val f = getTestFile("test.txt")
+
+    val reqPost = new HttpPost(s"http://${server.config.ip}:${server.config.port}/mybucket/")
+
+    // since lisb's client sends uncapitalized signature and policy our test case follows.
+
+    // [spec] passed as form fields to POST in the multipart/form-data encoded message body.
+    val entity = MultipartEntityBuilder.create
+      .addTextBody("key", "a/b")
+      .addTextBody("success_action_status", "201")
+      .addTextBody("Content-Disposition", "hoge.txt")
+      .addTextBody("Content-Type", "text/hoge")
+      .addBinaryBody("file", f)
+      .addTextBody("submit", "Upload to Amazon S3")
+      .build
+
+    reqPost.setEntity(entity)
+
+    val resPost = HttpClients.createDefault.execute(reqPost)
+    assert(resPost.getStatusLine.getStatusCode === 201)
+
+    val xml = XML.load(resPost.getEntity.getContent)
+    val bucketName = (xml \ "Bucket").text
+    assert(bucketName === "mybucket")
+    val keyName = (xml \ "Key").text
+    assert(keyName === "a/b")
+    val etag = (xml \ "ETag").text
+    val loc = (xml \ "Location").text
+    assert(loc === s"http://${server.config.ip}:${server.config.port}/mybucket/a%2Fb")
+
+    val obj = cli.getObject("mybucket", "a/b")
     checkFileContent(obj, f)
   }
 }

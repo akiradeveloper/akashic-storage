@@ -1,9 +1,11 @@
 package akashic.storage
 
 import akashic.storage.admin.User
+import org.apache.http.client.entity.EntityBuilder
+import org.apache.http.client.methods.{HttpPut, HttpGet, HttpPost}
+import org.apache.http.impl.client.HttpClients
 
 import scala.xml.XML
-import scalaj.http.Http
 
 class AdminTest extends ServerTestBase {
   case class FixtureParam()
@@ -14,19 +16,23 @@ class AdminTest extends ServerTestBase {
   def rootURL = s"http://${server.address}/admin/user"
 
   test("post -> get") { p =>
-    val postRes = Http(rootURL).method("POST").asString
-    assert(postRes.code === 200)
-    val user = User.fromXML(XML.loadString(postRes.body))
-    val getRes = Http(s"${rootURL}/${user.id}").method("GET").asString
-    assert(postRes.code === 200)
-    val gotUser = User.fromXML(XML.loadString(getRes.body))
+    val postReq = new HttpPost(rootURL)
+    val postRes = HttpClients.createDefault.execute(postReq)
+    assert(postRes.getStatusLine.getStatusCode === 200)
+    val user = User.fromXML(XML.load(postRes.getEntity.getContent))
+
+    val getReq = new HttpGet(s"${rootURL}/${user.id}")
+    val getRes = HttpClients.createDefault.execute(getReq)
+    assert(getRes.getStatusLine.getStatusCode === 200)
+    val gotUser = User.fromXML(XML.load(getRes.getEntity.getContent))
     assert(user === gotUser)
   }
 
   test("post -> put -> get") { p =>
-    val postRes = Http(rootURL).method("POST").asString
-    assert(postRes.code === 200)
-    val user = User.fromXML(XML.loadString(postRes.body))
+    val postReq = new HttpPost(rootURL)
+    val postRes = HttpClients.createDefault.execute(postReq)
+    assert(postRes.getStatusLine.getStatusCode === 200)
+    val user = User.fromXML(XML.load(postRes.getEntity.getContent))
     assert(user.name !== "hige")
     assert(user.email !== "hige@hige.net")
 
@@ -35,12 +41,15 @@ class AdminTest extends ServerTestBase {
         <Name>hige</Name>
         <Email>hige@hige.net</Email>
       </User>
-    val putRes = Http(s"${rootURL}/${user.id}").postData(xml.toString).method("PUT").asString
-    assert(putRes.code === 200)
+    val putReq = new HttpPut(s"${rootURL}/${user.id}")
+    putReq.setEntity(EntityBuilder.create.setText(xml.toString).build)
+    val putRes = HttpClients.createDefault.execute(putReq)
+    assert(putRes.getStatusLine.getStatusCode === 200)
 
-    val getRes = Http(s"${rootURL}/${user.id}").method("GET").asString
-    assert(postRes.code === 200)
-    val gotUser = User.fromXML(XML.loadString(getRes.body))
+    val getReq = new HttpGet(s"${rootURL}/${user.id}")
+    val getRes = HttpClients.createDefault.execute(getReq)
+    assert(postRes.getStatusLine.getStatusCode === 200)
+    val gotUser = User.fromXML(XML.load(getRes.getEntity.getContent))
     assert(gotUser.name === "hige")
     assert(gotUser.email === "hige@hige.net")
   }

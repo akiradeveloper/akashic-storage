@@ -4,9 +4,10 @@ import java.nio.file.{Paths, Files}
 
 import akashic.storage.server
 import akashic.storage.admin.User
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.{IOUtils, FileUtils}
+import org.apache.http.client.methods.{HttpGet, HttpPost}
+import org.apache.http.impl.client.HttpClients
 import scala.xml.XML
-import scalaj.http.Http
 import scala.sys.process.Process
 
 class McTest extends ServerTestBase {
@@ -29,9 +30,10 @@ class McTest extends ServerTestBase {
     super.beforeEach()
 
     val url = s"http://${server.address}/admin/user"
-    val postRes = Http(url).method("POST").asString
-    assert(postRes.code === 200)
-    val newUser = User.fromXML(XML.loadString(postRes.body))
+    val postReq = new HttpPost(url)
+    val postRes = HttpClients.createDefault.execute(postReq)
+    assert(postRes.getStatusLine.getStatusCode === 200)
+    val newUser = User.fromXML(XML.load(postRes.getEntity.getContent))
     println(newUser)
 
     val confDirPath = Paths.get(confDir)
@@ -79,8 +81,7 @@ class McTest extends ServerTestBase {
 
     val url = (mc(s"share download ${alias}/abc/test.txt").!!).split("\n")(2).split("Share: ")(1)
     println(url)
-    val res = Http(url).method("GET").asString
-
-    assert(res.body === "We love Scala!")
+    val res = HttpClients.createDefault.execute(new HttpGet(url))
+    assert(IOUtils.toString(res.getEntity.getContent) === "We love Scala!")
   }
 }
