@@ -10,8 +10,12 @@ object V2 {
   def authorize(resource: String, req: HttpRequest): Option[String] = {
     val paramList = ParamList.fromRequest(req)
     val headerList = HeaderList.fromRequest(req)
+
+    val authHeader: Option[String] = headerList.find("Authorization")
+    if (authHeader.isEmpty) return Some("")
+
     Try {
-      val authorization = headerList.find("Authorization").getOrElse("BANG!")
+      val authorization = authHeader.get
       val xs = authorization.split(" ")
       val a = xs(0)
       require(a == "AWS")

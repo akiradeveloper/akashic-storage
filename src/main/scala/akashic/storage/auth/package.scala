@@ -1,6 +1,7 @@
 package akashic.storage
 
 import akashic.storage.server
+import akashic.storage.service.Error
 import akka.http.scaladsl.model.HttpRequest
 
 package object auth {
@@ -13,5 +14,4 @@ package object auth {
     Seq(V2.authorize(resource, req), V2Presigned.authorize(resource, req))
       .find(_.isDefined)
       .flatten
-      .flatMap(server.users.getId(_))
 }

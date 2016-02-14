@@ -9,8 +9,12 @@ object V2Presigned {
   def authorize(resource: String, req: HttpRequest): Option[String] = {
     val paramList = ParamList.fromRequest(req)
     val headerList = HeaderList.fromRequest(req)
+
+    val accessKeyParam: Option[String] = paramList.find("AWSAccessKeyId")
+    if (accessKeyParam.isEmpty) return Some("")
+
     Try {
-      val accessKey = paramList.find("AWSAccessKeyId").get
+      val accessKey = accessKeyParam.get
       require(accessKey != "")
       val expires = paramList.find("Expires").get
       require(expires != "")
