@@ -20,7 +20,7 @@ object DeleteMultipleObjects {
 
   case class t(bucketName: String,
                xmlString: String,
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     override def name = "DELETE Multiple Objects"
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {

@@ -30,7 +30,7 @@ object CompleteMultipartUpload {
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                data: String,
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

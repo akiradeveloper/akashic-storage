@@ -1,15 +1,11 @@
 package akashic.storage.service
 
-trait Task[T] extends RequestIdAllocable with Authorizable {
+trait Task[T] extends Runnable[T] {
   def name: String
   def runOnce: T
   def run: T = {
-    println(s"-> ${name}")
-    val start = System.currentTimeMillis
-    allocRequestId
-    authorize
     var retry = 0
-    val a = try {
+    val result = try {
       runOnce
     } catch {
       case e: Error.Exception => throw e
@@ -18,7 +14,6 @@ trait Task[T] extends RequestIdAllocable with Authorizable {
         runOnce
     }
     val end = System.currentTimeMillis
-    println(s"<- ${name} ${end-start}[ms] (${retry} retry)")
-    a
+    result
   }
 }

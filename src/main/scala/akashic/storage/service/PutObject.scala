@@ -23,7 +23,7 @@ object PutObject {
                objectData: Array[Byte],
                contentType: Option[String],
                contentDisposition: Option[String],
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

@@ -51,7 +51,7 @@ object GetObject {
     responseContentEncoding: Option[String],
     req: HttpRequest,
     _name: String
-  ) extends API {
+  ) extends AuthorizedAPI {
     def name = _name
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

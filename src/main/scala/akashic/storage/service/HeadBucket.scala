@@ -13,7 +13,7 @@ object HeadBucket {
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String,
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     def name = "HEAD Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

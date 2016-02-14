@@ -2,9 +2,10 @@ package akashic.storage.service
 
 import akashic.storage.strings
 
-trait RequestIdAllocable {
+trait RequestIdAllocable[T] extends Runnable[T] {
   var requestId = ""
-  def allocRequestId = {
+  abstract override def run = {
     requestId = strings.random(16)
+    super.run
   }
 }

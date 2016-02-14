@@ -30,5 +30,9 @@ package object service {
     case (bucketName: String, keyName: String) => (bucketName, encodeKeyName(keyName))
   }
 
-  type API = Task[Route]
+  trait AuthorizableTask[T] extends Task[T] with RequestIdAllocable[T] with Authorizable[T] with Measure[T]
+  type AuthorizedAPI = AuthorizableTask[Route]
+
+  trait AnonymousTask[T] extends Task[T] with RequestIdAllocable[T] with Measure[T]
+  type AnonymousAPI = AnonymousTask[Route]
 }

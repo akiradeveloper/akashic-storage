@@ -21,7 +21,7 @@ object ListParts {
                uploadId: String,
                partNumberMarker: Option[Int],
                maxParts: Option[Int],
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     def name = "List Parts"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

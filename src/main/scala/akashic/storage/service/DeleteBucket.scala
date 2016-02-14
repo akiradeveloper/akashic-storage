@@ -13,7 +13,7 @@ object DeleteBucket {
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String,
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     override def name: String = "DELETE Bucket"
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {

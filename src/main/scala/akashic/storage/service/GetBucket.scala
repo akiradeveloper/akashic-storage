@@ -22,7 +22,7 @@ object GetBucket {
                marker: Option[String],
                maxKeys: Option[String],
                prefix: Option[String],
-               req: HttpRequest) extends API {
+               req: HttpRequest) extends AuthorizedAPI {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
