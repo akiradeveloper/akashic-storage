@@ -11,6 +11,7 @@ import scala.collection.immutable
 
 object MakeObject {
   case class Result(versionId: String, etag: String)
+  // TODO use acl
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                contentType: Option[String],
