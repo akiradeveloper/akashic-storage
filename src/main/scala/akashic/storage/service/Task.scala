@@ -1,7 +1,6 @@
 package akashic.storage.service
 
 trait Task[T] extends Runnable[T] {
-  def name: String
   def runOnce: T
   def run: T = {
     var retry = 0
@@ -13,7 +12,6 @@ trait Task[T] extends Runnable[T] {
         retry += 1
         runOnce
     }
-    val end = System.currentTimeMillis
     result
   }
 }
