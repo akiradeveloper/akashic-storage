@@ -24,8 +24,15 @@ object PutBucket {
     def runOnce = {
       val dest = server.tree.bucketPath(bucketName)
 
-      if (Files.exists(dest))
-        failWith(Error.BucketAlreadyExists())
+      if (Files.exists(dest)) {
+        val bucket = findBucket(server.tree, bucketName)
+        val bucketAcl = Acl.fromBytes(bucket.acl.read)
+        if (bucketAcl.owner == callerId) {
+          failWith(Error.BucketAlreadyOwnByYou())
+        } else {
+          failWith(Error.BucketAlreadyExists())
+        }
+      }
 
       Commit.once(dest) { patch =>
         val bucketPatch = patch.asBucket
