@@ -3,6 +3,7 @@ package akashic.storage.service
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 import scala.xml.NodeSeq
+import akashic.storage.server
 
 object Acl {
   case class t(owner: String, grants: Seq[Grant]) {
@@ -27,8 +28,7 @@ object Acl {
       this match {
         case ById(id: String) => id == callerId
         case ByEmail(email: String) =>
-          val myEmail = "TODO" // TODO
-          myEmail == email
+          server.users.getUser(callerId).get.email == email
         case AuthenticatedUsers() =>
           callerId != "anonymous"
         case AllUsers() =>
