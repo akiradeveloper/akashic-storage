@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import akashic.storage._
 import akashic.storage.auth.{GetCallerId, V2Post}
+import akashic.storage.service.Acl.CannedAcl
 import akka.http.scaladsl.model.{StatusCode, HttpEntity}
 import akka.http.scaladsl.model.headers.ETag
 import akka.http.scaladsl.server.Directives._
@@ -41,7 +42,7 @@ object PostObject {
       val callerId = GetCallerId(authKey, requestId, resource).run
 
       val keyName = encodeKeyName(keyNameSlashed)
-      val result = MakeObject.t(bucketName, keyName, data, contentType, contentDisposition, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, data, acl, contentType, contentDisposition, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)

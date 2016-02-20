@@ -14,6 +14,7 @@ object MakeObject {
   // TODO use acl
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
+               cannedAcl: Option[String],
                contentType: Option[String],
                contentDisposition: Option[String],
                callerId: String,
@@ -22,6 +23,11 @@ object MakeObject {
     override def runOnce: Result = {
       val computedETag = files.computeMD5(objectData)
       val bucket = findBucket(server.tree, bucketName)
+      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+
+      if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
+        failWith(Error.AccessDenied())
+
       Commit.once(bucket.keyPath(keyName)) { patch =>
         val keyPatch = patch.asKey
         keyPatch.init
@@ -32,12 +38,8 @@ object MakeObject {
 
         Commit.replaceData(version.acl) { patch =>
           val dataPatch = patch.asData
-          dataPatch.write(Acl.t(callerId, Seq(
-            Acl.Grant(
-              Acl.ById(callerId),
-              Acl.FullControl()
-            )
-          )).toBytes)
+          val grants = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
+          dataPatch.write(Acl.t(callerId, grants).toBytes)
         }
         version.data.write(objectData)
         version.meta.write(
@@ -62,19 +64,21 @@ object PutObject {
   val matcher = put &
     extractObject &
     entity(as[Array[Byte]]) &
+    optionalHeaderValueByName("x-amz-acl") &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
+               cannedAcl: Option[String],
                contentType: Option[String],
                contentDisposition: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
-      val result = MakeObject.t(bucketName, keyName, objectData, contentType, contentDisposition, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, objectData, cannedAcl, contentType, contentDisposition, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)

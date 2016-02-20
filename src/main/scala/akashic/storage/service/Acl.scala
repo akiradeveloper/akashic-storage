@@ -6,7 +6,7 @@ import scala.xml.NodeSeq
 import akashic.storage.server
 
 object Acl {
-  case class t(owner: String, grants: Seq[Grant]) {
+  case class t(owner: String, grants: Iterable[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
     def getPermission(callerId: String): Set[Permission] = {
       grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))

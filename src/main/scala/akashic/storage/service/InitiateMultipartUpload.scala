@@ -13,11 +13,13 @@ object InitiateMultipartUpload {
     post &
     extractObject &
     parameter("uploads").tflatMap(a => pass) & // FIXME not sure
+    optionalHeaderValueByName("x-amz-acl") &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
+               cannedAcl: Option[String],
                contentType: Option[String],
                contentDisposition: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
@@ -25,6 +27,11 @@ object InitiateMultipartUpload {
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
+      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+
+      if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
+        failWith(Error.AccessDenied())
+
       Commit.once(bucket.keyPath(keyName)) { patch =>
         val keyPatch = patch.asKey
         keyPatch.init
@@ -36,12 +43,8 @@ object InitiateMultipartUpload {
         val upload = patch.asUpload
         upload.init
 
-        upload.acl.write(Acl.t(callerId, Seq(
-            Acl.Grant(
-              Acl.ById(callerId),
-              Acl.FullControl()
-            )
-          )).toBytes)
+        val grants = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
+        upload.acl.write(Acl.t(callerId, grants).toBytes)
 
         upload.meta.write(
           Meta.t(

@@ -57,10 +57,16 @@ object GetObject {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName)
+
       val version = key.findLatestVersion match {
         case Some(a) => a
         case None => failWith(Error.NoSuchKey())
       }
+
+      val versionAcl = Acl.fromBytes(version.acl.read)
+      if (!versionAcl.getPermission(callerId).contains(Acl.Read()))
+        failWith(Error.AccessDenied())
+
       // TODO if this is a delete marker?
 
       val meta = Meta.fromBytes(version.meta.read)
