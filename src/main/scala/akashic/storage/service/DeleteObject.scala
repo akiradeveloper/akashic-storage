@@ -46,6 +46,11 @@ object DeleteObject {
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
+
+      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
+        failWith(Error.AccessDenied())
+
       val key = findKey(bucket, keyName)
 
       val deleteResult = deleteObject(bucket, key, versionId)

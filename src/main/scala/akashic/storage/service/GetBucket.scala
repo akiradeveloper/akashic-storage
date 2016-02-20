@@ -74,6 +74,9 @@ object GetBucket {
         case Some(a) => a
         case None => failWith(Error.NoSuchBucket())
       }
+      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
+        failWith(Error.AccessDenied())
 
       implicit class _ApplySome[A](a: A) {
         def applySome[B](bOpt: Option[B])(fn: A => B => A): A = {

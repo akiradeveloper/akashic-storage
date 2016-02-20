@@ -18,7 +18,10 @@ object HeadBucket {
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      // TODO check acl
+
+      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
+        failWith(Error.AccessDenied())
 
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
