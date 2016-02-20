@@ -7,20 +7,49 @@ import scala.xml.NodeSeq
 object Acl {
   case class t(owner: String, grants: Seq[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
+    def getPermission(callerId: String): Set[Permission] = {
+      grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
+    }
   }
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
 
-  case class Grant(grantee: Grantee, perm: Permission)
+  case class Grant(grantee: Grantee, perm: Permission) {
+    def getPermission(callerId: String): Set[Permission] = {
+      grantee.permit(callerId) match {
+        case true => perm.dissolve
+        case false => Set()
+      }
+    }
+  }
 
-  trait Grantee
+  sealed trait Grantee {
+    def permit(callerId: String): Boolean = {
+      this match {
+        case ById(id: String) => id == callerId
+        case ByEmail(email: String) =>
+          val myEmail = "TODO" // TODO
+          myEmail == email
+        case AuthenticatedUsers() =>
+          callerId != "anonymous"
+        case AllUsers() =>
+          true
+      }
+    }
+  }
   case class ById(id: String) extends Grantee
-  case class ByEmail(email: String) extends Grantee // TODO
-  case class AuthenticatedUsers() extends Grantee // TODO
-  case class AllUsers() extends Grantee // TODO
+  case class ByEmail(email: String) extends Grantee
+  case class AuthenticatedUsers() extends Grantee
+  case class AllUsers() extends Grantee
 
   // not sealed because WriteAcp and Read are allowed to bucket ACL only
-  trait Permission
-  case class Deny() extends Permission
+  sealed trait Permission {
+    def dissolve: Set[Permission] = {
+      this match {
+        case FullControl() => Set(Write(), Read(), WriteAcp(), ReadAcp())
+        case a => Set(a)
+      }
+    }
+  }
   case class FullControl() extends Permission
   case class Write() extends Permission
   case class Read() extends Permission // bucket only
@@ -43,5 +72,38 @@ object Acl {
       Grant(grantee, perm)
     }
     t(owner, grants)
+  }
+
+  sealed trait CannedAcl {
+    def makeGrants: Set[Grant] = {
+      def default(owner: String) = Grant(ById(owner), FullControl())
+      this match {
+        case Private(owner: String) => Set(default(owner))
+        case PublicRead(owner: String)  => Set(default(owner), Grant(AllUsers(), Read()))
+        case PublicReadWrite(owner: String) => Set(default(owner), Grant(AllUsers(), Read()), Grant(AllUsers(), Write()))
+        case AuthenticatedRead(owner: String) => Set(default(owner), Grant(AuthenticatedUsers(), Read()))
+        case BucketOwnerRead(owner: String, bucketOwner: String) => Set(default(owner), Grant(ById(bucketOwner), Read()))
+        case BucketOwnerFullControl(owner: String, bucketOwner: String) => Set(default(owner), Grant(ById(bucketOwner), FullControl()))
+      }
+    }
+  }
+  case class Private(owner: String) extends CannedAcl
+  case class PublicRead(owner: String) extends CannedAcl
+  case class PublicReadWrite(owner: String) extends CannedAcl
+  case class AuthenticatedRead(owner: String) extends CannedAcl
+  case class BucketOwnerRead(owner: String, bucketOwner: String) extends CannedAcl // object only
+  case class BucketOwnerFullControl(owner: String, bucketOwner: String) extends CannedAcl // object only
+
+  object CannedAcl {
+    def forName(name: String, owner: String, bucketOwner: String): CannedAcl = {
+      name match {
+        case "private" => Private(owner)
+        case "public-read" => PublicRead(owner)
+        case "public-read-write" => PublicReadWrite(owner)
+        case "authenticated-read" => AuthenticatedRead(owner)
+        case "bucket-owner-read" => BucketOwnerRead(owner, bucketOwner)
+        case "bucket-owner-full-control" => BucketOwnerFullControl(owner, bucketOwner)
+      }
+    }
   }
 }
