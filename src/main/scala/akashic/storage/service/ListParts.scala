@@ -26,7 +26,7 @@ object ListParts {
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
       val startNumber = partNumberMarker match {

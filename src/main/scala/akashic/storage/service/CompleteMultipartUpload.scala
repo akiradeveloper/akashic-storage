@@ -36,7 +36,7 @@ object CompleteMultipartUpload {
     def runOnce = {
       case class Part(partNumber: Int, eTag: String)
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
       val parts = Try {

@@ -48,10 +48,10 @@ object Error {
         case None => failWith(Error.NoSuchBucket())
       }
     }
-    def findKey(bucket: Bucket, keyName: String): Key = {
+    def findKey(bucket: Bucket, keyName: String, e: Error.t = Error.NoSuchKey()): Key = {
       bucket.findKey(keyName) match {
         case Some(a) => a
-        case None => failWith(Error.NoSuchKey())
+        case None => failWith(e)
       }
     }
     def findUpload(key: Key, uploadId: String): Upload = {

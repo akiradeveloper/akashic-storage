@@ -20,7 +20,7 @@ object AbortMultipartUpload {
 
     override def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
       server.astral.free(upload.root)
       val headers = ResponseHeaderList.builder
