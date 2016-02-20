@@ -11,6 +11,21 @@ object Acl {
     def getPermission(callerId: String): Set[Permission] = {
       grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
     }
+    def ownerXML = {
+      val displayName = server.users.getUser(owner).get.displayName
+      <Owner>
+        <ID>{owner}</ID>
+        <DisplayName>{displayName}</DisplayName>
+      </Owner>
+    }
+    def toXML = {
+      <AccessControlPolicy>
+        {ownerXML}
+        <AccessControlList>
+          { for (grant <- grants) yield grant.toXML }
+        </AccessControlList>
+      </AccessControlPolicy>
+    }
   }
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
 
@@ -20,6 +35,12 @@ object Acl {
         case true => perm.dissolve
         case false => Set()
       }
+    }
+    def toXML: NodeSeq = {
+      <Grant>
+        {grantee.toXML}
+        {perm.toXML}
+      </Grant>
     }
   }
 
@@ -35,11 +56,31 @@ object Acl {
           true
       }
     }
+    def doToXML: NodeSeq
+    def toXML: NodeSeq = {
+      <Grantee>
+        {doToXML}
+      </Grantee>
+    }
   }
-  case class ById(id: String) extends Grantee
-  case class ByEmail(email: String) extends Grantee
-  case class AuthenticatedUsers() extends Grantee
-  case class AllUsers() extends Grantee
+  case class ById(id: String) extends Grantee {
+    override def doToXML: NodeSeq = {
+      <ID>{id}</ID>
+      <DisplayName>{server.users.getUser(id).get.displayName}</DisplayName>
+    }
+  }
+  case class ByEmail(email: String) extends Grantee {
+    override def doToXML: NodeSeq =
+      <EmailAddress>{email}</EmailAddress>
+  }
+  case class AuthenticatedUsers() extends Grantee {
+    override def doToXML: NodeSeq =
+      <URI>http://acs.amazonaws.com/groups/global/AuthenticatedUsers</URI>
+  }
+  case class AllUsers() extends Grantee {
+    override def doToXML: NodeSeq =
+      <URI>http://acs.amazonaws.com/groups/global/AllUsers</URI>
+  }
 
   // not sealed because WriteAcp and Read are allowed to bucket ACL only
   sealed trait Permission {
@@ -48,6 +89,16 @@ object Acl {
         case FullControl() => Set(Write(), Read(), WriteAcp(), ReadAcp())
         case a => Set(a)
       }
+    }
+    def toXML: NodeSeq = {
+      val s = this match {
+        case Write() => "WRITE"
+        case Read() => "Read"
+        case WriteAcp() => "WRITE_ACP"
+        case ReadAcp() => "READ_ACP"
+        case FullControl() => "FULL_CONTROL"
+      }
+      <Permission>{s}</Permission>
     }
   }
   case class FullControl() extends Permission
