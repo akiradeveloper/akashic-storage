@@ -43,7 +43,8 @@ case class Server(config: ServerConfig) {
   val serviceRoute =
     GetBucketAcl.route ~            // GET    /bucketName?acl
     GetBucket.route ~               // GET    /bucketName
-    ListParts.route ~               // GET    /bucketName/keyname?uploadId=***
+    ListParts.route ~               // GET    /bucketName/keyName?uploadId=***
+    GetObjectAcl.route ~            // GET    /bucketName/keyName&acl
     GetObject.route ~               // GET    /bucketName/keyName
     GetService.route ~              // GET    /
     HeadBucket.route ~              // HEAD   /bucketName
