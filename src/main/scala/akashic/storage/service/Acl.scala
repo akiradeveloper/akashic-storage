@@ -56,30 +56,35 @@ object Acl {
           true
       }
     }
-    def doToXML: NodeSeq
-    def toXML: NodeSeq = {
-      <Grantee>
-        {doToXML}
-      </Grantee>
-    }
+    def toXML: NodeSeq
   }
   val URI_AUTHENTICATED_USERS = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
   val URI_ALL_USERS = "http://acs.amazonaws.com/groups/global/AllUsers"
   case class ById(id: String) extends Grantee {
-    override def doToXML: NodeSeq = {
-      <ID>{id}</ID>
-      <DisplayName>{server.users.getUser(id).get.displayName}</DisplayName>
+    override def toXML: NodeSeq = {
+      <Garantee xsi:type="CanonicalUser">
+        <ID>{id}</ID>
+        <DisplayName>{server.users.getUser(id).get.displayName}</DisplayName>
+      </Garantee>
     }
   }
   case class ByEmail(email: String) extends Grantee {
-    override def doToXML: NodeSeq =
-      <EmailAddress>{email}</EmailAddress>
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="GanonicalUser">
+        <EmailAddress>{email}</EmailAddress>
+      </Garantee>
   }
   case class AuthenticatedUsers() extends Grantee {
-    override def doToXML: NodeSeq = <URI>{URI_AUTHENTICATED_USERS}</URI>
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="Group">
+        <URI>{URI_AUTHENTICATED_USERS}</URI>
+      </Garantee>
   }
   case class AllUsers() extends Grantee {
-    override def doToXML: NodeSeq = <URI>{URI_ALL_USERS}</URI>
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="Group">
+        <URI>{URI_ALL_USERS}</URI>
+      </Garantee>
   }
 
   // not sealed because WriteAcp and Read are allowed to bucket ACL only
