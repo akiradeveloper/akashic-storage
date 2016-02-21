@@ -39,7 +39,7 @@ object GetBucket {
           <Contents>
             <Key>{decodeKeyName(key.name)}</Key>
             <LastModified>{dates.format000Z(files.lastDate(version.root))}</LastModified>
-            <ETag>{meta.eTag}</ETag>
+            <ETag>{quoteString(meta.eTag)}</ETag>
             <Size>{version.data.length}</Size>
             <StorageClass>STANDARD</StorageClass>
             <Owner>
