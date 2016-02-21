@@ -3,6 +3,7 @@ package akashic.storage
 import java.net.{URLEncoder, URLDecoder}
 
 import akashic.storage.patch.Version
+import akka.http.scaladsl.server.util.ConstructFromTuple
 import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Directive, Route}
@@ -18,6 +19,11 @@ package object service {
   }
 
   def withParamter(name: String) = parameter(name).tflatMap(a => pass)
+  val extractGrantHeader: Directive1[Seq[Acl.GrantHeader]] =
+    extractRequest.map(a => a.headers
+         .filter(_.name.startsWith("x-amz-grant-"))
+         .map(b => Acl.GrantHeader.parseLine(b.name, b.value))
+      )
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
