@@ -17,6 +17,8 @@ package object service {
       }
   }
 
+  def withParamter(name: String) = parameter(name).tflatMap(a => pass)
+
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"

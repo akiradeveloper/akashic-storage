@@ -48,6 +48,7 @@ case class Server(config: ServerConfig) {
     GetService.route ~              // GET    /
     HeadBucket.route ~              // HEAD   /bucketName
     HeadObject.route ~              // HEAD   /bucketName/keyName
+    PutBucketAcl.route ~            // PUT    /bucketName?acl
     PutBucket.route ~               // PUT    /bucketName
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     PutObject.route ~               // PUT    /bucketName/keyName
