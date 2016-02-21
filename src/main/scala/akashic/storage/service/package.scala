@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.util.ConstructFromTuple
 import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Directive, Route}
+import scala.collection.immutable
 
 package object service {
   // first appearance wins
@@ -19,10 +20,10 @@ package object service {
   }
 
   def withParamter(name: String) = parameter(name).tflatMap(a => pass)
-  val extractGrantHeader: Directive1[Seq[Acl.GrantHeader]] =
+  val extractGrantHeader: Directive1[immutable.Seq[Acl.GrantHeader]] =
     extractRequest.map(a => a.headers
          .filter(_.name.startsWith("x-amz-grant-"))
-         .map(b => Acl.GrantHeader.parseLine(b.name, b.value))
+         .map(a => Acl.GrantHeader.parseLine(a.name, a.value))
       )
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
