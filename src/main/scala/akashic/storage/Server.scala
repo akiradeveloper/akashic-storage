@@ -52,6 +52,7 @@ case class Server(config: ServerConfig) {
     PutBucketAcl.route ~            // PUT    /bucketName?acl
     PutBucket.route ~               // PUT    /bucketName
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObjectAcl.route ~            // PUT    /bucketName/keyName?acl
     PutObject.route ~               // PUT    /bucketName/keyName
     DeleteBucket.route ~            // DELETE /bucketName
     AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
