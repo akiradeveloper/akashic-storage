@@ -12,7 +12,7 @@ object InitiateMultipartUpload {
   val matcher =
     post &
     extractObject &
-    parameter("uploads").tflatMap(a => pass) & // FIXME not sure
+    withParamter("uploads") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
