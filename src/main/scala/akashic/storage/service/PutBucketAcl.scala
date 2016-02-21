@@ -12,8 +12,8 @@ import scala.xml.XML
 object PutBucketAcl {
   val matcher =
     get &
-    withParamter("acl") &
     extractBucket &
+    withParamter("acl") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     entity(as[Option[String]]) &
