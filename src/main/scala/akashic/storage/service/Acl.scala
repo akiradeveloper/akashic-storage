@@ -63,6 +63,8 @@ object Acl {
       </Grantee>
     }
   }
+  val URI_AUTHENTICATED_USERS = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+  val URI_ALL_USERS = "http://acs.amazonaws.com/groups/global/AllUsers"
   case class ById(id: String) extends Grantee {
     override def doToXML: NodeSeq = {
       <ID>{id}</ID>
@@ -74,12 +76,10 @@ object Acl {
       <EmailAddress>{email}</EmailAddress>
   }
   case class AuthenticatedUsers() extends Grantee {
-    override def doToXML: NodeSeq =
-      <URI>http://acs.amazonaws.com/groups/global/AuthenticatedUsers</URI>
+    override def doToXML: NodeSeq = <URI>{URI_AUTHENTICATED_USERS}</URI>
   }
   case class AllUsers() extends Grantee {
-    override def doToXML: NodeSeq =
-      <URI>http://acs.amazonaws.com/groups/global/AllUsers</URI>
+    override def doToXML: NodeSeq = <URI>{URI_ALL_USERS}</URI>
   }
 
   // not sealed because WriteAcp and Read are allowed to bucket ACL only
@@ -154,6 +154,52 @@ object Acl {
         case "authenticated-read" => AuthenticatedRead(owner)
         case "bucket-owner-read" => BucketOwnerRead(owner, bucketOwner)
         case "bucket-owner-full-control" => BucketOwnerFullControl(owner, bucketOwner)
+      }
+    }
+  }
+
+  sealed trait GrantHeader {
+    def grantees: Iterable[Grantee]
+    def permission: Permission
+    def makeGrants: Iterable[Grant] = grantees.map(Grant(_, permission))
+  }
+  case class GrantRead(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = Read()
+  }
+  case class GrantWrite(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = Write()
+  }
+  case class GrantReadAcp(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = ReadAcp()
+  }
+  case class GrantWriteAcp(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = WriteAcp()
+  }
+  case class GrantFullControl(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = FullControl()
+  }
+  object GrantHeader {
+    def doParseLine(k: String, v: String): Grantee = {
+      k match {
+        case "id" => ById(v)
+        case "emailAddress" => ByEmail(v)
+        case "uri" => v match {
+          case URI_AUTHENTICATED_USERS => AuthenticatedUsers()
+          case URI_ALL_USERS => AllUsers()
+        }
+      }
+    }
+    def parseLine(k: String, v: String): GrantHeader = {
+      val grantees = v
+        .split(",")
+        .map(_.split("="))
+        .map(a => doParseLine(a(0), a(1)))
+      k match {
+        case "x-amz-grant-read" => GrantRead(grantees)
+        case "x-amz-grant-write" => GrantWrite(grantees)
+        case "x-amz-grant-read-acp" => GrantReadAcp(grantees)
+        case "x-amz-grant-write-acp" => GrantWriteAcp(grantees)
+        case "x-amz-grant-full-control" => GrantFullControl(grantees)
       }
     }
   }

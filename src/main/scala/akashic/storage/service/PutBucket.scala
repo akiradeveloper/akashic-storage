@@ -4,6 +4,7 @@ import java.nio.file.Files
 
 import akashic.storage.server
 import akashic.storage.patch._
+import akashic.storage.service.Acl.Grant
 import akashic.storage.service.Error.Reportable
 import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.Route
@@ -14,10 +15,12 @@ object PutBucket {
     put &
     extractBucket &
     optionalHeaderValueByName("x-amz-acl") &
+    extractGrantsFromHeaders &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Grant],
                req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
@@ -40,8 +43,8 @@ object PutBucket {
 
         Commit.replaceData(bucketPatch.acl) { patch =>
           val dataPatch = patch.asData
-          val grants = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, callerId)).map(_.makeGrants).get
-          dataPatch.write(Acl.t(callerId, grants).toBytes)
+          val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, callerId)).map(_.makeGrants).get
+          dataPatch.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
         }
 
         Commit.replaceData(bucketPatch.versioning) { patch =>

@@ -14,12 +14,14 @@ object InitiateMultipartUpload {
     extractObject &
     parameter("uploads").tflatMap(a => pass) & // FIXME not sure
     optionalHeaderValueByName("x-amz-acl") &
+    extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
@@ -43,8 +45,8 @@ object InitiateMultipartUpload {
         val upload = patch.asUpload
         upload.init
 
-        val grants = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
-        upload.acl.write(Acl.t(callerId, grants).toBytes)
+        val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
+        upload.acl.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
 
         upload.meta.write(
           Meta.t(

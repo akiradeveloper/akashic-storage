@@ -15,6 +15,7 @@ object MakeObject {
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
                callerId: String,
@@ -38,8 +39,8 @@ object MakeObject {
 
         Commit.replaceData(version.acl) { patch =>
           val dataPatch = patch.asData
-          val grants = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
-          dataPatch.write(Acl.t(callerId, grants).toBytes)
+          val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
+          dataPatch.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
         }
         version.data.write(objectData)
         version.meta.write(
@@ -65,6 +66,7 @@ object PutObject {
     extractObject &
     entity(as[Array[Byte]]) &
     optionalHeaderValueByName("x-amz-acl") &
+    extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     extractRequest
@@ -72,13 +74,14 @@ object PutObject {
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
-      val result = MakeObject.t(bucketName, keyName, objectData, cannedAcl, contentType, contentDisposition, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, objectData, cannedAcl, grantsFromHeaders, contentType, contentDisposition, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)
