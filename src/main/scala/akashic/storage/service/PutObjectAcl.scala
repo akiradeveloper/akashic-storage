@@ -15,7 +15,7 @@ object PutObjectAcl {
     withParamter("acl") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
-    entity(as[Option[String]]) &
+    optionalStringBody &
     extractRequest
 
   val route = matcher.as(t)(_.run)
