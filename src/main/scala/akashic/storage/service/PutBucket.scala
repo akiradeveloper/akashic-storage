@@ -54,7 +54,8 @@ object PutBucket {
           data.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
         }
 
-        val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("us-east-1")
+        // [spec] empty string (for the US East (N. Virginia) region)
+        val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
         Commit.replaceData(bucketPatch.location) { data =>
           data.write(Location.t(loc.get).toBytes)
         }

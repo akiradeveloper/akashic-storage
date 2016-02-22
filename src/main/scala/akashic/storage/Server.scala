@@ -42,6 +42,7 @@ case class Server(config: ServerConfig) {
   // My guess is evaluation matters for the null pointer issue
   val serviceRoute =
     GetBucketAcl.route ~            // GET    /bucketName?acl
+    GetBucketLocation.route ~       // GET    /bucketName?location
     GetBucket.route ~               // GET    /bucketName
     ListParts.route ~               // GET    /bucketName/keyName?uploadId=***
     GetObjectAcl.route ~            // GET    /bucketName/keyName&acl
