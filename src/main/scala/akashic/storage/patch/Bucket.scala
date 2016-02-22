@@ -7,6 +7,7 @@ import akashic.storage.files
 case class Bucket(root: Path) extends Patch {
   val acl = Data(root.resolve("acl"))
   val versioning = Data(root.resolve("versioning"))
+  val location = Data(root.resolve("location"))
   val keys: Path = root.resolve("keys")
   def keyPath(name: String): Path = keys.resolve(name)
   def init {

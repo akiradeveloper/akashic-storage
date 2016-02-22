@@ -45,7 +45,7 @@ object PutBucketAcl {
         Acl.t(bucketAcl.owner, grantsFromCanned)
       }
 
-      Commit.replaceData(bucket.acl) { data: Data =>
+      Commit.replaceData(bucket.acl) { data =>
         data.write(newAcl.toBytes)
       }
       val headers = ResponseHeaderList.builder

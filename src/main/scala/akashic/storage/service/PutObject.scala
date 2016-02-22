@@ -37,10 +37,9 @@ object MakeObject {
       Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
         val version = patch.asVersion
 
-        Commit.replaceData(version.acl) { patch =>
-          val dataPatch = patch.asData
+        Commit.replaceData(version.acl) { data =>
           val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
-          dataPatch.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
+          data.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
         }
         version.data.write(objectData)
         version.meta.write(

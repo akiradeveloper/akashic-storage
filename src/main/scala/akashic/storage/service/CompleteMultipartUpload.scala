@@ -100,9 +100,8 @@ object CompleteMultipartUpload {
           }
 
           val aclBytes: Array[Byte] = upload.acl.read
-          Commit.replaceData(versionPatch.acl) { patch =>
-            val dataPatch = patch.asData
-            dataPatch.write(aclBytes)
+          Commit.replaceData(versionPatch.acl) { data =>
+            data.write(aclBytes)
           }
 
           val oldMeta = Meta.fromBytes(upload.meta.read)

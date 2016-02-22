@@ -10,17 +10,21 @@ import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 
+import scala.xml.{XML, NodeSeq}
+
 object PutBucket {
   val matcher =
     put &
     extractBucket &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
+    optionalStringBody &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Grant],
+               entity: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
@@ -41,15 +45,18 @@ object PutBucket {
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
-        Commit.replaceData(bucketPatch.acl) { patch =>
-          val dataPatch = patch.asData
+        Commit.replaceData(bucketPatch.acl) { data =>
           val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, callerId)).map(_.makeGrants).get
-          dataPatch.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
+          data.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
         }
 
-        Commit.replaceData(bucketPatch.versioning) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
+        Commit.replaceData(bucketPatch.versioning) { data =>
+          data.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
+        }
+
+        val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("us-east-1")
+        Commit.replaceData(bucketPatch.location) { data =>
+          data.write(Location.t(loc.get).toBytes)
         }
       }
 
@@ -59,5 +66,8 @@ object PutBucket {
 
       complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
+  }
+  def parseLocationConstraint(xml: NodeSeq): String = {
+    (xml \ "LocationConstraint").text
   }
 }

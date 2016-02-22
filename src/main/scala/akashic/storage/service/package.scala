@@ -30,6 +30,21 @@ package object service {
   val extractGrantsFromHeaders: Directive1[immutable.Seq[Grant]] =
     extractGrantHeaders.map(_.map(_.makeGrants).flatten)
 
+  val optionalBinaryBody: Directive1[Option[Array[Byte]]] = entity(as[Array[Byte]]).map { a =>
+    if (a.size == 0) {
+      None
+    } else {
+      Some(a)
+    }
+  }
+
+  val optionalStringBody: Directive1[Option[String]] = entity(as[String]).map { a =>
+    a match {
+      case "" => None
+      case a => Some(a)
+    }
+  }
+
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
