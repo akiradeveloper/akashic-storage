@@ -11,7 +11,7 @@ object GetBucketLocation {
   val matcher =
     get &
     extractBucket &
-    withParamter("location") &
+    withParameter("location") &
     extractRequest
 
   val route = matcher.as(t)(_.run)

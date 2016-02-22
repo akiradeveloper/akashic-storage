@@ -12,7 +12,7 @@ object InitiateMultipartUpload {
   val matcher =
     post &
     extractObject &
-    withParamter("uploads") &
+    withParameter("uploads") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &

@@ -11,7 +11,7 @@ object GetObjectAcl {
   val matcher =
     get &
     extractObject &
-    withParamter("acl") &
+    withParameter("acl") &
     extractRequest
 
   val route = matcher.as(t)(_.run)

@@ -13,7 +13,7 @@ object PutBucketAcl {
   val matcher =
     put &
     extractBucket &
-    withParamter("acl") &
+    withParameter("acl") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalStringBody &

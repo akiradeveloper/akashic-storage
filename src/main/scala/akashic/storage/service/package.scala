@@ -20,7 +20,7 @@ package object service {
       }
   }
 
-  def withParamter(name: String) = parameter(name).tflatMap(a => pass)
+  def withParameter(name: String) = parameter(name).tflatMap(a => pass)
 
   private val extractGrantHeaders: Directive1[immutable.Seq[Acl.GrantHeader]] =
     extractRequest.map(a => a.headers

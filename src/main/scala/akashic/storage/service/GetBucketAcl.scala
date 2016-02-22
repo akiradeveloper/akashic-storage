@@ -11,7 +11,7 @@ object GetBucketAcl {
   val matcher =
     get &
     extractBucket &
-    withParamter("acl") &
+    withParameter("acl") &
     extractRequest
 
   val route = matcher.as(t)(_.run)

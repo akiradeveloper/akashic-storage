@@ -12,7 +12,7 @@ object PutObjectAcl {
   val matcher =
     put &
     extractObject &
-    withParamter("acl") &
+    withParameter("acl") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalStringBody &
