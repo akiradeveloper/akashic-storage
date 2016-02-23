@@ -11,18 +11,9 @@ trait ServerConfig {
 }
 
 object ServerConfig {
-  def apply(configRoot: Config, init: Boolean) = new ServerConfig {
+  def apply(configRoot: Config) = new ServerConfig {
     val config = configRoot.getConfig("akashic.storage")
-
-    val mp = Paths.get(config.getString("mountpoint"))
-    if (init && Files.exists(mp)) {
-      files.purgeDirectory(mp)
-    }
-    if (!Files.exists(mp)) {
-      Files.createDirectory(mp)
-    }
-
-    override def mountpoint = mp
+    override def mountpoint = Paths.get(config.getString("mountpoint"))
     override def ip = config.getString("ip")
     override def port: Int = config.getInt("port")
   }

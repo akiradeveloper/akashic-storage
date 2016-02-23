@@ -1,6 +1,6 @@
 package akashic.storage
 
-import java.nio.file.Files
+import java.nio.file.{Paths, Files}
 
 import akashic.storage.admin._
 import akashic.storage.service._
@@ -13,15 +13,22 @@ import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.util.ByteString
+import org.apache.commons.io.FileUtils
 
-case class Server(config: ServerConfig) {
-  Files.createDirectory(config.mountpoint.resolve("tree"))
+case class Server(config: ServerConfig, cleanup: Boolean) {
+  require(Files.exists(config.mountpoint))
+
+  if (cleanup)
+    FileUtils.cleanDirectory(config.mountpoint.toFile)
+
+  if (files.children(config.mountpoint).isEmpty) {
+    Files.createDirectory(config.mountpoint.resolve("tree"))
+    Files.createDirectory(config.mountpoint.resolve("admin"))
+    Files.createDirectory(config.mountpoint.resolve("astral"))
+  }
+
   val tree = Tree(config.mountpoint.resolve("tree"))
-
-  Files.createDirectory(config.mountpoint.resolve("admin"))
   val users = UserTable(config.mountpoint.resolve("admin"))
-
-  Files.createDirectory(config.mountpoint.resolve("astral"))
   val astral = Astral(config.mountpoint.resolve("astral"))
 
   val adminRoute =

@@ -1,5 +1,7 @@
 package akashic.storage.app
 
+import java.nio.file.Files
+
 import akashic.storage._
 import akashic.storage.admin.TestUsers
 import com.typesafe.config.ConfigFactory
@@ -8,7 +10,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object RunServer extends App {
-  server = Server(ServerConfig(ConfigFactory.load("test.conf"), init=true))
+  val config = ServerConfig(ConfigFactory.load("test.conf"))
+  Files.createDirectories(config.mountpoint)
+  server = Server(config, cleanup = true)
 
   // workaround
   server.users.addUser(TestUsers.hoge)

@@ -8,8 +8,8 @@ import java.io.File
 
 class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
-    val config = ServerConfig(ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/conf")), init=false)
-    server = Server(config)
+    val config = ServerConfig(ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/conf")))
+    server = Server(config, cleanup = false)
 
     // this is a workaround before authorziation is available
     server.users.addUser(TestUsers.hoge)
