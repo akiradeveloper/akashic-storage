@@ -17,6 +17,7 @@ object InitiateMultipartUpload {
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
+    extractMetadata &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
@@ -24,6 +25,7 @@ object InitiateMultipartUpload {
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
+               metadata: HeaderList.t,
                req: HttpRequest) extends AuthorizedAPI {
     def name = "Initiate Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
@@ -57,7 +59,7 @@ object InitiateMultipartUpload {
               .appendOpt("Content-Type", contentType)
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
-            xattrs = HeaderList.builder.build
+            xattrs = metadata
           ).toBytes)
       }
       val xml =

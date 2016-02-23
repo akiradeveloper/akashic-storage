@@ -9,6 +9,11 @@ object ResponseHeaderList {
   def builder = Builder()
   case class Builder() {
     private val l = mutable.ListBuffer[HttpHeader]()
+    def withHeader(xs: Seq[(String, String)]): this.type = {
+      for ((k, v) <- xs)
+        l += RawHeader(k, v)
+      this
+    }
     def withHeader(k: String, v: String): this.type = {
       withHeader(RawHeader(k, v))
     }
