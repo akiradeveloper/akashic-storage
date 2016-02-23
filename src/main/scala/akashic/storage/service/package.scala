@@ -1,10 +1,14 @@
 package akashic.storage
 
 import java.net.{URLEncoder, URLDecoder}
+import java.util.concurrent.TimeUnit
 
 import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
+import akka.http.scaladsl.model.Multipart
 import akka.http.scaladsl.server.util.ConstructFromTuple
+import scala.concurrent.Await
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.xml.NodeSeq
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Directive, Route}
@@ -52,6 +56,18 @@ package object service {
          .foldLeft(HeaderList.builder) { case (acc, (k, v)) => acc.append(k, v) }
          .build
       )
+
+  // torima impl
+  val extractMetadataFromFields: Directive1[HeaderList.t] =
+    entity(as[Multipart.FormData]).map { a =>
+      val fut = a.toStrict(FiniteDuration.apply(30, TimeUnit.SECONDS))
+      val strict = Await.result(fut, Duration.apply(30, TimeUnit.SECONDS))
+      strict.strictParts
+        .map(a => (a.name, a.entity.getData().decodeString("UTF-8")))
+        .filter { case (k, _) => k.startsWith("x-amz-meta-") }
+        .foldLeft(HeaderList.builder) { case (acc, (k, v)) => acc.append(k, v) }
+        .build
+    }
 
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
