@@ -82,6 +82,7 @@ object GetObject {
         .withHeader(`Last-Modified`(DateTime(files.lastDate(filePath).getTime)))
         .withHeader(ETag(meta.eTag))
         .withHeader(CONTENT_DISPOSITION, contentDisposition)
+        .withHeader(meta.xattrs.unwrap)
         .build
 
       val ct: ContentType = ContentType.parse(contentType.get).right.get
