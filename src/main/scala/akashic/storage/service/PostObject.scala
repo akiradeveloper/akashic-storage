@@ -42,7 +42,7 @@ object PostObject {
       val callerId = GetCallerId(authKey, requestId, resource).run
 
       val keyName = encodeKeyName(keyNameSlashed)
-      val result = MakeObject.t(bucketName, keyName, data, acl, Seq.empty, contentType, contentDisposition, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, data, acl, Seq.empty, contentType, contentDisposition, HeaderList.empty, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)

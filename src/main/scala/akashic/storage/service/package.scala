@@ -45,6 +45,14 @@ package object service {
     }
   }
 
+  val extractMetadata: Directive1[HeaderList.t] =
+    extractRequest.map(a => a.headers
+         .filter(_.name.startsWith("x-amz-meta-"))
+         .map(a => (a.name, a.value))
+         .foldLeft(HeaderList.builder) { case (acc, (k, v)) => acc.append(k, v) }
+         .build
+      )
+
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
