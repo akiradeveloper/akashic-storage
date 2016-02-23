@@ -7,6 +7,7 @@ import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
 import akka.http.scaladsl.model.Multipart
 import akka.http.scaladsl.server.util.ConstructFromTuple
+import akka.stream.{Materializer, ActorMaterializer}
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.xml.NodeSeq
@@ -58,7 +59,7 @@ package object service {
       )
 
   // torima impl
-  val extractMetadataFromFields: Directive1[HeaderList.t] =
+  def extractMetadataFromFields(implicit fm: Materializer): Directive1[HeaderList.t] =
     entity(as[Multipart.FormData]).map { a =>
       val fut = a.toStrict(FiniteDuration.apply(30, TimeUnit.SECONDS))
       val strict = Await.result(fut, Duration.apply(30, TimeUnit.SECONDS))
