@@ -23,7 +23,9 @@ object PostObject {
         "policy"?,
         "AWSAccessKeyId"?,
         "signature"?
-      )
+      ) &
+      extractMetadataFromFields
+
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyNameSlashed: String,
@@ -34,7 +36,8 @@ object PostObject {
                contentDisposition: Option[String],
                policy: Option[String],
                accessKey: Option[String],
-               signature: Option[String]) extends AnonymousAPI {
+               signature: Option[String],
+               metadata: HeaderList.t) extends AnonymousAPI {
     override def name = "POST Object"
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {
@@ -42,7 +45,7 @@ object PostObject {
       val callerId = GetCallerId(authKey, requestId, resource).run
 
       val keyName = encodeKeyName(keyNameSlashed)
-      val result = MakeObject.t(bucketName, keyName, data, acl, Seq.empty, contentType, contentDisposition, HeaderList.empty, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, data, acl, Seq.empty, contentType, contentDisposition, metadata, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)
