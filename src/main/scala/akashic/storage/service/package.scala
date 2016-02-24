@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Multipart
 import akka.http.scaladsl.server.util.ConstructFromTuple
 import akka.stream.{Materializer, ActorMaterializer}
@@ -16,6 +17,11 @@ import akka.http.scaladsl.server.{Directive1, Directive, Route}
 import scala.collection.immutable
 
 package object service {
+
+  // shared actor system and materializer
+  implicit var system: ActorSystem = _
+  implicit var mat: ActorMaterializer = _
+
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
     def `<+`(other: Option[A]): Option[A] = 
@@ -59,7 +65,7 @@ package object service {
       )
 
   // torima impl
-  def extractMetadataFromFields(implicit fm: Materializer): Directive1[HeaderList.t] =
+  def extractMetadataFromFields: Directive1[HeaderList.t] =
     entity(as[Multipart.FormData]).map { a =>
       val fut = a.toStrict(FiniteDuration.apply(30, TimeUnit.SECONDS))
       val strict = Await.result(fut, Duration.apply(30, TimeUnit.SECONDS))

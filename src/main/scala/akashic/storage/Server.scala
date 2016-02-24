@@ -96,9 +96,6 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   def address = s"${config.ip}:${config.port}"
 
-  implicit var system: ActorSystem = _
-  implicit var mat: ActorMaterializer = _
-
   def start = {
     system = ActorSystem("akashic-storage")
     mat = ActorMaterializer()
