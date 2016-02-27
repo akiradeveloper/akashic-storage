@@ -89,9 +89,9 @@ package object service {
     case (bucketName: String, keyName: String) => (bucketName, encodeKeyName(keyName))
   }
 
-  trait AuthorizableTask[T] extends Task[T] with RequestIdAllocable[T] with Error.Reportable with Authorizable[T] with Measure[T]
+  trait AuthorizableTask[T] extends Task[T] with Error.Reportable with Authorizable[T] with RequestIdAllocable[T] with Measure[T]
   type AuthorizedAPI = AuthorizableTask[Route]
 
-  trait AnonymousTask[T] extends Task[T] with RequestIdAllocable[T] with Error.Reportable with Measure[T]
+  trait AnonymousTask[T] extends Task[T] with Error.Reportable with RequestIdAllocable[T] with Measure[T]
   type AnonymousAPI = AnonymousTask[Route]
 }
