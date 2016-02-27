@@ -2,6 +2,7 @@ package akashic.storage
 
 import java.nio.file.{Files => JFiles, Path}
 
+import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.FileUtils
 
 object files {
@@ -32,14 +33,15 @@ object files {
 
   import org.apache.commons.codec.digest.DigestUtils
 
-  def computeMD5(path: Path): String = {
+  def computeMD5(path: Path): Array[Byte] = {
     using(JFiles.newInputStream(path)) { inp =>
-      DigestUtils.md5Hex(inp)
+      // DigestUtils.md5Hex(inp)
+      DigestUtils.md5(inp)
     }
   }
 
-  def computeMD5(data: Array[Byte]): String = {
-    DigestUtils.md5Hex(data)
+  def computeMD5(data: Array[Byte]): Array[Byte] = {
+    DigestUtils.md5(data)
   }
 
   import java.util.Date

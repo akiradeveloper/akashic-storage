@@ -7,6 +7,8 @@ import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders._
 import akka.http.scaladsl.server.Directives._
+import org.apache.commons.codec.binary.{Hex, Base64}
+import org.apache.commons.codec.digest.DigestUtils
 import scala.collection.immutable
 
 object MakeObject {
@@ -18,12 +20,19 @@ object MakeObject {
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
+               contentMd5: Option[String],
                metadata: HeaderList.t,
                callerId: String,
                requestId: String) extends Task[Result] with Error.Reportable {
     override def resource: String = Resource.forObject(bucketName, keyName)
     override def runOnce: Result = {
-      val computedETag = files.computeMD5(objectData)
+      val computedMD5 = files.computeMD5(objectData)
+      for (md5 <- contentMd5)
+        if (Base64.encodeBase64String(computedMD5) != md5)
+          failWith(Error.BadDigest())
+
+      val computedETag = Hex.encodeHexString(computedMD5)
+
       val bucket = findBucket(server.tree, bucketName)
       val bucketAcl = Acl.fromBytes(bucket.acl.read)
 
@@ -68,6 +77,7 @@ object PutObject {
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
+    optionalHeaderValueByName("Content-MD5") &
     extractMetadata &
     extractRequest
   val route = matcher.as(t)(_.run)
@@ -77,12 +87,13 @@ object PutObject {
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
+               contentMd5: Option[String],
                metadata: HeaderList.t,
                req: HttpRequest) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
-      val result = MakeObject.t(bucketName, keyName, objectData, cannedAcl, grantsFromHeaders, contentType, contentDisposition, metadata, callerId, requestId).run
+      val result = MakeObject.t(bucketName, keyName, objectData, cannedAcl, grantsFromHeaders, contentType, contentDisposition, contentMd5, metadata, callerId, requestId).run
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .withHeader(X_AMZ_VERSION_ID, result.versionId)
