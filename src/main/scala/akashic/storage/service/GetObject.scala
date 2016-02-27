@@ -7,6 +7,7 @@ import akka.http.scaladsl.model._
 import com.google.common.net.HttpHeaders._
 
 import akka.http.scaladsl.server.Directives._
+import org.apache.commons.codec.binary.{Hex, Base64}
 
 object HeadObject {
   val matcher =

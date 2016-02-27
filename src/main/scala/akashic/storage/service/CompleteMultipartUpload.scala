@@ -10,6 +10,7 @@ import akashic.storage.{files, server}
 import akashic.storage.patch.{Commit, Patch, Version, Data}
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -63,7 +64,8 @@ object CompleteMultipartUpload {
           case Some(a) => a
           case None => failWith(Error.InvalidPart())
         }
-        if (files.computeMD5(uploadedPart) != eTag) {
+        val computedETag = Hex.encodeHexString(files.computeMD5(uploadedPart))
+        if (computedETag != eTag) {
           failWith(Error.InvalidPart())
         }
         // Each part must be at least 5MB in size, expect the last part.
