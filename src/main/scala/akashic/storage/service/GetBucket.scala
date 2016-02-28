@@ -130,7 +130,11 @@ object GetBucket {
         case None => 1000 // dafault
       } 
 
-      val truncated = groups1.size > len
+      val truncated = if (len == 0) {
+        false
+      } else {
+        groups1.size > len
+      }
 
       // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
       // So truncate the list after grouping into CommonPrefixes
