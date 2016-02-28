@@ -53,6 +53,9 @@ object CompleteMultipartUpload {
         case Failure(_) => failWith(Error.MalformedXML())
       }
 
+      if (parts.size == 0)
+        failWith(Error.MalformedXML())
+
       // parts must be sorted
       if (parts != parts.sortBy(_.partNumber))
         failWith(Error.InvalidPartOrder())
