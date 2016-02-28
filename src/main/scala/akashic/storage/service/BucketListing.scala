@@ -68,8 +68,27 @@ object BucketListing {
   }
 
   implicit class Truncation[T <: Filterable](value: Seq[Container[T]]) {
-    def byMaxLen(n: Int) = {
-      (value, false)
+    case class Result(value: Seq[Container[T]], truncated: Boolean, nextMarker: Option[String])
+    def truncateByMaxLen(len: Int) = {
+      val truncated = if (len == 0) {
+        false
+      } else {
+        value.size > len
+      }
+      // [spec] All of the keys rolled up in a common prefix count
+      // as a single return when calculating the number of returns.
+      // So truncate the list after grouping into CommonPrefixes
+      val newValue = value.take(len)
+
+      // [spec] This element is returned only if you have delimiter request parameter specified.
+      // If response does not include the NextMaker and it is truncated,
+      // you can use the value of the last Key in the response as the marker in the subsequent request
+      // to get the next set of object keys.
+      val nextMarker = truncated match {
+        case true if len > 0 => Some(newValue(len-1).get.name)
+        case _ => None
+      }
+      Result(newValue, truncated, nextMarker)
     }
   }
 }
