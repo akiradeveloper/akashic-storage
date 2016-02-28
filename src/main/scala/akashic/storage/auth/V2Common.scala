@@ -18,8 +18,8 @@ object V2Common {
     // even though the client doesn't specify the Content-Type
     // akka-http sometimes infer the Content-Type as octet-stream
     val contentTypes = req.entity.contentType match {
-      case ContentTypes.NoContentType => Stream("", "", "")
-      case a => Stream(a.value, a.mediaType.value, "")
+      case ContentTypes.NoContentType => Stream("")
+      case a => Stream(a.value, a.value.toLowerCase, a.mediaType.value, "")
     }
     V2Common(req.method.name, resource, paramList, headerList, contentTypes)
   }
@@ -69,8 +69,8 @@ case class V2Common(method: String, resource: String, paramList: ParamList.t,
     contentTypes map { contentType: String =>
       val result =
         method + "\n" +
-        headerList.find("Content-Md5").getOrElse("") + "\n" +
-        contentType.toLowerCase + "\n" +
+        headerList.find("Content-MD5").getOrElse("") + "\n" +
+        contentType + "\n" +
         dateOrExpire + "\n" +
         cannonicalAmzHeaders +
         cannonicalResource
