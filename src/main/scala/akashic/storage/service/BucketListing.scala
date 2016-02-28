@@ -28,7 +28,7 @@ object BucketListing {
   implicit class Filtering[T <: Filterable](value: Seq[Single[T]]) {
     def takesOnlyAfter(lastName: Option[String]) = {
       lastName match {
-        case Some(a) => value.dropWhile(_.get.name < a)
+        case Some(a) => value.dropWhile(_.get.name <= a)
         case None => value
       }
     }
