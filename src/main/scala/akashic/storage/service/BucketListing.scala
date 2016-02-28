@@ -50,15 +50,14 @@ object BucketListing {
       delimiter match {
         case Some(a) =>
           val deli = encodeKeyName(a)
-          val newValue: Seq[Container[T]] =
-            value
+          val newValue: Seq[Container[T]] = value
             .groupBy(_.prefixBy(deli)).toSeq // [prefix -> seq(contents)]
             .sortBy(_._1) // sort by prefix
             .map { case (prefix, members) =>
               if (members.size > 1) {
                 Group(members, prefix.slice(0, prefix.size - deli.size))
               } else {
-                members(0)
+                members.head
               }
             }
           newValue
