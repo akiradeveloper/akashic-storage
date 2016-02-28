@@ -10,10 +10,7 @@ case class Version(root: Path) extends Patch {
   val meta = Data(root.resolve("meta"))
   val acl = Data(root.resolve("acl"))
 
-  def deletable: Boolean = {
-    val m = Meta.fromBytes(meta.read)
-    if (m.isDeleteMarker) return false
-    if (m.isVersioned) return false
-    true
-  }
+  // [spec] All objects (including all object versions and delete markers)
+  // in the bucket must be deleted before the bucket itself can be deleted.
+  val deletable = false
 }
