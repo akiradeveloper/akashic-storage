@@ -13,24 +13,23 @@ object GetBucket {
   val matcher =
     get &
     extractBucket &
-    parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys"?, "prefix"?) &
+    parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys".as[Int]?, "prefix"?) &
     extractRequest
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],
                marker: Option[String],
-               maxKeys: Option[String],
+               maxKeys: Option[Int],
                prefix: Option[String],
                req: HttpRequest) extends AuthorizedAPI {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
-      sealed trait Group {
+      sealed trait Xmlable {
         def toXML: NodeSeq
-        def lastKeyName: String // last keyname in this group
       }
-      case class Contents(version: Version) extends Group {
+      case class Contents(version: Version) extends Xmlable with BucketListing.Filterable {
         val acl = Acl.fromBytes(version.acl.read)
         val meta = Meta.fromBytes(version.meta.read)
         val ownerId = acl.owner
@@ -48,25 +47,13 @@ object GetBucket {
             </Owner>
           </Contents>
         }
-        override def lastKeyName = key.name
-        def prefixBy(delimiter: String): String = {
-          val s = key.name
-          s.indexOf(delimiter) match {
-            case -1 => s
-            case i => s.slice(0, i) + delimiter
-          }
-        }
+        override def name: String = key.name
       }
-      // not used yet
-      // FIXME use non empty list
-      case class CommonPrefixes(members: Seq[Contents], prefix: String) extends Group {
+      case class CommonPrefixes(members: Seq[Contents], prefix: String) extends Xmlable {
         override def toXML = {
           <CommonPrefixes>
             <Prefix>{prefix}</Prefix>
           </CommonPrefixes>
-        }
-        override def lastKeyName = {
-          members.last.key.name
         }
       }
 
@@ -78,78 +65,32 @@ object GetBucket {
       if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
         failWith(Error.AccessDenied())
 
-      implicit class _ApplySome[A](a: A) {
-        def applySome[B](bOpt: Option[B])(fn: A => B => A): A = {
-          bOpt match {
-            case Some(b) => fn(a)(b)
-            case None => a
-          }
-        }
+      import BucketListing._
+      val len = maxKeys match {
+        case Some(a) => a
+        case None => 1000 // dafault
       }
-     
-      val groups0: Seq[Contents] = bucket.listKeys
+
+      val result = bucket.listKeys
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
         .filter { version =>
           val meta = Meta.fromBytes(version.meta.read)
           !meta.isDeleteMarker
         }
-        .sortBy(_.key.name) 
-        // [spec] Indicates where in the bucket listing begins. Marker is included in the response if it was sent with the request.
-        .applySome(marker) { a => b => a.dropWhile(_.key.name <= b) }
-        .applySome(prefix) { a => b => a.filter(_.key.name.startsWith(b)) }
-        .map(Contents(_))
+        .sortBy(_.key.name)
+        .map(a => Single(Contents(a)))
+        .takesOnlyAfter(marker)
+        .filterByPrefix(prefix)
+        .groupByDelimiter(delimiter)
+        .truncateByMaxLen(len)
 
-      val groups1: Seq[Group] = if (delimiter.isEmpty) {
-        groups0
-      } else {
-        val deli = encodeKeyName(delimiter.get)
-        groups0.groupBy(_.prefixBy(deli)).toSeq // [prefix -> seq(contents)]
-          .sortBy(_._1) // sort by prefix
-          .map { case (prefix, members) =>
-            if (members.size > 1) {
-              CommonPrefixes(members, prefix.slice(0, prefix.size - deli.size))
-            } else {
-              members(0)
-            }
-          }
+      val groups: Seq[Xmlable] = result.value.map {
+        case Single(a) => a
+        case Group(a, prefix) => CommonPrefixes(a.map(_.get), prefix)
       }
 
-      def parseMaxKeys(s: String): Int = {
-        if (s == "") {
-          failWith(Error.InvalidArgument())
-        }
-        Try(s.toInt).toOption match {
-          case Some(a) => a
-          case None => failWith(Error.InvalidArgument())
-        }
-      }
-
-      val len = maxKeys match {
-        case Some(a) => parseMaxKeys(a)
-        case None => 1000 // dafault
-      } 
-
-      val truncated = if (len == 0) {
-        false
-      } else {
-        groups1.size > len
-      }
-
-      // [spec] All of the keys rolled up in a common prefix count as a single return when calculating the number of returns.
-      // So truncate the list after grouping into CommonPrefixes
-      val groups: Seq[Group] = groups1.take(len)
-
-      // [spec] This element is returned only if you have delimiter request parameter specified.
-      // If response does not include the NextMaker and it is truncated,
-      // you can use the value of the last Key in the response as the marker in the subsequent request
-      // to get the next set of object keys.
-      val nextMarker = truncated match {
-        case true if len > 0 => Some(groups(len-1).lastKeyName)
-        case _ => None
-      }
-
-      val xml = 
+      val xml =
         <ListBucketResult>
           <Name>{bucketName}</Name>
           { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => <Prefix></Prefix> } }
@@ -158,8 +99,8 @@ object GetBucket {
           { delimiter match { case Some(a) => <Delimiter>{a}</Delimiter>; case None => NodeSeq.Empty } }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
-          { delimiter match { case Some(a) if truncated => <NextMarker>{nextMarker.get}</NextMarker>; case _ => NodeSeq.Empty } }
-          <IsTruncated>{truncated}</IsTruncated>
+          { delimiter match { case Some(a) if result.truncated => <NextMarker>{result.nextMarker.get}</NextMarker>; case _ => NodeSeq.Empty } }
+          <IsTruncated>{result.truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>
 
