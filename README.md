@@ -5,23 +5,7 @@
 
 **akashic-storage** is a Amazon S3 compatible storage server running on any filesystem backend. The ultimate goal is to offer the best on-premise S3 storage used world-wide. It's build on top of akka-http and written in Scala.
 
+You can learn more about **akashic-storage** in our [Wiki](https://github.com/akiradeveloper/akashic-storage/wiki)
+
 ![Concept](https://rawgit.com/akiradeveloper/akashic-storage/develop/concept.svg)
 
-## Getting Started
-
-The easiest way to try out akashic-storage is to use [Vagrant](https://www.vagrantup.com) virtual machine. It will install everything you need and set up working akashic-storage service. You can find `Vagranfile` at `/vagrant-quick-start` folder.
-
-### First step
-
-Before launching your Vagrant environment, you must install [VirtualBox 5.x](https://www.virtualbox.org/wiki/Downloads) as [Vagrant](https://www.vagrantup.com/downloads.html). All of these software packages provide easy-to-use visual installers for all popular operating systems.
-
-### Boot up Vagrant
-
-Once you finish installing Vagrant, you can now boot up your Vagrant VM.
-
-```
-$ cd vagrant-quick-start
-$ vagrant up
-```
-
-Now you can access akashic-storage at `http://localhost:10946`.
