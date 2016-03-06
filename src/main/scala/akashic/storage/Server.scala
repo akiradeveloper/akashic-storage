@@ -83,7 +83,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   def adminAuthenticator(credentials: Credentials): Option[String] = {
     credentials match {
-      case p @ Credentials.Provided(id) if p.verify("passwd") => Some(id)
+      case p @ Credentials.Provided(id) if p.verify(config.adminPassword) => Some(id)
       case _ => None
     }
   }
