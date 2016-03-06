@@ -8,6 +8,7 @@ trait ServerConfig {
   def mountpoint: Path
   def ip: String
   def port: Int
+  def adminPassword: String
 }
 
 object ServerConfig {
@@ -16,5 +17,6 @@ object ServerConfig {
     override def mountpoint = Paths.get(config.getString("mountpoint"))
     override def ip = config.getString("ip")
     override def port: Int = config.getInt("port")
+    override def adminPassword = config.getString("admin-passwd")
   }
 }

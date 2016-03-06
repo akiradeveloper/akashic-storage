@@ -10,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object RunServer extends App {
-  val config = ServerConfig(ConfigFactory.load("test.conf"))
+  val config = ServerConfig(ConfigFactory.load("run-server.conf"))
   Files.createDirectories(config.mountpoint)
   server = Server(config, cleanup = true)
 
