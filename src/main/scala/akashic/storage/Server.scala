@@ -81,19 +81,8 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
       complete(StatusCodes.InternalServerError, HttpEntity.Empty)
   }
 
-  def adminAuthenticator(credentials: Credentials): Option[String] = {
-    credentials match {
-      case p @ Credentials.Provided(id) if p.verify(config.adminPassword) => Some(id)
-      case _ => None
-    }
-  }
-
   val apiRoute =
-    handleExceptions(adminErrHandler) {
-      authenticateBasic(realm = "akashic-storage-admin", adminAuthenticator) { userId =>
-        adminRoute
-      }
-    } ~
+    handleExceptions(adminErrHandler) { admin.Auth.authenticate(adminRoute) } ~
     handleExceptions(serviceErrHandler) { serviceRoute }
 
   val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
