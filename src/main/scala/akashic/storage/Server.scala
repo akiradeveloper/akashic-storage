@@ -8,6 +8,7 @@ import akashic.storage.patch.{Astral, Tree}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes, StatusCode}
+import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{Directive0, ExceptionHandler, Route}
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
@@ -80,8 +81,19 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
       complete(StatusCodes.InternalServerError, HttpEntity.Empty)
   }
 
+  def adminAuthenticator(credentials: Credentials): Option[String] = {
+    credentials match {
+      case p @ Credentials.Provided(id) if p.verify("passwd") => Some(id)
+      case _ => None
+    }
+  }
+
   val apiRoute =
-    handleExceptions(adminErrHandler) { adminRoute } ~
+    handleExceptions(adminErrHandler) {
+      authenticateBasic(realm = "akashic-storage-admin", adminAuthenticator) { userId =>
+        adminRoute
+      }
+    } ~
     handleExceptions(serviceErrHandler) { serviceRoute }
 
   val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)

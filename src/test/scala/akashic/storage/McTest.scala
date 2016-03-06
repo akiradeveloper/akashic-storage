@@ -4,9 +4,11 @@ import java.nio.file.{Paths, Files}
 
 import akashic.storage.server
 import akashic.storage.admin.User
+import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.{IOUtils, FileUtils}
 import org.apache.http.client.methods.{HttpGet, HttpPost}
 import org.apache.http.impl.client.HttpClients
+import org.apache.http.message.BasicHeader
 import scala.xml.XML
 import scala.sys.process.Process
 
@@ -30,7 +32,11 @@ class McTest extends ServerTestBase {
     super.beforeEach()
 
     val url = s"http://${server.address}/admin/user"
+    val authHeader = new BasicHeader("Authorization", s"Basic ${Base64.encodeBase64URLSafeString("admin:passwd".getBytes)}")
+
     val postReq = new HttpPost(url)
+    postReq.addHeader(authHeader)
+
     val postRes = HttpClients.createDefault.execute(postReq)
     assert(postRes.getStatusLine.getStatusCode === 200)
     val newUser = User.fromXML(XML.load(postRes.getEntity.getContent))
