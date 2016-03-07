@@ -47,7 +47,14 @@ object Acl {
   sealed trait Grantee {
     def permit(callerId: String): Boolean = {
       this match {
-        case ById(id: String) => id == callerId
+        case ById(id: String) => {
+          id match {
+            case "anonymous" =>
+              true
+            case _ =>
+              id == callerId
+          }
+        }
         case ByEmail(email: String) =>
           server.users.getUser(callerId).get.email == email
         case AuthenticatedUsers() =>
@@ -132,7 +139,13 @@ object Acl {
 
   sealed trait CannedAcl {
     def makeGrants: Set[Grant] = {
-      def default(owner: String) = Grant(ById(owner), FullControl())
+      def default(owner: String) = {
+        val grantee = owner match {
+          case "anonymous" => AllUsers()
+          case _ => ById(owner)
+        }
+        Grant(grantee, FullControl())
+      }
       this match {
         case Private(owner: String) => Set(default(owner))
         case PublicRead(owner: String)  => Set(default(owner), Grant(AllUsers(), Read()))
