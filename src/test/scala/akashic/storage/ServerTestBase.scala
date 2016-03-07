@@ -20,10 +20,12 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
     val config = makeConfig
     Files.createDirectories(config.mountpoint)
     server = Server(config, cleanup = true)
+
     Await.ready(server.start, Duration.Inf)
 
-    // FIXME (should via HTTP)
     server.users.addUser(TestUsers.hoge)
+    server.users.addUser(TestUsers.s3testsMain)
+    server.users.addUser(TestUsers.s3testsAlt)
   }
 
   override def afterEach {
