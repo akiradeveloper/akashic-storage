@@ -28,6 +28,12 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     Files.createDirectory(config.mountpoint.resolve("astral"))
   }
 
+  val initialized =
+    Files.exists(config.mountpoint.resolve("tree")) &&
+    Files.exists(config.mountpoint.resolve("admin")) &&
+    Files.exists(config.mountpoint.resolve("astral"))
+  require(initialized)
+
   val tree = Tree(config.mountpoint.resolve("tree"))
   val users = UserTable(config.mountpoint.resolve("admin"))
   val astral = Astral(config.mountpoint.resolve("astral"))
