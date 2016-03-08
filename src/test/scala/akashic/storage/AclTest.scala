@@ -49,9 +49,17 @@ class AclTest extends ServerTestBase {
   test("anon user can't access to auth resources") { p =>
     import p._
     auth1.createBucket("authb")
-    anon.putObject("authb", "anono", FILE) // should throw
+
+    try {
+      anon.putObject("authb", "anono", FILE) // should throw
+      fail
+    } catch { case _ => }
 
     auth1.putObject("authb", "autho", FILE)
-    anon.getObject("authb", "autho") // should throw
+
+    try {
+      anon.getObject("authb", "autho") // should throw
+      fail
+    } catch { case _ => }
   }
 }
