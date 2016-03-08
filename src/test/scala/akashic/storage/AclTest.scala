@@ -3,11 +3,14 @@ package akashic.storage
 import akashic.storage.admin.TestUsers
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.{AnonymousAWSCredentials, BasicAWSCredentials}
+import com.amazonaws.services.s3.model.{CannedAccessControlList, CreateBucketRequest}
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
 
 class AclTest extends ServerTestBase {
 
-  case class FixtureParam(anon: AmazonS3Client, auth1: AmazonS3Client)
+  case class FixtureParam(anon: AmazonS3Client,
+                          auth1: AmazonS3Client,
+                          auth2: AmazonS3Client)
   override protected def withFixture(test: OneArgTest) = {
     val anonConf = new ClientConfiguration
     val anon = new AmazonS3Client(new AnonymousAWSCredentials(), anonConf)
@@ -20,7 +23,13 @@ class AclTest extends ServerTestBase {
     auth1.setEndpoint(s"http://${server.address}")
     auth1.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true))
 
-    test(FixtureParam(anon, auth1))
+    val auth2Conf = new ClientConfiguration()
+    auth2Conf.setSignerOverride("S3SignerType")
+    val auth2 = new AmazonS3Client(new BasicAWSCredentials(TestUsers.s3testsAlt.accessKey, TestUsers.s3testsAlt.secretKey), auth1Conf)
+    auth2.setEndpoint(s"http://${server.address}")
+    auth2.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true))
+
+    test(FixtureParam(anon, auth1, auth2))
   }
 
   val FILE = getTestFile("test.txt")
@@ -46,20 +55,37 @@ class AclTest extends ServerTestBase {
     auth1.getObject("anonb", "anono")
   }
 
+  def shouldThrow[A](fn: => A): Unit = {
+    try {
+      fn
+      fail
+    } catch { case _: Throwable => }
+  }
+
   test("anon user can't access to auth resources") { p =>
     import p._
     auth1.createBucket("authb")
 
-    try {
-      anon.putObject("authb", "anono", FILE) // should throw
-      fail
-    } catch { case _ => }
+    shouldThrow {
+      anon.putObject("authb", "anono", FILE)
+    }
 
     auth1.putObject("authb", "autho", FILE)
 
-    try {
-      anon.getObject("authb", "autho") // should throw
-      fail
-    } catch { case _ => }
+    shouldThrow {
+      anon.getObject("authb", "autho")
+    }
+  }
+
+  test("auth2 can access auth1 resources (canned acl)") { p =>
+    import p._
+    auth1.createBucket(new CreateBucketRequest("auth1b")
+      .withCannedAcl(CannedAccessControlList.AuthenticatedRead))
+
+    shouldThrow {
+      anon.listObjects("auth1b")
+    }
+
+    auth2.listObjects("auth1b")
   }
 }
