@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion
 import com.amazonaws.services.s3.model._
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
+import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.HmacUtils
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.{HttpPut, HttpGet, HttpPost}
@@ -347,13 +348,18 @@ class AmazonSDKTest extends ServerTestBase {
 
     val f = getTestFile("test.txt")
 
-    val reqPost = new HttpPost(s"http://${server.config.ip}:${server.config.port}/mybucket/")
+    val policy = strings.random(64)
+    val arr: Array[Byte] = HmacUtils.hmacSha1(TestUsers.hoge.secretKey.getBytes, policy.getBytes("UTF-8"))
+    val signature = Base64.encodeBase64String(arr)
 
-    // since lisb's client sends uncapitalized signature and policy our test case follows.
+    val reqPost = new HttpPost(s"http://${server.config.ip}:${server.config.port}/mybucket/")
 
     // [spec] passed as form fields to POST in the multipart/form-data encoded message body.
     val entity = MultipartEntityBuilder.create
       .addTextBody("key", "a/b")
+      .addTextBody("Policy", policy)
+      .addTextBody("Signature", signature)
+      .addTextBody("AWSAccessKeyId", TestUsers.hoge.accessKey)
       .addTextBody("success_action_status", "201")
       .addTextBody("Content-Disposition", "hoge.txt")
       .addTextBody("Content-Type", "text/hoge")

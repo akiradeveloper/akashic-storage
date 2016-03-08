@@ -13,16 +13,16 @@ object PostObject {
   val matcher =
     post &
       extractBucket &
-      formFields(
+      formFields( // formFields is case-sensitive
         "key",
         "file".as[Array[Byte]],
         "acl"?,
         "success_action_status".as[Int]?,
         "Content-Type"?,
         "Content-Disposition"?,
-        "policy"?,
+        "Policy"?,
         "AWSAccessKeyId"?,
-        "signature"?
+        "Signature"?
       ) &
       extractMetadataFromFields
 
