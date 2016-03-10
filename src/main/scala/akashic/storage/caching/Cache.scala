@@ -28,7 +28,7 @@ trait Cache[V] extends Data[V] {
   def put(v: V) {
     val lookupKey = Files.exists(filePath) match {
       case true => k
-      case false => "INITIAL"
+      case false => ""
     }
     cacheMap.find(lookupKey) match {
       case None =>
