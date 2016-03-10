@@ -30,7 +30,7 @@ object GetBucket {
         def toXML: NodeSeq
       }
       case class Contents(version: Version) extends Xmlable with BucketListing.Filterable {
-        val acl = Acl.fromBytes(version.acl.read)
+        val acl = version.acl.get
         val meta = Meta.fromBytes(version.meta.read)
         val ownerId = acl.owner
         val key = version.key

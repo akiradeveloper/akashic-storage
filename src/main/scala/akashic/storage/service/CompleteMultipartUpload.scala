@@ -105,7 +105,7 @@ object CompleteMultipartUpload {
           }
 
           val aclBytes: Array[Byte] = upload.acl.read
-          Commit.replaceData(versionPatch.acl) { data =>
+          Commit.replaceData(versionPatch.acl.data) { data =>
             data.write(aclBytes)
           }
 

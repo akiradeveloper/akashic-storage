@@ -2,6 +2,7 @@ package akashic.storage.patch
 
 import java.nio.file._
 
+import akashic.storage.caching.Cache
 import akashic.storage.server
 
 object Commit {

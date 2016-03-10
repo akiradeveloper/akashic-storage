@@ -27,7 +27,7 @@ object GetObjectAcl {
         case Some(a) => a
         case None => failWith(Error.NoSuchKey())
       }
-      val versionAcl = Acl.fromBytes(version.acl.read)
+      val versionAcl = version.acl.get
       if (!versionAcl.getPermission(callerId).contains(Acl.ReadAcp()))
         failWith(Error.AccessDenied())
 

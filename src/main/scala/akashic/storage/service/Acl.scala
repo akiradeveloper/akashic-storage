@@ -6,6 +6,10 @@ import scala.xml.NodeSeq
 import akashic.storage.server
 
 object Acl {
+
+  def writer(a: t): Array[Byte] = a.pickle.value
+  def reader(a: Array[Byte]): t = fromBytes(a)
+
   case class t(owner: String, grants: Iterable[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
     def getPermission(callerId: String): Set[Permission] = {
