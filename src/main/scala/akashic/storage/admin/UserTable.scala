@@ -12,7 +12,7 @@ import scala.pickling.binary._
 case class UserTable(root: Path) {
   val dbPath = root.resolve("db")
   def makeCache(path: Path) = new Cache[InMem] {
-    override def cacheMap: CacheMap[K, InMem] = new CacheMap[K, InMem]()
+    override def cacheMap: CacheMap[K, InMem] = new CacheMap.Null[K, InMem]()
     private def doWriter(a: InMem): Array[Byte] = {
       a.toByteArray
     }

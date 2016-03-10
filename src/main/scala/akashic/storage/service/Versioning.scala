@@ -9,7 +9,7 @@ import scala.pickling.binary._
 
 object Versioning {
   def makeCache(path: Path) = new Cache[Versioning.t] {
-    override def cacheMap: CacheMap[K, Versioning.t] = new CacheMap[K, Versioning.t]()
+    override def cacheMap: CacheMap[K, Versioning.t] = new CacheMap.Null[K, Versioning.t]()
     override def writer: (Versioning.t) => Array[Byte] = Versioning.writer
     override def reader: (Array[Byte]) => Versioning.t = Versioning.reader
     override val filePath: Path = path

@@ -16,7 +16,7 @@ object Acl {
     override val filePath: Path = path
     override def writer: (Acl.t) => Array[Byte] = Acl.writer
     override def reader: (Array[Byte]) => Acl.t = Acl.reader
-    override def cacheMap: CacheMap[K, Acl.t] = new CacheMap[K, Acl.t]()
+    override def cacheMap: CacheMap[K, Acl.t] = new CacheMap.Null[K, Acl.t]()
   }
   case class t(owner: String, grants: Iterable[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value

@@ -12,7 +12,7 @@ object Meta {
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]) = fromBytes(a)
   def makeCache(path: Path) = new Cache[Meta.t] {
-    override def cacheMap: CacheMap[K, t] = new CacheMap[K, Meta.t]()
+    override def cacheMap: CacheMap[K, t] = new CacheMap.Null[K, t]()
     override def writer: (t) => Array[Byte] = Meta.writer
     override def reader: (Array[Byte]) => t = Meta.reader
     override val filePath: Path = path
