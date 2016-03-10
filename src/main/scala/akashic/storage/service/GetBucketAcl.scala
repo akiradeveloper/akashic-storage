@@ -22,7 +22,7 @@ object GetBucketAcl {
     override def resource: String = Resource.forBucket(bucketName)
     override def runOnce: Route = {
       val bucket = findBucket(server.tree, bucketName)
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .build

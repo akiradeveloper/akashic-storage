@@ -19,7 +19,7 @@ object HeadBucket {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
 
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
         failWith(Error.AccessDenied())
 

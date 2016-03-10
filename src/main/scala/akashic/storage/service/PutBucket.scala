@@ -33,7 +33,7 @@ object PutBucket {
 
       if (Files.exists(dest)) {
         val bucket = findBucket(server.tree, bucketName)
-        val bucketAcl = Acl.fromBytes(bucket.acl.read)
+        val bucketAcl = bucket.acl.get
         if (bucketAcl.owner == callerId) {
           failWith(Error.BucketAlreadyOwnByYou())
         } else {
@@ -45,19 +45,19 @@ object PutBucket {
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
-        Commit.replaceData(bucketPatch.acl) { data =>
+        Commit.replaceData(bucketPatch.acl, Acl.makeCache) { data =>
           val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, callerId)).map(_.makeGrants).get
-          data.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
+          data.put(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders))
         }
 
-        Commit.replaceData(bucketPatch.versioning) { data =>
-          data.write(Versioning.t(Versioning.UNVERSIONED).toBytes)
+        Commit.replaceData(bucketPatch.versioning, Versioning.makeCache) { data =>
+          data.put(Versioning.t(Versioning.UNVERSIONED))
         }
 
         // [spec] empty string (for the US East (N. Virginia) region)
         val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
-        Commit.replaceData(bucketPatch.location) { data =>
-          data.write(Location.t(loc.get).toBytes)
+        Commit.replaceData(bucketPatch.location, Location.makeCache) { data =>
+          data.put(Location.t(loc.get))
         }
       }
 

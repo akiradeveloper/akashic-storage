@@ -30,7 +30,7 @@ object PutBucketAcl {
     override def resource: String = Resource.forBucket(bucketName)
     override def runOnce: Route = {
       val bucket = findBucket(server.tree, bucketName)
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       if (!bucketAcl.getPermission(callerId).contains(Acl.WriteAcp()))
         failWith(Error.AccessDenied())
 
@@ -45,8 +45,8 @@ object PutBucketAcl {
         Acl.t(bucketAcl.owner, grantsFromCanned)
       }
 
-      Commit.replaceData(bucket.acl) { data =>
-        data.write(newAcl.toBytes)
+      Commit.replaceData(bucket.acl, Acl.makeCache) { data =>
+        data.put(newAcl)
       }
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)

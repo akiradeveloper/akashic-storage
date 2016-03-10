@@ -2,6 +2,7 @@ package akashic.storage.admin
 
 import java.nio.file.{Files, Path}
 
+import akashic.storage.caching.{CacheMap, Cache}
 import akashic.storage.patch.{Data, Commit}
 import akashic.storage.{files, strings}
 
@@ -10,10 +11,22 @@ import scala.pickling.binary._
 
 case class UserTable(root: Path) {
   val dbPath = root.resolve("db")
-  val dbData: Data = Data(dbPath)
-  var updateTime: Long = -1L
-  var db: InMem = InMem(Map(), Map())
-  dbData.write(db.toByteArray)
+  def makeCache(path: Path) = new Cache[InMem] {
+    override def cacheMap: CacheMap[K, InMem] = new CacheMap[K, InMem]()
+    private def doWriter(a: InMem): Array[Byte] = {
+      a.toByteArray
+    }
+    private def doReader(a: Array[Byte]): InMem = {
+      val list = BinaryPickle(a).unpickle[Seq[User.t]]
+      val userMap = list.map(a => (a.id, a)).toMap
+      InMem(userMap.values)
+    }
+    override def writer: (InMem) => Array[Byte] = doWriter
+    override def reader = doReader
+    override val filePath: Path = path
+  }
+  val dbData = makeCache(dbPath)
+  dbData.put(InMem(Map(), Map()))
 
   object InMem {
     def apply(ls: Iterable[User.t]): InMem = {
@@ -41,46 +54,22 @@ case class UserTable(root: Path) {
       userMap.values.toSeq.pickle.value
     }
     def commit {
-      val p = files.lastDate(dbPath).getTime
-      var q = p
-      var firstTime = true
-      while (p == q) {
-        if (!firstTime) {
-          Thread.sleep(1000)
-        }
-        firstTime = false
-        Commit.replaceData(dbData) { data: Data =>
-          data.write(toByteArray)
-        }
-        q = files.lastDate(dbPath).getTime
+      Commit.replaceData(dbData, makeCache) { data =>
+        data.put(this)
       }
-      assert(files.lastDate(dbPath).getTime > p)
-    }
-  }
-
-  private def reload = {
-    val pTime = files.lastDate(dbPath).getTime
-    if (updateTime < pTime) {
-      val list = BinaryPickle(dbData.read).unpickle[Seq[User.t]]
-      val userMap = list.map(a => (a.id, a)).toMap
-      db = InMem(userMap.values)
-      updateTime = pTime
     }
   }
 
   def getId(accessKey: String): Option[String] = {
-    reload
-    db.idMap.get(accessKey)
+    dbData.get.idMap.get(accessKey)
   }
 
   def getUser(id: String): Option[User.t] = {
-    reload
-    db.userMap.get(id)
+    dbData.get.userMap.get(id)
   }
 
   def addUser(user: User.t): Unit = {
-    reload
-    db.add(user).commit
+    dbData.get.add(user).commit
   }
 
   private def mkRandUser: User.t = {
@@ -96,13 +85,11 @@ case class UserTable(root: Path) {
 
   def mkUser: User.t = {
     val newUser = mkRandUser
-    reload
-    db.add(newUser).commit
+    dbData.get.add(newUser).commit
     newUser
   }
 
   def updateUser(id: String, user: User.t): Unit = {
-    reload
-    db.remove(id).add(user).commit
+    dbData.get.remove(id).add(user).commit
   }
 }

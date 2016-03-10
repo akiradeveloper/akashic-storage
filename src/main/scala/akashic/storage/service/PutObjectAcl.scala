@@ -49,8 +49,8 @@ object PutObjectAcl {
         Acl.t(versionAcl.owner, grantsFromCanned)
       }
 
-      Commit.replaceData(version.acl.data) { data =>
-        data.write(newAcl.toBytes)
+      Commit.replaceData(version.acl, Acl.makeCache) { data =>
+        data.put(newAcl)
       }
 
       val headers = ResponseHeaderList.builder

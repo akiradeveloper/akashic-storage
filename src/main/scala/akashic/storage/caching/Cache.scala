@@ -4,14 +4,14 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{Files, Path}
 
 import akashic.storage.files
+import akashic.storage.patch.Data
 
-trait Cache[V] {
+trait Cache[V] extends Data[V] {
   type K = String
   def k: K = {
-    val attr = Files.readAttributes(file, classOf[BasicFileAttributes])
+    val attr = Files.readAttributes(filePath, classOf[BasicFileAttributes])
     s"${attr.fileKey.hashCode}-${attr.creationTime.toMillis}"
   }
-  def file: Path
   def cacheMap: CacheMap[K, V]
   def reader: Array[Byte] => V
   def writer: V => Array[Byte]
@@ -19,17 +19,21 @@ trait Cache[V] {
     cacheMap.find(k) match {
       case Some(a) => a
       case None =>
-        val bytes = files.readBytes(file)
+        val bytes = files.readBytes(filePath)
         val ret = reader(bytes)
         cacheMap.insert(k, ret)
         ret
     }
   }
   def put(v: V) {
-    cacheMap.find(k) match {
+    val lookupKey = Files.exists(filePath) match {
+      case true => k
+      case false => "INITIAL"
+    }
+    cacheMap.find(lookupKey) match {
       case None =>
         val bytes = writer(v)
-        files.writeBytes(file, bytes)
+        files.writeBytes(filePath, bytes)
         cacheMap.insert(k, v)
       case _ =>
     }

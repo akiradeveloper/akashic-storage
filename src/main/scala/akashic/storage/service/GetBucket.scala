@@ -31,7 +31,7 @@ object GetBucket {
       }
       case class Contents(version: Version) extends Xmlable with BucketListing.Filterable {
         val acl = version.acl.get
-        val meta = Meta.fromBytes(version.meta.read)
+        val meta = version.meta.get
         val ownerId = acl.owner
         val key = version.key
         override def toXML = {
@@ -61,7 +61,7 @@ object GetBucket {
         case Some(a) => a
         case None => failWith(Error.NoSuchBucket())
       }
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
         failWith(Error.AccessDenied())
 
@@ -75,7 +75,7 @@ object GetBucket {
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
         .filter { version =>
-          val meta = Meta.fromBytes(version.meta.read)
+          val meta = version.meta.get
           !meta.isDeleteMarker
         }
         .sortBy(_.key.name)

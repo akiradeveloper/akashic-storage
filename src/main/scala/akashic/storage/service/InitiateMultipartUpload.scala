@@ -31,7 +31,7 @@ object InitiateMultipartUpload {
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
 
       if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
         failWith(Error.AccessDenied())
@@ -48,9 +48,9 @@ object InitiateMultipartUpload {
         upload.init
 
         val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
-        upload.acl.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
+        upload.acl.put(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders))
 
-        upload.meta.write(
+        upload.meta.put(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,
@@ -60,7 +60,7 @@ object InitiateMultipartUpload {
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
             xattrs = metadata
-          ).toBytes)
+          ))
       }
       val xml =
         <InitiateMultipartUploadResult>

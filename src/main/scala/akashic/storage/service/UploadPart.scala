@@ -1,7 +1,7 @@
 package akashic.storage.service
 
 import akashic.storage.{files, server}
-import akashic.storage.patch.Commit
+import akashic.storage.patch.{Data, Commit}
 import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
 import akka.http.scaladsl.model.headers.ETag
 import akka.http.scaladsl.server.Route
@@ -42,8 +42,8 @@ object UploadPart {
       val computedETag = Hex.encodeHexString(computedMD5)
 
       val part = upload.part(partNumber)
-      Commit.replaceData(part.unwrap) { data =>
-        data.write(partData)
+      Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
+        data.put(partData)
       }
 
       val headers = ResponseHeaderList.builder

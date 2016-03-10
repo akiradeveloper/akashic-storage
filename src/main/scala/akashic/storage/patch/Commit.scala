@@ -7,8 +7,8 @@ import akashic.storage.server
 
 object Commit {
   // for file
-  def replaceData(to: Data)(fn: Data => Unit): Unit = {
-    val from = server.astral.allocData(fn)
+  def replaceData[V](to: Data[V], makeTemp: Path => Data[V])(fn: Data[V] => Unit): Unit = {
+    val from = server.astral.allocData(makeTemp, fn)
     Files.move(from.root, to.root, StandardCopyOption.REPLACE_EXISTING)
   }
 

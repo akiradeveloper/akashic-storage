@@ -70,7 +70,7 @@ object GetObject {
 
       // TODO if this is a delete marker?
 
-      val meta = Meta.fromBytes(version.meta.read)
+      val meta = version.meta.get
       
       val filePath = version.data.filePath
 

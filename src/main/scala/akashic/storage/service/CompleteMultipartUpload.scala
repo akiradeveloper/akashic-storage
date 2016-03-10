@@ -100,18 +100,17 @@ object CompleteMultipartUpload {
           files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
             for (part <- parts) {
               // parts are all valid so we don't need to call findPart
-              f.write(upload.part(part.partNumber).unwrap.read)
+              f.write(upload.part(part.partNumber).unwrap.get)
             }
           }
 
-          val aclBytes: Array[Byte] = upload.acl.read
-          Commit.replaceData(versionPatch.acl.data) { data =>
-            data.write(aclBytes)
+          Commit.replaceData(versionPatch.acl, Acl.makeCache) { data =>
+            data.put(upload.acl.get)
           }
 
-          val oldMeta = Meta.fromBytes(upload.meta.read)
+          val oldMeta = upload.meta.get
           val newMeta = oldMeta.copy(eTag = newETag)
-          versionPatch.meta.write(newMeta.toBytes)
+          versionPatch.meta.put(newMeta)
         }
 
         server.astral.free(upload.root)

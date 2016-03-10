@@ -6,9 +6,9 @@ import akashic.storage.{files, strings}
 
 // Astral is where everything is given birth and die
 case class Astral(root: Path) {
-  def allocData(fn: Data => Unit): Data = {
+  def allocData[V](makeTemp: Path => Data[V], fn: Data[V] => Unit): Data[V] = {
     val newPath = root.resolve(strings.random(32))
-    val data = Data(newPath)
+    val data = makeTemp(newPath)
     try {
       fn(data)
     } catch {
@@ -47,7 +47,7 @@ case class Astral(root: Path) {
     Some(newPath)
   }
 
-  def free(data: Data): Unit = {
+  def free[V](data: Data[V]): Unit = {
     Files.delete(moveBack(data.root).get)
   }
 

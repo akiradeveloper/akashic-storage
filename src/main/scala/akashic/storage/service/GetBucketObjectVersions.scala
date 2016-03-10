@@ -36,7 +36,7 @@ object GetBucketObjectVersions {
       }
       case class VersionContents(unwrap: Version) extends Xmlable with Filterable {
         override def name: String = unwrap.key.name
-        val meta = Meta.fromBytes(unwrap.meta.read)
+        val meta = unwrap.meta.get
         val acl = unwrap.acl.get
         def asNormalVersion: NodeSeq =
           <Version>

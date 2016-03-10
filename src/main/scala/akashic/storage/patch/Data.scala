@@ -5,20 +5,20 @@ import java.nio.file.{Files, Path}
 import akashic.storage.files
 import org.apache.commons.io.FileUtils
 
-case class Data(root: Path) extends Patch {
-  val filePath: Path = root
+trait Data[V] extends Patch {
+  val filePath: Path
   def length: Long = files.fileSize(filePath)
-  def write(bytes: Array[Byte]) = {
-    files.writeBytes(filePath, bytes)
+  def root = filePath
+  def get: V
+  def put(v: V)
+}
+
+object Data {
+  case class Pure(filePath: Path) extends Data[Array[Byte]] {
+    override def get: Array[Byte] = files.readBytes(filePath)
+    override def put(v: Array[Byte]): Unit = files.writeBytes(filePath, v)
   }
-  def read: Array[Byte] = {
-    files.readBytes(filePath)
-  }
-  def readOpt: Option[Array[Byte]] = {
-    if (Files.exists(root)) {
-      Some(read)
-    } else {
-      None
-    }
+  object Pure {
+    def make(path: Path) = Pure(path)
   }
 }

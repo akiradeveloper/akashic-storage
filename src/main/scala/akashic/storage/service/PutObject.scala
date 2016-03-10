@@ -34,7 +34,7 @@ object MakeObject {
       val computedETag = Hex.encodeHexString(computedMD5)
 
       val bucket = findBucket(server.tree, bucketName)
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
 
       if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
         failWith(Error.AccessDenied())
@@ -47,12 +47,12 @@ object MakeObject {
       Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
         val version = patch.asVersion
 
-        Commit.replaceData(version.acl.data) { data =>
+        Commit.replaceData(version.acl, Acl.makeCache) { data =>
           val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner)).map(_.makeGrants).get
-          data.write(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders).toBytes)
+          data.put(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders))
         }
-        version.data.write(objectData)
-        version.meta.write(
+        version.data.put(objectData)
+        version.meta.put(
           Meta.t(
             isVersioned = false,
             isDeleteMarker = false,
@@ -62,7 +62,7 @@ object MakeObject {
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
             xattrs = metadata
-          ).toBytes)
+          ))
       }
       Result("null", computedETag)
     }

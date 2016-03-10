@@ -13,7 +13,7 @@ trait Patch {
 
   def name: String = files.basename(root)
 
-  def asData = Data(root)
+//   def asData = Data(root)
   def asBucket = Bucket(root)
   def asKey = Key(root)
   def asVersion = Version(root)

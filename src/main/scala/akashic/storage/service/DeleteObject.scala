@@ -15,7 +15,7 @@ object DeleteObject {
     // x-amz-version-id
     // Returns the version ID of the delete marker created as a result of the DELETE operation.
     // If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
-    val versioning = Versioning.fromBytes(bucket.versioning.read).value
+    val versioning = bucket.versioning.get.value
     if (versionId.isDefined) {
       assert(false)
       None
@@ -47,7 +47,7 @@ object DeleteObject {
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
 
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
         failWith(Error.AccessDenied())
 

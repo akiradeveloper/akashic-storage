@@ -22,7 +22,7 @@ object GetBucketLocation {
     override def resource: String = Resource.forBucket(bucketName)
     override def runOnce: Route = {
       val bucket = findBucket(server.tree, bucketName)
-      val loc = Location.fromBytes(bucket.location.read)
+      val loc = bucket.location.get
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .build

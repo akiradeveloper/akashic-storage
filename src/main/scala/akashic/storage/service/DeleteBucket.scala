@@ -18,7 +18,7 @@ object DeleteBucket {
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val bucketAcl = Acl.fromBytes(bucket.acl.read)
+      val bucketAcl = bucket.acl.get
       if (callerId != bucketAcl.owner)
         failWith(Error.AccessDenied())
       if (!bucket.listKeys.forall(_.deletable))

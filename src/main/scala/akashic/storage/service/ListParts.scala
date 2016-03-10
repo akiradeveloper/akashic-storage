@@ -51,7 +51,7 @@ object ListParts {
         case None => 0
       }
 
-      val acl = Acl.fromBytes(upload.acl.read)
+      val acl = upload.acl.get
 
       val ownerId = acl.owner
 
