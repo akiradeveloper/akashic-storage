@@ -13,7 +13,13 @@ trait Cache[V] extends Data[V] {
     Files.exists(filePath) match {
       case true =>
         val attr = Files.readAttributes(filePath, classOf[BasicFileAttributes])
-        s"${attr.fileKey.hashCode}-${attr.creationTime.toMillis}"
+        attr.fileKey match {
+          // if the fileKey is null we can't safely cache objects.
+          // because the filesystem returns null fileKey is not common case
+          // I decided to not cache.
+          case null => NULL_KEY
+          case x => s"${x.hashCode}-${attr.creationTime.toMillis}"
+        }
       case false => NULL_KEY
     }
   }
