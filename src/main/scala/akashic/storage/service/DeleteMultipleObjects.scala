@@ -13,6 +13,7 @@ object DeleteMultipleObjects {
   val matcher =
     post &
     extractBucket &
+    withParameter("delete") &
     entity(as[String]) &
     extractRequest
 
