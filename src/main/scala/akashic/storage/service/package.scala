@@ -65,6 +65,7 @@ package object service {
       )
 
   // torima impl
+  @deprecated
   def extractMetadataFromFields: Directive1[HeaderList.t] =
     entity(as[Multipart.FormData]).map { a =>
       val fut = a.toStrict(FiniteDuration.apply(30, TimeUnit.SECONDS))
