@@ -7,10 +7,21 @@ import akashic.storage.files
 import akashic.storage.patch.Data
 
 trait Cache[V] extends Data[V] {
+  val NULL_KEY = ""
   type K = String
-  def k: K = {
-    val attr = Files.readAttributes(filePath, classOf[BasicFileAttributes])
-    s"${attr.fileKey.hashCode}-${attr.creationTime.toMillis}"
+  private def computeLookupKey: K = {
+    Files.exists(filePath) match {
+      case true =>
+        val attr = Files.readAttributes(filePath, classOf[BasicFileAttributes])
+        s"${attr.fileKey.hashCode}-${attr.creationTime.toMillis}"
+      case false => NULL_KEY
+    }
+  }
+  private def k: K = {
+    cacheMap match {
+      case _: CacheMap.Null[K, V] => NULL_KEY
+      case _ => computeLookupKey
+    }
   }
   def cacheMap: CacheMap[K, V]
   def reader: Array[Byte] => V
@@ -26,11 +37,7 @@ trait Cache[V] extends Data[V] {
     }
   }
   def put(v: V) {
-    val lookupKey = Files.exists(filePath) match {
-      case true => k
-      case false => ""
-    }
-    cacheMap.find(lookupKey) match {
+    cacheMap.find(k) match {
       case None =>
         val bytes = writer(v)
         files.writeBytes(filePath, bytes)
