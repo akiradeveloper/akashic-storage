@@ -8,10 +8,10 @@ import scala.util.Try
 object V2Presigned {
   def authorize(resource: String, req: HttpRequest): Option[String] = {
     val paramList = ParamList.fromRequest(req)
-    val headerList = HeaderList.fromRequest(req)
-
     val accessKeyParam: Option[String] = paramList.find("AWSAccessKeyId")
     if (accessKeyParam.isEmpty) return Some("")
+
+    val headerList = HeaderList.fromRequest(req)
 
     Try {
       val accessKey = accessKeyParam.get

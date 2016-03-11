@@ -104,9 +104,7 @@ object CompleteMultipartUpload {
             }
           }
 
-          Commit.replaceData(versionPatch.acl, Acl.makeCache) { data =>
-            data.put(upload.acl.get)
-          }
+          versionPatch.acl.put(upload.acl.get)
 
           val oldMeta = upload.meta.get
           val newMeta = oldMeta.copy(eTag = newETag)

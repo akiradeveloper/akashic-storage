@@ -45,19 +45,21 @@ object PutBucket {
         val bucketPatch = patch.asBucket
         bucketPatch.init
 
-        Commit.replaceData(bucketPatch.acl, Acl.makeCache) { data =>
-          val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, callerId, callerId)).map(_.makeGrants).get
-          data.put(Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders))
+        bucketPatch.acl.put {
+          val grantsFromCanned = (cannedAcl <+ Some("private"))
+            .map(Acl.CannedAcl.forName(_, callerId, callerId))
+            .map(_.makeGrants).get
+          Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
 
-        Commit.replaceData(bucketPatch.versioning, Versioning.makeCache) { data =>
-          data.put(Versioning.t(Versioning.UNVERSIONED))
+        bucketPatch.versioning.put {
+          Versioning.t(Versioning.UNVERSIONED)
         }
 
-        // [spec] empty string (for the US East (N. Virginia) region)
-        val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
-        Commit.replaceData(bucketPatch.location, Location.makeCache) { data =>
-          data.put(Location.t(loc.get))
+        bucketPatch.location.put {
+          // [spec] empty string (for the US East (N. Virginia) region)
+          val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
+          Location.t(loc.get)
         }
       }
 

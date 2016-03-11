@@ -8,11 +8,11 @@ import scala.util.Try
 
 object V2 {
   def authorize(resource: String, req: HttpRequest): Option[String] = {
-    val paramList = ParamList.fromRequest(req)
     val headerList = HeaderList.fromRequest(req)
-
     val authHeader: Option[String] = headerList.find("Authorization")
     if (authHeader.isEmpty) return Some("")
+
+    val paramList = ParamList.fromRequest(req)
 
     Try {
       val authorization = authHeader.get
