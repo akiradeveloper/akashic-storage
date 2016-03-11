@@ -5,6 +5,7 @@ import org.apache.commons.codec.digest.HmacUtils
 
 import scala.util.Try
 
+@deprecated
 case class V2Post(policy: Option[String], accessKey: Option[String], signature: Option[String]) {
   def authorize: Option[String] = {
     if (policy.isEmpty) return Some("")

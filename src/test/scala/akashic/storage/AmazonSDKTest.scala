@@ -17,6 +17,7 @@ import org.apache.http.client.methods.{HttpPut, HttpGet, HttpPost}
 import org.apache.http.entity.FileEntity
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.HttpClients
+import org.scalatest.Ignore
 
 import scala.xml.XML
 
@@ -342,48 +343,48 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj, f)
   }
 
-//  test("post object and get") { p =>
-//    val cli = p.client
-//    cli.createBucket("mybucket")
-//
-//    val f = getTestFile("test.txt")
-//
-//    val policy = strings.random(64)
-//    val arr: Array[Byte] = HmacUtils.hmacSha1(TestUsers.hoge.secretKey.getBytes, policy.getBytes("UTF-8"))
-//    val signature = Base64.encodeBase64String(arr)
-//
-//    val reqPost = new HttpPost(s"http://${server.config.ip}:${server.config.port}/mybucket/")
-//
-//    // [spec] passed as form fields to POST in the multipart/form-data encoded message body.
-//    val entity = MultipartEntityBuilder.create
-//      .addTextBody("key", "a/b")
-//      .addTextBody("Policy", policy)
-//      .addTextBody("Signature", signature)
-//      .addTextBody("AWSAccessKeyId", TestUsers.hoge.accessKey)
-//      .addTextBody("success_action_status", "201")
-//      .addTextBody("Content-Disposition", "hoge.txt")
-//      .addTextBody("Content-Type", "text/hoge")
-//      .addBinaryBody("file", f)
-//      .addTextBody("submit", "Upload to Amazon S3")
-//      .build
-//
-//    reqPost.setEntity(entity)
-//
-//    val resPost = HttpClients.createDefault.execute(reqPost)
-//    assert(resPost.getStatusLine.getStatusCode === 201)
-//
-//    val xml = XML.load(resPost.getEntity.getContent)
-//    val bucketName = (xml \ "Bucket").text
-//    assert(bucketName === "mybucket")
-//    val keyName = (xml \ "Key").text
-//    assert(keyName === "a/b")
-//    val etag = (xml \ "ETag").text
-//    val loc = (xml \ "Location").text
-//    assert(loc === s"http://${server.config.ip}:${server.config.port}/mybucket/a%2Fb")
-//
-//    val obj = cli.getObject("mybucket", "a/b")
-//    checkFileContent(obj, f)
-//  }
+  ignore("post object and get") { p =>
+    val cli = p.client
+    cli.createBucket("mybucket")
+
+    val f = getTestFile("test.txt")
+
+    val policy = strings.random(64)
+    val arr: Array[Byte] = HmacUtils.hmacSha1(TestUsers.hoge.secretKey.getBytes, policy.getBytes("UTF-8"))
+    val signature = Base64.encodeBase64String(arr)
+
+    val reqPost = new HttpPost(s"http://${server.config.ip}:${server.config.port}/mybucket/")
+
+    // [spec] passed as form fields to POST in the multipart/form-data encoded message body.
+    val entity = MultipartEntityBuilder.create
+      .addTextBody("key", "a/b")
+      .addTextBody("Policy", policy)
+      .addTextBody("Signature", signature)
+      .addTextBody("AWSAccessKeyId", TestUsers.hoge.accessKey)
+      .addTextBody("success_action_status", "201")
+      .addTextBody("Content-Disposition", "hoge.txt")
+      .addTextBody("Content-Type", "text/hoge")
+      .addBinaryBody("file", f)
+      .addTextBody("submit", "Upload to Amazon S3")
+      .build
+
+    reqPost.setEntity(entity)
+
+    val resPost = HttpClients.createDefault.execute(reqPost)
+    assert(resPost.getStatusLine.getStatusCode === 201)
+
+    val xml = XML.load(resPost.getEntity.getContent)
+    val bucketName = (xml \ "Bucket").text
+    assert(bucketName === "mybucket")
+    val keyName = (xml \ "Key").text
+    assert(keyName === "a/b")
+    val etag = (xml \ "ETag").text
+    val loc = (xml \ "Location").text
+    assert(loc === s"http://${server.config.ip}:${server.config.port}/mybucket/a%2Fb")
+
+    val obj = cli.getObject("mybucket", "a/b")
+    checkFileContent(obj, f)
+  }
 
   test("[performance] put/get XMB") { p =>
     val cli = p.client

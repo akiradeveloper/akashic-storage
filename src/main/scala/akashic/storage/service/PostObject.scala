@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import scala.xml.NodeSeq
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
+@deprecated
 object PostObject {
   val matcher =
     post &
