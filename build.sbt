@@ -12,10 +12,10 @@ parallelExecution in Test := false
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" % "akka-stream-experimental_2.11" % "2.0.3",
-  "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0.3",
-  "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0.3",
-  "com.typesafe.akka" %% "akka-http-xml-experimental" % "2.0.3",
+  // "com.typesafe.akka" % "akka-stream-experimental_2.11" % "2.0.3",
+  // "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0.3",
+  "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.4.2",
+  "com.typesafe.akka" %% "akka-http-xml-experimental" % "2.4.2",
   "org.scala-lang.modules" %% "scala-pickling" % "0.10.1",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
   "com.typesafe" % "config" % "1.3.0",
