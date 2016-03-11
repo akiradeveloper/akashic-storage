@@ -7,17 +7,13 @@ import com.google.common.cache.CacheBuilder
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
+import akashic.storage.server
 
 object Location {
-  val cache = new CacheMap.Guava[String, t](
-    CacheBuilder.newBuilder
-      .maximumSize(128)
-      .build()
-  )
   def writer(a: t) = a.toBytes
   def reader(a: Array[Byte]) = fromBytes(a)
   def makeCache(path: Path) = new Cache[Location.t] {
-    override def cacheMap: CacheMap[K, Location.t] = cache
+    override def cacheMap: CacheMap[K, Location.t] = server.cacheMaps.forLocation
     override def writer: (Location.t) => Array[Byte] = Location.writer
     override def reader: (Array[Byte]) => Location.t = Location.reader
     override val filePath: Path = path

@@ -9,17 +9,13 @@ import com.google.common.cache.CacheBuilder
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
+import akashic.storage.server
 
 object Meta {
-  val cache = new CacheMap.Guava[String, t](
-    CacheBuilder.newBuilder
-      .maximumSize(2048)
-      .build()
-  )
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]) = fromBytes(a)
   def makeCache(path: Path) = new Cache[Meta.t] {
-    override def cacheMap: CacheMap[K, t] = cache
+    override def cacheMap: CacheMap[K, t] = server.cacheMaps.forMeta
     override def writer: (t) => Array[Byte] = Meta.writer
     override def reader: (Array[Byte]) => t = Meta.reader
     override val filePath: Path = path

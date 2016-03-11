@@ -12,18 +12,13 @@ import scala.xml.NodeSeq
 import akashic.storage.server
 
 object Acl {
-  val cache = new CacheMap.Guava[String, t](
-    CacheBuilder.newBuilder
-      .maximumSize(2048)
-      .build()
-  )
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]): t = fromBytes(a)
   def makeCache(path: Path) = new Cache[Acl.t] {
     override val filePath: Path = path
     override def writer: (Acl.t) => Array[Byte] = Acl.writer
     override def reader: (Array[Byte]) => Acl.t = Acl.reader
-    override def cacheMap: CacheMap[K, Acl.t] = cache
+    override def cacheMap: CacheMap[K, Acl.t] = server.cacheMaps.forAcl
   }
   case class t(owner: String, grants: Iterable[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value

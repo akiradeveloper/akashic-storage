@@ -3,6 +3,7 @@ package akashic.storage
 import java.nio.file.{Paths, Files}
 
 import akashic.storage.admin._
+import akashic.storage.caching.CacheMaps
 import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
 import akka.actor.ActorSystem
@@ -37,6 +38,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   val tree = Tree(config.mountpoint.resolve("tree"))
   val users = UserTable(config.mountpoint.resolve("admin"))
   val astral = Astral(config.mountpoint.resolve("astral"))
+  val cacheMaps = CacheMaps(config)
 
   val adminRoute =
     MakeUser.route ~
