@@ -33,6 +33,5 @@ func main() {
 	config := lib.Config{hostName, portNumber, passwd}
 	config.Debug()
 
-	path := os.Getenv("HOME") + "/.akashic-admin"
-	config.Encode(path)
+	config.Encode(lib.ConfigPath)
 }
