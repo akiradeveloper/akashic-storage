@@ -2,8 +2,10 @@ package main
 
 import (
 	"./lib"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -15,4 +17,7 @@ func main() {
 
 	res, err := http.DefaultClient.Do(req)
 	log.Println(res, err)
+
+	bytes, _ := ioutil.ReadAll(res.Body)
+	os.Stdout.Write(bytes)
 }
