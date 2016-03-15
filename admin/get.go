@@ -3,7 +3,6 @@ package main
 import (
 	"./lib"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
