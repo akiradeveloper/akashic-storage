@@ -3,11 +3,21 @@ package main
 import (
 	"./lib"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 )
 
 func registerMc(alias, hostName string, portNumber int, accessKey, secretKey string) {
+	command := exec.Command("mc", "config", "host", alias, "add",
+		fmt.Sprintf("http://%s:%d", hostName, portNumber),
+		accessKey, secretKey,
+		"S3v2")
+	if err := command.Run(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func main() {
