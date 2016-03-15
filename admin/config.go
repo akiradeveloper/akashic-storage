@@ -3,6 +3,7 @@ package main
 import (
 	"./lib"
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	flag.Parse()
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("hostname (default: localhost): ")
 	hostName, _ := reader.ReadString('\n')

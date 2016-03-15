@@ -2,22 +2,24 @@ package main
 
 import (
 	"./lib"
+	"flag"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
+	flag.Parse()
+
 	config := lib.ReadConfig()
 	url := lib.AdminURL(config.HostName, config.PortNumber)
 
-	req, err := http.NewRequest("POST", url, lib.EmptyReader)
+	req, _ := http.NewRequest("POST", url, lib.EmptyReader)
 	req.SetBasicAuth("admin", config.Passwd)
 
-	res, err := http.DefaultClient.Do(req)
-	log.Println(res, err)
+	res, _ := http.DefaultClient.Do(req)
 
 	bytes, _ := ioutil.ReadAll(res.Body)
-	os.Stdout.Write(bytes)
+	newUser := lib.NewUserFromXML(bytes)
+	os.Stdout.WriteString(newUser.Id)
 }
