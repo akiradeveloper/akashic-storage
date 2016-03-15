@@ -12,7 +12,7 @@ sudo: required
 before_install:
   - sudo apt-get -y -qq update
 install:
-  - cd admin; make; sudo make install
+  - cd admin-cli; make; sudo make install
   - wget https://dl.minio.io/client/mc/release/linux-amd64/mc; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
   - sudo apt-get -y -qq install python-virtualenv
 script:
