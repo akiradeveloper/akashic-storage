@@ -19,4 +19,5 @@ install:
 uninstall:
 	rm $(INSTALL_DIR)/$(ALL)
 akashic-admin-%: %.go
+	go get github.com/BurntSushi/toml
 	go build -o $@ $<
