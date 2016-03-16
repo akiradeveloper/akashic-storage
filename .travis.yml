@@ -11,6 +11,7 @@ scala:
 sudo: required
 before_install:
   - sudo apt-get -y -qq update
+  - unset GOROOT
   - export GOPATH="$HOME/go"
   - export PATH="/usr/local/go/bin:$PATH"
 install:
