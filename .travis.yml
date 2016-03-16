@@ -4,8 +4,6 @@ language: scala
 env:
   - TEST_KIND="sbt-test"
   - TEST_KIND="s3-tests"
-  - GOPATH="$HOME/go"
-  - PATH="$PATH:/usr/local/go/bin"
 jdk:
   - oraclejdk8
 scala:
@@ -13,6 +11,8 @@ scala:
 sudo: required
 before_install:
   - sudo apt-get -y -qq update
+  - export GOPATH="$HOME/go"
+  - export PATH="$PATH:/usr/local/go/bin"
 install:
   # install Go
   - wget https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz; sudo tar -C /usr/local -xzf go1.6.linux-amd64.tar.gz; go version
