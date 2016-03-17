@@ -44,6 +44,7 @@ func main() {
 	log.Println(xml)
 
 	req, _ := http.NewRequest("PUT", url, strings.NewReader(xml))
+	req.SetBasicAuth("admin", config.Passwd)
 	req.Header.Add("Content-Type", "application/xml")
 
 	res, _ := http.DefaultClient.Do(req)
