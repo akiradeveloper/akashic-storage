@@ -36,6 +36,16 @@ class AdminCLITest extends ServerTestBase {
     assert(get.! === 0)
   }
 
+  test("list") { _ =>
+    val res0 = Process("akashic-admin-list").!!
+    Process("akashic-admin-add").!
+    val res1 = Process("akashic-admin-list").!!
+    assert(res0.length < res1.length)
+    Process("akashic-admin-add").!
+    val res2 = Process("akashic-admin-list").!!
+    assert(res1.length < res2.length)
+  }
+
   test("update") { _ =>
     val add = Process("akashic-admin-add")
     val userId = add.!!

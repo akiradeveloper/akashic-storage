@@ -2,13 +2,15 @@ INSTALL_DIR=/usr/local/bin
 
 ADD=akashic-admin-add
 GET=akashic-admin-get
+LIST=akashic-admin-list
 UPDATE=akashic-admin-update
 CONFIG=akashic-admin-config
 SETUP_MC=akashic-admin-setup-mc
 ALL=$(ADD) \
     $(GET) \
-    $(CONFIG) \
+    $(LIST) \
     $(UPDATE) \
+    $(CONFIG) \
     $(SETUP_MC)
 
 all: $(ALL)

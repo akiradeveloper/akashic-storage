@@ -42,6 +42,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   val adminRoute =
     Add.route ~
+    List.route ~
     Get.route ~
     Update.route
 
