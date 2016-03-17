@@ -2,16 +2,16 @@ package lib
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/BurntSushi/toml"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
 type Config struct {
-	HostName   string
-	PortNumber int
-	Passwd     string
+	HostName string
+	Port     int
+	Passwd   string
 }
 
 var (
@@ -37,8 +37,8 @@ func (self *Config) Encode(fileName string) {
 }
 
 func (self *Config) Debug() {
-	fmt.Printf("hostName: %s, portNumber: %d, passwd: %s\n",
+	log.Printf("hostname: %s, port: %d, passwd: %s\n",
 		self.HostName,
-		self.PortNumber,
+		self.Port,
 		self.Passwd)
 }

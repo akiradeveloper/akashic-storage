@@ -25,13 +25,29 @@ class AdminCLITest extends ServerTestBase {
     val cmd = Process("akashic-admin-add")
     val res = cmd.!!
     println(res)
-    assert(res.length === 120)
+    assert(res.length === 65)
   }
 
-  test("add and get") { _ =>
+  test("get") { _ =>
     val add = Process("akashic-admin-add")
     val userId = add.!!
+    println(userId)
     val get = Process(s"akashic-admin-get ${userId}")
     assert(get.! === 0)
+  }
+
+  test("update") { _ =>
+    val add = Process("akashic-admin-add")
+    val userId = add.!!
+    println(userId)
+    val update = Process(s"akashic-admin-update -name=abc -email=abc@abc.com ${userId}")
+    assert(update.! === 0)
+  }
+
+  test("setup-mc") { _ =>
+    val add = Process("akashic-admin-add")
+    val userId = add.!!
+    val setupMc = Process(s"akashic-admin-setup-mc -alias=aaa -port=10000 ${userId}")
+    assert(setupMc.! === 0)
   }
 }

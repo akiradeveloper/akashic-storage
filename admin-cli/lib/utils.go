@@ -2,13 +2,11 @@ package lib
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
-func AdminURL(hostName string, portNumber int) string {
-	url := fmt.Sprintf("http://%s:%d/admin/user", hostName, portNumber)
-	log.Println(url)
+func AdminURL(hostName string, port int) string {
+	url := fmt.Sprintf("http://%s:%d/admin/user", hostName, port)
 	return url
 }
 

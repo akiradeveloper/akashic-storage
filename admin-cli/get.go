@@ -15,7 +15,7 @@ func main() {
 	args := flag.Args()
 	userId := args[0]
 
-	url := lib.AdminURL(config.HostName, config.PortNumber) + "/" + userId
+	url := lib.AdminURL(config.HostName, config.Port) + "/" + userId
 
 	req, _ := http.NewRequest("GET", url, lib.EmptyReader)
 	req.SetBasicAuth("admin", config.Passwd)

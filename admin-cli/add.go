@@ -12,7 +12,7 @@ func main() {
 	flag.Parse()
 
 	config := lib.ReadConfig()
-	url := lib.AdminURL(config.HostName, config.PortNumber)
+	url := lib.AdminURL(config.HostName, config.Port)
 
 	req, _ := http.NewRequest("POST", url, lib.EmptyReader)
 	req.SetBasicAuth("admin", config.Passwd)

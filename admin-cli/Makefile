@@ -14,7 +14,7 @@ ALL=$(ADD) \
 all: $(ALL)
 clean: 	
 	rm $(ALL)
-install:
+install: all
 	install -m 555 $(ALL) $(INSTALL_DIR)
 uninstall:
 	rm $(INSTALL_DIR)/$(ALL)
