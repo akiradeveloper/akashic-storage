@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.HttpRequest
 package object auth {
   def doGetSecretKey(accessKey: String): String = {
     val id = server.users.getId(accessKey).get
-    server.users.getUser(id).get.secretKey
+    server.users.find(id).get.secretKey
   }
   val getSecretKey: String => String = (accessKey: String) => doGetSecretKey(accessKey)
   def authorize(resource: String, req: HttpRequest): Option[String] = {

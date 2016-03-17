@@ -12,7 +12,7 @@ class ServerDaemon extends Daemon {
     server = Server(config, cleanup = false)
 
     // this is a workaround before authorziation is available
-    server.users.addUser(TestUsers.hoge)
+    server.users.add(TestUsers.hoge)
   }
   override def start(): Unit = {
     server.start

@@ -26,7 +26,7 @@ object Acl {
       grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
     }
     def ownerXML = {
-      val displayName = server.users.getUser(owner).get.displayName
+      val displayName = server.users.find(owner).get.displayName
       <Owner>
         <ID>{owner}</ID>
         <DisplayName>{displayName}</DisplayName>
@@ -70,7 +70,7 @@ object Acl {
           }
         }
         case ByEmail(email: String) =>
-          server.users.getUser(callerId).get.email == email
+          server.users.find(callerId).get.email == email
         case AuthenticatedUsers() =>
           callerId != "anonymous"
         case AllUsers() =>
@@ -85,7 +85,7 @@ object Acl {
     override def toXML: NodeSeq = {
       <Garantee xsi:type="CanonicalUser">
         <ID>{id}</ID>
-        <DisplayName>{server.users.getUser(id).get.displayName}</DisplayName>
+        <DisplayName>{server.users.find(id).get.displayName}</DisplayName>
       </Garantee>
     }
   }

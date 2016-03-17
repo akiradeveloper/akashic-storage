@@ -76,11 +76,11 @@ object ListParts {
           <UploadId>{uploadId}</UploadId>
           <Initiator>
             <ID>{initiatorId}</ID>
-            <DisplayName>{server.users.getUser(initiatorId).get.displayName}</DisplayName>
+            <DisplayName>{server.users.find(initiatorId).get.displayName}</DisplayName>
           </Initiator>
           <Owner>
             <ID>{ownerId}</ID>
-            <DisplayName>{server.users.getUser(ownerId).get.displayName}</DisplayName>
+            <DisplayName>{server.users.find(ownerId).get.displayName}</DisplayName>
           </Owner>
           <StorageClass>STANDARD</StorageClass>
           { partNumberMarker match { case Some(a) => <PartNumberMarker>{a}</PartNumberMarker>; case None => NodeSeq.Empty } }

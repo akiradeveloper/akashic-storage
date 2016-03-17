@@ -16,7 +16,7 @@ object RunServer extends App {
 
   Await.ready(server.start, Duration.Inf)
 
-  server.users.addUser(TestUsers.hoge)
-  server.users.addUser(TestUsers.s3testsMain)
-  server.users.addUser(TestUsers.s3testsAlt)
+  server.users.add(TestUsers.hoge)
+  server.users.add(TestUsers.s3testsMain)
+  server.users.add(TestUsers.s3testsAlt)
 }

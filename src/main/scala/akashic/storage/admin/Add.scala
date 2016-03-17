@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akashic.storage.server
 
-object MakeUser {
+object Add {
   val matcher =
     post &
     path("admin" / "user")
@@ -14,7 +14,7 @@ object MakeUser {
     complete(result.xml)
   }
   case class Result(xml: NodeSeq)
-  def run(users: UserTable): Result = {
+  def run(users: UserDB): Result = {
     val newUser = users.mkUser
     Result(User.toXML(newUser))
   }

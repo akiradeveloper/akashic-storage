@@ -36,14 +36,14 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   require(initialized)
 
   val tree = Tree(config.mountpoint.resolve("tree"))
-  val users = UserTable(config.mountpoint.resolve("admin"))
+  val users = UserDB(config.mountpoint.resolve("admin"))
   val astral = Astral(config.mountpoint.resolve("astral"))
   val cacheMaps = CacheMaps(config)
 
   val adminRoute =
-    MakeUser.route ~
-    GetUser.route ~
-    UpdateUser.route
+    Add.route ~
+    Get.route ~
+    Update.route
 
   val adminErrHandler = ExceptionHandler {
     case admin.Error.Exception(e) =>

@@ -21,7 +21,7 @@ object GetService {
       def Owner(callerId: String) = {
         <Owner>
           <ID>{callerId}</ID>
-          <DisplayName>{server.users.getUser(callerId).get.displayName}</DisplayName>
+          <DisplayName>{server.users.find(callerId).get.displayName}</DisplayName>
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {

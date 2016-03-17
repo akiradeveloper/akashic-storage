@@ -7,7 +7,7 @@ import scala.xml.XML
 import akka.http.scaladsl.server.Directives._
 import akashic.storage.server
 
-object UpdateUser {
+object Update {
   val matcher =
     put &
     path("admin" / "user" / Segment) &
@@ -24,14 +24,14 @@ object UpdateUser {
   }
 
   case class Result()
-  def run(users: UserTable, id: String, body: String): Result = {
+  def run(users: UserDB, id: String, body: String): Result = {
     val xml = XML.loadString(body)
-    val user = users.getUser(id) match {
+    val user = users.find(id) match {
       case Some(a) => a
       case None => Error.failWith(Error.NotFound())
     }
     val newUser = user.modifyWith(xml)
-    users.updateUser(id, newUser)
+    users.update(id, newUser)
     Result()
   }
 }

@@ -10,7 +10,7 @@ import com.google.common.cache.CacheBuilder
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 
-case class UserTable(root: Path) {
+case class UserDB(root: Path) {
   val cache = new CacheMap.Guava[String, InMem](CacheBuilder.newBuilder
     .maximumSize(1)
     .build())
@@ -69,11 +69,11 @@ case class UserTable(root: Path) {
     dbData.get.idMap.get(accessKey)
   }
 
-  def getUser(id: String): Option[User.t] = {
+  def find(id: String): Option[User.t] = {
     dbData.get.userMap.get(id)
   }
 
-  def addUser(user: User.t): Unit = {
+  def add(user: User.t): Unit = {
     dbData.get.add(user).commit
   }
 
@@ -94,7 +94,11 @@ case class UserTable(root: Path) {
     newUser
   }
 
-  def updateUser(id: String, user: User.t): Unit = {
+  def update(id: String, user: User.t): Unit = {
     dbData.get.remove(id).add(user).commit
+  }
+
+  def list: Iterable[User.t] = {
+    dbData.get.userMap.values
   }
 }

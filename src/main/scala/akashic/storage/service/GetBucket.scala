@@ -43,7 +43,7 @@ object GetBucket {
             <StorageClass>STANDARD</StorageClass>
             <Owner>
               <ID>{ownerId}</ID>
-              <DisplayName>{server.users.getUser(ownerId).get.displayName}</DisplayName>
+              <DisplayName>{server.users.find(ownerId).get.displayName}</DisplayName>
             </Owner>
           </Contents>
         }
