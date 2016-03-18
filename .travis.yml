@@ -23,7 +23,7 @@ install:
   # install minio/mc
   - wget https://dl.minio.io/client/mc/release/linux-amd64/mc; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
   # install virtualenv for s3-tests
-  - sudo apt-get -y -qq install python-virtualenv jsvc
+  - sudo apt-get -y -qq install python-virtualenv jsvc tree
 script:
   - if [ "$TEST_KIND" = "sbt-test" ]; then cd travis-script; sh sbt-test.sh; fi
   - if [ "$TEST_KIND" = "s3-tests" ]; then cd travis-script; sh s3-tests.sh; fi

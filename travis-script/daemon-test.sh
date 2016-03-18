@@ -12,7 +12,7 @@ akashic-admin-config <<INP
 passwd
 INP
 
-userId=`akashic-storage-add`
+userId=`akashic-admin-add`
 echo "userId: $userId"
 
 # alias, hostname, port
@@ -28,10 +28,11 @@ echo "**** start ****"
 sudo service akashic-storage start
 sudo service akashic-storage status
 
-echo "akiradeveloper" > /tmp/t
+echo "akiradeveloper" > file-up
 mc mb aka/myb
-mc cp /tmp/t aka/myb/myo
+mc cp file-up aka/myb/myo
 mc ls aka/myb
+tree /mnt/akashic-storage
 
 echo "**** stop ****"
 sudo service akashic-storage stop
@@ -40,7 +41,8 @@ sudo service akashic-storage status
 echo "**** start ****"
 sudo service akashic-storage start
 sudo service akashic-storage status
+tree /mnt/akashic-storage
 mc ls aka
 mc ls aka/myb
-mc cat aka/myb/myo > t-down
-diff t t-down
+mc cat aka/myb/myo > file-down
+diff file-up file-down
