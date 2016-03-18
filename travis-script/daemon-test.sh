@@ -12,6 +12,12 @@ akashic-admin-config <<INP
 passwd
 INP
 
+ls -l /usr/default/java
+
+echo "**** start ****"
+sudo service akashic-storage start
+sudo service akashic-storage status
+
 userId=`akashic-admin-add`
 echo "userId: $userId"
 
@@ -21,12 +27,7 @@ aka
 
 10946
 INP
-
-ls -l /usr/default/java
-
-echo "**** start ****"
-sudo service akashic-storage start
-sudo service akashic-storage status
+cat ~/.mc/config.json
 
 echo "akiradeveloper" > file-up
 mc mb aka/myb
