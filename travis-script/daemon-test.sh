@@ -5,6 +5,7 @@ sudo service akashic-storage status
 
 sudo mkdir -p /mnt/akashic-storage
 
+# hostname, port, passwd
 akashic-admin-config <<INP
 
 
@@ -14,7 +15,12 @@ INP
 userId = `akashic-storage-add`
 echo "userId: $userId"
 
-akashic-admin-setup-mc $userId
+# alias, hostname, port
+akashic-admin-setup-mc $userId <<INP
+akast
+
+10946
+INP
 
 echo "start"
 sudo service akashic-storage start
@@ -34,4 +40,5 @@ sudo service akashic-storage start
 sudo service akashic-storage status
 mc ls akashic-storage
 mc ls akashic-storage/myb
-mc cat akashic-storage/myb/myo
+mc cat akashic-storage/myb/myo > t-down
+diff t t-down

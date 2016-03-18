@@ -57,7 +57,12 @@ class AdminCLITest extends ServerTestBase {
   test("setup-mc") { _ =>
     val add = Process("akashic-admin-add")
     val userId = add.!!
-    val setupMc = Process(s"akashic-admin-setup-mc -alias=aaa -port=10000 ${userId}")
-    assert(setupMc.! === 0)
+
+    val input = "aaa\n10000\n"
+    val is = new ByteArrayInputStream(input.getBytes)
+    val setupMc = Process(s"akashic-admin-setup-mc ${userId}")
+    val res = (setupMc #< is).!
+
+    assert(res === 0)
   }
 }

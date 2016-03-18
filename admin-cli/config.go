@@ -22,18 +22,18 @@ func main() {
 	}
 
 	fmt.Print("port# (default: 10946): ")
-	portNumberS, _ := reader.ReadString('\n')
-	portNumberS = strings.Trim(portNumberS, "\n")
-	if portNumberS == "" {
-		portNumberS = "10946"
+	portS, _ := reader.ReadString('\n')
+	portS = strings.Trim(portS, "\n")
+	if portS == "" {
+		portS = "10946"
 	}
-	portNumber, _ := strconv.Atoi(portNumberS)
+	port, _ := strconv.Atoi(portS)
 
 	fmt.Print("admin passwd: ")
 	passwd, _ := reader.ReadString('\n')
 	passwd = strings.Trim(passwd, "\n")
 
-	config := lib.Config{hostName, portNumber, passwd}
+	config := lib.Config{hostName, port, passwd}
 	config.Debug()
 
 	config.Encode(lib.ConfigPath)

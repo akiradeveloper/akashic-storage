@@ -2,6 +2,7 @@ package main
 
 import (
 	"./lib"
+	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 )
 
 func configMc(alias, hostName string, portNumber int, accessKey, secretKey string) {
@@ -23,12 +26,8 @@ func configMc(alias, hostName string, portNumber int, accessKey, secretKey strin
 
 func main() {
 	config := lib.ReadConfig()
-	alias := flag.String("alias", "akashic-storage", "name to access the server")
-	hostName := flag.String("hostname", "localhost", "hostname")
-	portNumber := flag.Int("port", 10946, "port number")
-	flag.Parse()
 
-	log.Printf("alias:%s, hostname:%s, port: %d\n", *alias, *hostName, *portNumber)
+	flag.Parse()
 
 	args := flag.Args()
 	userId := args[0]
@@ -45,5 +44,31 @@ func main() {
 
 	log.Printf("accessKey:%s, secretKey:%s\n", user.AccessKey, user.SecretKey)
 
-	configMc(*alias, *hostName, *portNumber, user.AccessKey, user.SecretKey)
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("alias (default: akashic-storage): ")
+	alias, _ := reader.ReadString('\n')
+	alias = strings.Trim(alias, "\n")
+	if alias == "" {
+		alias = "akashic-storage"
+	}
+
+	fmt.Print("hostname (default: localhost): ")
+	hostName, _ := reader.ReadString('\n')
+	hostName = strings.Trim(hostName, "\n")
+	if hostName == "" {
+		hostName = "localhost"
+	}
+
+	fmt.Print("port# (default: 10946): ")
+	portS, _ := reader.ReadString('\n')
+	portS = strings.Trim(portS, "\n")
+	if portS == "" {
+		portS = "10946"
+	}
+	port, _ := strconv.Atoi(portS)
+
+	log.Printf("alias:%s, hostname:%s, port: %d\n", alias, hostName, port)
+
+	configMc(alias, hostName, port, user.AccessKey, user.SecretKey)
 }

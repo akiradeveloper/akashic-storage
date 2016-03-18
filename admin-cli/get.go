@@ -12,6 +12,7 @@ func main() {
 	config := lib.ReadConfig()
 
 	flag.Parse()
+
 	args := flag.Args()
 	userId := args[0]
 

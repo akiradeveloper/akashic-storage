@@ -10,6 +10,7 @@ import (
 
 func main() {
 	config := lib.ReadConfig()
+
 	flag.Parse()
 
 	url := lib.AdminURL(config.HostName, config.Port)
