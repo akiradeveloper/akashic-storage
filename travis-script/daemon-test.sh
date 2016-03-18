@@ -1,12 +1,12 @@
 cd ../installer
 sh compile-jar.sh
 sudo sh install.sh
-sudo service akashic-storage status
 
 sudo mkdir -p /mnt/akashic-storage
 
 echo "**** start ****"
-sudo service akashic-storage start; sleep 10
+sudo service akashic-storage start
+sleep 10
 sudo service akashic-storage status
 
 # hostname, port, passwd
@@ -35,11 +35,13 @@ mc ls aka/myb
 tree /mnt/akashic-storage
 
 echo "**** stop ****"
-sudo service akashic-storage stop; sleep 10
+sudo service akashic-storage stop
+sleep 10
 sudo service akashic-storage status
 
 echo "**** start ****"
-sudo service akashic-storage start; sleep 10
+sudo service akashic-storage start
+sleep 10
 sudo service akashic-storage status
 tree /mnt/akashic-storage
 mc ls aka
