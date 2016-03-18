@@ -4,6 +4,7 @@ language: scala
 env:
   - TEST_KIND="sbt-test"
   - TEST_KIND="s3-tests"
+  - TEST_KIND="daemon-test"
 jdk:
   - oraclejdk8
 scala:
@@ -22,7 +23,8 @@ install:
   # install minio/mc
   - wget https://dl.minio.io/client/mc/release/linux-amd64/mc; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
   # install virtualenv for s3-tests
-  - sudo apt-get -y -qq install python-virtualenv
+  - sudo apt-get -y -qq install python-virtualenv jsvc
 script:
   - if [ "$TEST_KIND" = "sbt-test" ]; then cd travis-script; sh sbt-test.sh; fi
   - if [ "$TEST_KIND" = "s3-tests" ]; then cd travis-script; sh s3-tests.sh; fi
+  - if [ "$TEST_KIND" = "daemon-test" ]; then cd travis-script; sh daemon-test.sh; fi
