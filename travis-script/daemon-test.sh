@@ -12,7 +12,7 @@ akashic-admin-config <<INP
 passwd
 INP
 
-ls -l /usr/default/java
+echo JAVA_HOME=$JAVA_HOME
 
 echo "**** start ****"
 sudo service akashic-storage start

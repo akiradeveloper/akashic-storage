@@ -15,6 +15,7 @@ before_install:
   - unset GOROOT
   - export GOPATH="$HOME/go"
   - export PATH="/usr/local/go/bin:$PATH"
+  - export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
 install:
   # install Go
   - wget https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz; sudo tar -C /usr/local -xzf go1.6.linux-amd64.tar.gz; go version
