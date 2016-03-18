@@ -1,20 +1,20 @@
 cd ../installer
 sh compile-jar.sh
-sh install.sh
+sudo sh install.sh
 sudo service akashic-storage status
 
 sudo mkdir -p /mnt/akashic-storage
 
-akashic-storage-config <<INP
+akashic-admin-config <<INP
 
 
-
+passwd
 INP
 
 userId = `akashic-storage-add`
 echo "userId: $userId"
 
-akashic-storage-setup-mc $userId
+akashic-admin-setup-mc $userId
 
 echo "start"
 sudo service akashic-storage start
