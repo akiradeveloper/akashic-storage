@@ -5,18 +5,17 @@ sudo service akashic-storage status
 
 sudo mkdir -p /mnt/akashic-storage
 
+echo "**** start ****"
+sudo service akashic-storage start
+sudo service akashic-storage status
+
 # hostname, port, passwd
 akashic-admin-config <<INP
 
 
 passwd
 INP
-
-echo JAVA_HOME=$JAVA_HOME
-
-echo "**** start ****"
-sudo service akashic-storage start
-sudo service akashic-storage status
+cat ~/.akashic-admin
 
 userId=`akashic-admin-add`
 echo "userId: $userId"
