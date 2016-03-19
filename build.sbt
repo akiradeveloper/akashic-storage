@@ -12,6 +12,9 @@ parallelExecution in Test := false
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
+  "ch.qos.logback" % "logback-classic" % "1.1.6",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.2",
+
   // "com.typesafe.akka" % "akka-stream-experimental_2.11" % "2.0.3",
   // "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0.3",
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.4.2",
@@ -34,5 +37,4 @@ libraryDependencies ++= Seq(
   "org.apache.httpcomponents" % "httpmime" % "4.5.1"
   // "org.scalaj" %% "scalaj-http" % "2.2.0"
   // "com.github.scopt" %% "scopt" % "3.3.0",
-  // "ch.qos.logback" % "logback-classic" % "1.1.2"
 )

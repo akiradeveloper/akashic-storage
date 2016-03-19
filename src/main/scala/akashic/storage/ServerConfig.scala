@@ -18,5 +18,7 @@ object ServerConfig {
     override def ip = config.getString("ip")
     override def port: Int = config.getInt("port")
     override def adminPassword = config.getString("admin-passwd")
+
+    logger.info("config: {}", (mountpoint, ip, port, adminPassword))
   }
 }

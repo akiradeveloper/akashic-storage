@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit
 import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
 import akka.actor.ActorSystem
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.Multipart
+import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.http.scaladsl.server.util.ConstructFromTuple
 import akka.stream.{Materializer, ActorMaterializer}
 import scala.concurrent.Await
@@ -95,4 +97,6 @@ package object service {
 
   trait AnonymousTask[T] extends Task[T] with Error.Reportable with RequestIdAllocable[T] with Measure[T]
   type AnonymousAPI = AnonymousTask[Route]
+
+  val apiLogger = DebuggingDirectives.logRequestResult("service")
 }

@@ -20,10 +20,13 @@ import org.apache.commons.io.FileUtils
 case class Server(config: ServerConfig, cleanup: Boolean) {
   require(Files.exists(config.mountpoint))
 
-  if (cleanup)
+  if (cleanup) {
     FileUtils.cleanDirectory(config.mountpoint.toFile)
+    logger.info("mountpoint is cleaned up")
+  }
 
   if (files.children(config.mountpoint).isEmpty) {
+    logger.info("initialize mountpoint")
     Files.createDirectory(config.mountpoint.resolve("tree"))
     Files.createDirectory(config.mountpoint.resolve("admin"))
     Files.createDirectory(config.mountpoint.resolve("astral"))
@@ -34,6 +37,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     Files.exists(config.mountpoint.resolve("admin")) &&
     Files.exists(config.mountpoint.resolve("astral"))
   require(initialized)
+  logger.info("mountpoint is initialized")
 
   val tree = Tree(config.mountpoint.resolve("tree"))
   val users = UserDB(config.mountpoint.resolve("admin"))
@@ -91,8 +95,8 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   }
 
   val apiRoute =
-    handleExceptions(adminErrHandler) { admin.Auth.authenticate(adminRoute) } ~
-    handleExceptions(serviceErrHandler) { scala.concurrent.blocking(serviceRoute) }
+    admin.apiLogger { handleExceptions(adminErrHandler) { admin.Auth.authenticate(adminRoute) } } ~
+    service.apiLogger { handleExceptions(serviceErrHandler) { scala.concurrent.blocking(serviceRoute) } }
 
   val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
   val unmatchRoute =
@@ -107,6 +111,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   def address = s"${config.ip}:${config.port}"
 
   def start = {
+    logger.info("start server")
     system = ActorSystem("akashic-storage")
     mat = ActorMaterializer()
     Http().bindAndHandle(
@@ -116,6 +121,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   }
 
   def stop: Unit = {
+    logger.info("stop server")
     system.shutdown
     system.awaitTermination
   }

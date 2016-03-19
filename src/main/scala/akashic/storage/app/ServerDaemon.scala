@@ -6,6 +6,8 @@ import com.typesafe.config.ConfigFactory
 import org.apache.commons.daemon.{DaemonContext, Daemon}
 import java.io.File
 
+import scala.concurrent.Await
+
 class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
     val config = ServerConfig(ConfigFactory.load("server-daemon.conf"))

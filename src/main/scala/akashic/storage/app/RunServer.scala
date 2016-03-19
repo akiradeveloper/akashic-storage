@@ -14,7 +14,8 @@ object RunServer extends App {
   Files.createDirectories(config.mountpoint)
   server = Server(config, cleanup = true)
 
-  Await.ready(server.start, Duration.Inf)
+  val fut = server.start
+  Await.ready(fut, Duration.Inf)
 
   server.users.add(TestUsers.hoge)
   server.users.add(TestUsers.s3testsMain)
