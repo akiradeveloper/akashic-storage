@@ -2,7 +2,7 @@ cd ../installer
 sh compile-jar.sh
 sudo sh install.sh
 
-sudo mkdir -p /mnt/akashic-storage
+sudo mkdir -p /tmp/akashic-storage-test
 
 echo "**** start ****"
 sudo service akashic-storage start
@@ -48,3 +48,8 @@ mc ls aka
 mc ls aka/myb
 mc cat aka/myb/myo > file-down
 diff file-up file-down
+
+echo -- error.log --
+cat $HOME/.akashic-storage/log/error.log
+echo -- all.log --
+cat $HOME/.akashic-storage/log/all.log
