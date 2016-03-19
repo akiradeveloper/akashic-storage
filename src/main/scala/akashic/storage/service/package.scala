@@ -3,9 +3,11 @@ package akashic.storage
 import java.net.{URLEncoder, URLDecoder}
 import java.util.concurrent.TimeUnit
 
+import akashic.storage.admin._
 import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
 import akka.actor.ActorSystem
+import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.Multipart
 import akka.http.scaladsl.server.directives.DebuggingDirectives
@@ -93,5 +95,6 @@ package object service {
   trait AnonymousTask[T] extends Task[T] with Error.Reportable with RequestIdAllocable[T] with Measure[T]
   type AnonymousAPI = AnonymousTask[Route]
 
-  val apiLogger = DebuggingDirectives.logRequestResult("service")
+  val logger = Logging.getLogger(system, getClass)
+  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult("service"))
 }
