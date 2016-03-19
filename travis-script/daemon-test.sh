@@ -49,7 +49,9 @@ mc ls aka/myb
 mc cat aka/myb/myo > file-down
 diff file-up file-down
 
+sudo chmod 0666 /var/log/akashic-storage
+
 echo -- error.log --
-sudo cat /root/.akashic-storage/log/error.log
+cat /var/log/akashic-storage/error.log
 echo -- all.log --
-sudo cat /root/.akashic-storage/log/all.log
+cat /var/log/akashic-storage/all.log
