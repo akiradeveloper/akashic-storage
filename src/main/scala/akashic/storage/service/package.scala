@@ -19,11 +19,6 @@ import akka.http.scaladsl.server.{Directive1, Directive, Route}
 import scala.collection.immutable
 
 package object service {
-
-  // shared actor system and materializer
-  implicit var system: ActorSystem = _
-  implicit var mat: ActorMaterializer = _
-
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
     def `<+`(other: Option[A]): Option[A] = 

@@ -7,5 +7,6 @@ import akka.http.scaladsl.server.Directives._
 
 package object admin {
   val logger = LoggerFactory.getLogger(getClass)
+  // implicit val logger = Logging.getLogger(system, getClass)
   val apiLogger = DebuggingDirectives.logRequestResult("admin")
 }

@@ -16,6 +16,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.util.ByteString
 import org.apache.commons.io.FileUtils
+import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
   require(Files.exists(config.mountpoint))
@@ -43,6 +44,11 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   val users = UserDB(config.mountpoint.resolve("admin"))
   val astral = Astral(config.mountpoint.resolve("astral"))
   val cacheMaps = CacheMaps(config)
+
+  system = ActorSystem("akashic-storage")
+  mat = ActorMaterializer()
+  ec = system.dispatcher
+  sys.addShutdownHook(system.shutdown)
 
   val adminRoute =
     Add.route ~
@@ -110,19 +116,19 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   def address = s"${config.ip}:${config.port}"
 
+  var binding: Future[Http.ServerBinding] = _
+
   def start = {
     logger.info("start server")
-    system = ActorSystem("akashic-storage")
-    mat = ActorMaterializer()
-    Http().bindAndHandle(
+    binding = Http().bindAndHandle(
       handler = Route.handlerFlow(route),
       interface = config.ip,
       port = config.port)
+    binding
   }
 
   def stop: Unit = {
     logger.info("stop server")
-    system.shutdown
-    system.awaitTermination
+    binding.map(_.unbind)
   }
 }
