@@ -50,6 +50,6 @@ mc cat aka/myb/myo > file-down
 diff file-up file-down
 
 echo -- error.log --
-cat $HOME/.akashic-storage/log/error.log
+sudo cat $HOME/.akashic-storage/log/error.log
 echo -- all.log --
-cat $HOME/.akashic-storage/log/all.log
+sudo cat $HOME/.akashic-storage/log/all.log
