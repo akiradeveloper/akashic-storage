@@ -1,6 +1,8 @@
 package akashic
 
+import akashic.storage.service._
 import akka.actor.ActorSystem
+import akka.event.Logging
 import akka.stream.ActorMaterializer
 import org.slf4j.{LoggerFactory, Logger}
 

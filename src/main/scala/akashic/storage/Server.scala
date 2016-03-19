@@ -19,6 +19,11 @@ import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
+  system = ActorSystem("akashic-storage")
+  mat = ActorMaterializer()
+  ec = system.dispatcher
+  sys.addShutdownHook(system.shutdown)
+
   require(Files.exists(config.mountpoint))
 
   if (cleanup) {
@@ -44,11 +49,6 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   val users = UserDB(config.mountpoint.resolve("admin"))
   val astral = Astral(config.mountpoint.resolve("astral"))
   val cacheMaps = CacheMaps(config)
-
-  system = ActorSystem("akashic-storage")
-  mat = ActorMaterializer()
-  ec = system.dispatcher
-  sys.addShutdownHook(system.shutdown)
 
   val adminRoute =
     Add.route ~
@@ -101,8 +101,8 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   }
 
   val apiRoute =
-    admin.apiLogger { handleExceptions(adminErrHandler) { admin.Auth.authenticate(adminRoute) } } ~
-    service.apiLogger { handleExceptions(serviceErrHandler) { scala.concurrent.blocking(serviceRoute) } }
+    handleExceptions(adminErrHandler) { admin.Auth.authenticate(admin.apiLogger(adminRoute)) } ~
+    handleExceptions(serviceErrHandler) { scala.concurrent.blocking(service.apiLogger(serviceRoute)) }
 
   val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
   val unmatchRoute =
