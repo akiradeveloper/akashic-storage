@@ -9,13 +9,9 @@ import org.slf4j.{LoggerFactory, Logger}
 import scala.concurrent.ExecutionContext
 
 package object storage {
-  implicit var system: ActorSystem = _
-  implicit var mat: ActorMaterializer = _
-  implicit var ec: ExecutionContext = _
-
-  system = ActorSystem("akashic-storage")
-  mat = ActorMaterializer()
-  ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem("akashic-storage")
+  implicit val mat: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContext = system.dispatcher
   sys.addShutdownHook(system.shutdown)
 
   var server: Server = _

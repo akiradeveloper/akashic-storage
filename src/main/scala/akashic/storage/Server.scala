@@ -124,6 +124,6 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   def stop: Unit = {
     logger.info("stop server")
-    binding.map(_.unbind)
+    binding.flatMap(_.unbind)
   }
 }
