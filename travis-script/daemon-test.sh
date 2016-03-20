@@ -25,15 +25,6 @@ cat ~/.akashic-admin
 
 userId=`akashic-admin-add`
 echo "userId: $userId"
-echo -- daemon.log --
-cat /var/akashic-storage/log/daemon.log
-echo -- daemon.err --
-cat /var/akashic-storage/log/daemon.err
-echo -- error.log --
-cat /var/akashic-storage/log/error.log
-echo -- all.log --
-cat /var/akashic-storage/log/all.log
-
 
 # alias, hostname, port
 akashic-admin-setup-mc $userId <<INP
@@ -44,6 +35,8 @@ INP
 cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > file-up
+mc mb aka/myb; echo
+mc cp file-up aka/myb/myo; echo
 echo -- daemon.log --
 cat /var/akashic-storage/log/daemon.log
 echo -- daemon.err --
@@ -53,8 +46,6 @@ cat /var/akashic-storage/log/error.log
 echo -- all.log --
 cat /var/akashic-storage/log/all.log
 
-mc mb aka/myb; echo
-mc cp file-up aka/myb/myo; echo
 mc ls aka/myb; echo
 tree $DIR
 
@@ -87,6 +78,10 @@ mc ls aka/myb; echo
 mc cat aka/myb/myo > file-down; echo
 diff file-up file-down
 
+echo -- daemon.log --
+cat /var/akashic-storage/log/daemon.log
+echo -- daemon.err --
+cat /var/akashic-storage/log/daemon.err
 echo -- error.log --
 cat /var/akashic-storage/log/error.log
 echo -- all.log --
