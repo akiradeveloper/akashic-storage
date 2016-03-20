@@ -40,6 +40,10 @@ mc cp file-up aka/myb/myo; echo
 mc ls aka/myb; echo
 tree $DIR
 
+echo -- daemon.log --
+cat /var/akashic-storage/log/daemon.log
+echo -- daemon.err --
+cat /var/akashic-storage/log/daemon.err
 echo -- error.log --
 cat /var/akashic-storage/log/error.log
 echo -- all.log --
