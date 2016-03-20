@@ -101,7 +101,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   }
 
   val apiRoute =
-    handleExceptions(adminErrHandler) { admin.Auth.authenticate(admin.apiLogger(adminRoute)) } ~
+    handleExceptions(adminErrHandler) { admin.apiLogger(adminRoute) } ~
     handleExceptions(serviceErrHandler) { scala.concurrent.blocking(service.apiLogger(serviceRoute)) }
 
   val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)

@@ -10,7 +10,9 @@ object List {
     path("admin" / "user")
 
   val route = matcher {
-    run(server.users)
+    authenticate {
+      run(server.users)
+    }
   }
 
   private def run(users: UserDB) = {

@@ -14,13 +14,15 @@ object Update {
     entity(as[String])
 
   val route = matcher { (id: String, xmlString: String) =>
-    val status = Try {
-      run(server.users, id, xmlString)
-    } match {
-      case Success(_) => StatusCodes.OK
-      case Failure(_) => StatusCodes.ServerError // FIXME
+    authenticate {
+      val status = Try {
+        run(server.users, id, xmlString)
+      } match {
+        case Success(_) => StatusCodes.OK
+        case Failure(_) => StatusCodes.ServerError // FIXME
+      }
+      complete(HttpEntity.Empty)
     }
-    complete(HttpEntity.Empty)
   }
 
   case class Result()

@@ -11,8 +11,10 @@ object Get {
     path("admin" / "user" / Segment)
 
   val route = matcher { id: String =>
-    val result = run(server.users, id)
-    complete(result.xml)
+    authenticate {
+      val result = run(server.users, id)
+      complete(result.xml)
+    }
   }
 
   case class Result(xml: NodeSeq)

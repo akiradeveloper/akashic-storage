@@ -9,4 +9,5 @@ package object admin {
   // val logger = LoggerFactory.getLogger(getClass)
   val logger = Logging.getLogger(system, getClass)
   val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult("admin"))
+  val authenticate = Auth.authenticate
 }

@@ -10,8 +10,10 @@ object Add {
     post &
     path("admin" / "user")
   val route = matcher {
-    val result = run(server.users)
-    complete(result.xml)
+    authenticate {
+      val result = run(server.users)
+      complete(result.xml)
+    }
   }
   case class Result(xml: NodeSeq)
   def run(users: UserDB): Result = {
