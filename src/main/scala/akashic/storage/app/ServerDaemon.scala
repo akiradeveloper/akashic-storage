@@ -21,7 +21,9 @@ class ServerDaemon extends Daemon {
       context.reset()
       configurator.doConfigure("/opt/akashic-storage/etc/logback.xml")
     } catch {
-      case _: Throwable => System.exit(1)
+      case _: Throwable =>
+        System.err.println("failed to configure logback [NG]")
+        System.exit(1)
     }
 
     val config = ServerConfig(
