@@ -6,9 +6,6 @@
             <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
         </encoder>
     </appender>
-    <logger name="akashic.storage" level="ERROR">
-        <appender-ref ref="ERROR_LOG"/>
-    </logger>
     <appender name="ADMIN_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/akashic-storage/log/admin.log</file>
         <append>false</append>
@@ -16,14 +13,6 @@
             <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
         </encoder>
     </appender>
-    <logger name="akashic.storage.admin" level="INFO">
-        <appender-ref ref="ADMIN_LOG"/>
-    </logger>
-
-    <logger name="akashic.storage.service" level="DEBUG">
-        <appender-ref ref="ALL_LOG"/>
-    </logger>
-
     <appender name="ALL_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/akashic-storage/log/all.log</file>
         <append>false</append>
@@ -31,7 +20,17 @@
             <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
         </encoder>
     </appender>
+
     <root level="DEBUG">
         <appender-ref ref="ALL_LOG"/>
     </root>
+    <logger name="akashic.storage" level="ERROR">
+        <appender-ref ref="ERROR_LOG"/>
+    </logger>
+    <logger name="akashic.storage.admin" level="INFO">
+        <appender-ref ref="ADMIN_LOG"/>
+    </logger>
+    <logger name="akashic.storage.service" level="DEBUG">
+        <appender-ref ref="ALL_LOG"/>
+    </logger>
 </configuration>
