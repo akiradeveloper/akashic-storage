@@ -14,18 +14,6 @@ import scala.concurrent.Await
 
 class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
-    val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-    try {
-      val configurator = new JoranConfigurator()
-      configurator.setContext(context)
-      context.reset()
-      configurator.doConfigure("/opt/akashic-storage/etc/logback.xml")
-    } catch {
-      case _: Throwable =>
-        System.err.println("failed to configure logback [NG]")
-        System.exit(1)
-    }
-
     val config = ServerConfig(
         ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/application.conf"))
         .withFallback(ConfigFactory.load()))
