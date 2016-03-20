@@ -13,4 +13,4 @@ cp logback_default.xml /opt/$NAME/etc/logback.xml
 mkdir -p /var/$NAME; chmod o+rwx /var/$NAME
 
 cp $NAME /etc/init.d
-chmod +x /etc/init.d/$NAME
+chmod o+x /etc/init.d/$NAME
