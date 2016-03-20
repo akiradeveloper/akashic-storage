@@ -38,6 +38,11 @@ mc cp file-up aka/myb/myo; echo
 mc ls aka/myb; echo
 tree $DIR
 
+echo -- error.log --
+cat /var/akashic-storage/log/error.log
+echo -- all.log --
+cat /var/akashic-storage/log/all.log
+
 echo "**** stop ****"
 service akashic-storage stop
 sleep 10
