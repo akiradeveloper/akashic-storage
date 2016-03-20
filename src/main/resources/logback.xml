@@ -1,4 +1,4 @@
-<configuration>
+<configuration debug="true">
     <appender name="ERROR_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/akashic-storage/log/error.log</file>
         <append>false</append>
