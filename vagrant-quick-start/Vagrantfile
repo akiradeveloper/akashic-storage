@@ -38,9 +38,9 @@ Vagrant.configure(2) do |config|
     if [ ! -e akashic-storage.jar ]; then
       curl https://bintray.com/sbt/rpm/rpm | sudo tee /etc/yum.repos.d/bintray-sbt-rpm.repo
       sudo yum -y install sbt
-      sh compile-jar.sh
+      make
     fi
-    sudo sh install.sh
+    sudo make install
     cd -
 
     sudo /etc/init.d/akashic-storage start
