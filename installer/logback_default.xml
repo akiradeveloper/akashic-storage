@@ -20,6 +20,10 @@
         <appender-ref ref="ADMIN_LOG"/>
     </logger>
 
+    <logger name="akashic.storage.service" level="DEBUG">
+        <appender-ref ref="ALL_LOG"/>
+    </logger>
+
     <appender name="ALL_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/akashic-storage/log/all.log</file>
         <append>false</append>
