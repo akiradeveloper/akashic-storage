@@ -1,6 +1,7 @@
 cd ../installer
 make
 sudo make install
+tree /opt/akashic-storage
 cd -
 
 whoami
