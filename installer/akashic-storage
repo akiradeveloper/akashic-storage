@@ -1,6 +1,7 @@
 #!/bin/sh
 
 whoami
+export
 
 NAME=akashic-storage
 # JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
