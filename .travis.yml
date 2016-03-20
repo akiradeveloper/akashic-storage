@@ -11,7 +11,9 @@ scala:
   - 2.11.6
 sudo: required
 script:
+  - sudo mkdir -p /var/log/akashic-storage; chmod 0666 /var/log/akashic-storage
   - jdk_switcher use oraclejdk8; echo $JAVA_HOME
+  - sudo jdk_switcher use oraclejdk8; sudo echo $JAVA_HOME
 before_install:
   - sudo apt-get -y -qq update
   - unset GOROOT
