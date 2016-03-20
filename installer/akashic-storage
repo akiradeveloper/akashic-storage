@@ -7,7 +7,7 @@ echo $(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
 
 NAME=akashic-storage
 # JAVA_HOME=${JAVA_HOME-/usr/java/default}
-echo JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
 CLASS_PATH=/opt/$NAME/jar/$NAME.jar
 LOG_OUT=/var/$NAME/log/daemon.log
 LOG_ERR=/var/$NAME/log/daemon.err
