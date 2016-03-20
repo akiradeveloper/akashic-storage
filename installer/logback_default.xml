@@ -21,16 +21,9 @@
         </encoder>
     </appender>
 
-    <logger name="akashic.storage" level="ERROR">
-        <appender-ref ref="ERROR_LOG"/>
-    </logger>
     <logger name="akashic.storage.admin" level="INFO">
         <appender-ref ref="ADMIN_LOG"/>
     </logger>
-    <logger name="akashic.storage.service" level="DEBUG" additivity="false">
-        <appender-ref ref="ALL_LOG"/>
-    </logger>
-
     <root level="DEBUG">
         <appender-ref ref="ALL_LOG"/>
     </root>
