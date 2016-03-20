@@ -2,7 +2,7 @@ package akashic.storage.app
 
 import akashic.storage.{Server, ServerConfig, server}
 import akashic.storage.admin.TestUsers
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.daemon.{DaemonContext, Daemon}
 import java.io.File
 
@@ -10,7 +10,9 @@ import scala.concurrent.Await
 
 class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
-    val config = ServerConfig(ConfigFactory.load("server-daemon.conf"))
+    val config = ServerConfig(
+        ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/application.conf"))
+        .withFallback(ConfigFactory.load()))
     server = Server(config, cleanup = false)
   }
   override def start(): Unit = {

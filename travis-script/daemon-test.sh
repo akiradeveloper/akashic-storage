@@ -1,6 +1,7 @@
 cd ../installer
-sh compile-jar.sh
-sudo sh install.sh
+make
+sudo make install
+cd -
 
 whoami
 export
