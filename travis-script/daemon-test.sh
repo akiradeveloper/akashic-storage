@@ -3,6 +3,7 @@ sh compile-jar.sh
 sudo sh install.sh
 
 whoami
+export
 
 DIR=/tmp/akashic-storage-test
 mkdir -p $DIR
