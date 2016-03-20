@@ -1,7 +1,7 @@
 #!/bin/sh
 
 NAME=akashic-storage
-JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+# JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
 # JAVA_HOME=${JAVA_HOME-/usr/java/default}
 echo JAVA_HOME=$JAVA_HOME
 CLASS_PATH=/opt/$NAME/jar/$NAME.jar

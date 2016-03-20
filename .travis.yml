@@ -11,8 +11,8 @@ scala:
   - 2.11.6
 sudo: required
 script:
-  - sudo mkdir -p /var/akashic-storage; chmod 0777 /var/akashic-storage
-  - echo $JAVA_HOME
+  - sudo mkdir -p /var/akashic-storage; chmod o+rwx /var/akashic-storage
+  - echo JAVA_HOME="$JAVA_HOME"
 before_install:
   - sudo apt-get -y -qq update
   - unset GOROOT
