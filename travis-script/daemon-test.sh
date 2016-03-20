@@ -30,12 +30,12 @@ aka
 
 10946
 INP
-cat ~/.mc/config.json
+cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > file-up
-mc mb aka/myb
-mc cp file-up aka/myb/myo
-mc ls aka/myb
+mc mb aka/myb; echo
+mc cp file-up aka/myb/myo; echo
+mc ls aka/myb; echo
 tree $DIR
 
 echo "**** stop ****"
@@ -48,10 +48,10 @@ service akashic-storage start
 sleep 10
 service akashic-storage status
 tree $DIR
-cat ~/.mc/config.json
-mc ls aka
-mc ls aka/myb
-mc cat aka/myb/myo > file-down
+cat ~/.mc/config.json; echo
+mc ls aka; echo
+mc ls aka/myb; echo
+mc cat aka/myb/myo > file-down; echo
 diff file-up file-down
 
 echo -- error.log --
