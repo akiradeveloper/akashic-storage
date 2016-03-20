@@ -1,9 +1,9 @@
 #!/bin/sh
 
-whoami
-export
-echo $(dirname $(dirname $(readlink -f $(which javac))))
-echo $(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+# whoami
+# export
+# echo $(dirname $(dirname $(readlink -f $(which javac))))
+# echo $(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
 
 NAME=akashic-storage
 # JAVA_HOME=${JAVA_HOME-/usr/java/default}

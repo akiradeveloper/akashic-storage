@@ -48,6 +48,7 @@ service akashic-storage start
 sleep 10
 service akashic-storage status
 tree $DIR
+cat ~/.mc/config.json
 mc ls aka
 mc ls aka/myb
 mc cat aka/myb/myo > file-down
