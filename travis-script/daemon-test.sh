@@ -2,6 +2,8 @@ cd ../installer
 sh compile-jar.sh
 sudo sh install.sh
 
+whoami
+
 DIR=/tmp/akashic-storage-test
 mkdir -p $DIR
 

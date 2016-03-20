@@ -10,10 +10,10 @@ jdk:
 scala:
   - 2.11.6
 sudo: required
-script:
+before_install:
+  - whoami
   - sudo mkdir -p /var/akashic-storage; chmod o+rwx /var/akashic-storage
   - echo JAVA_HOME="$JAVA_HOME"
-before_install:
   - sudo apt-get -y -qq update
   - unset GOROOT
   - export GOPATH="$HOME/go"
