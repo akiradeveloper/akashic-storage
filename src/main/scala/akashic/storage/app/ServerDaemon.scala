@@ -17,9 +17,11 @@ class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
     println("init daemon")
 
+    println("print logback status")
     val lc = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     StatusPrinter.print(lc)
 
+    println("load config")
     val config = ServerConfig(
         ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/application.conf"))
         .withFallback(ConfigFactory.load()))
