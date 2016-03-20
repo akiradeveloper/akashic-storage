@@ -1,13 +1,19 @@
 cd ../installer
-sh compile-jar.sh
-sudo sh install.sh
+make
+sudo make install
+ls -lR /opt/akashic-storage
+cd -
 
-sudo mkdir -p /tmp/akashic-storage-test
+whoami
+export
+
+DIR=/tmp/akashic-storage-test
+mkdir -p $DIR
 
 echo "**** start ****"
-sudo service akashic-storage start
+service akashic-storage start
 sleep 10
-sudo service akashic-storage status
+service akashic-storage status
 
 # hostname, port, passwd
 akashic-admin-config <<INP
@@ -26,30 +32,40 @@ aka
 
 10946
 INP
-cat ~/.mc/config.json
+cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > file-up
-mc mb aka/myb
-mc cp file-up aka/myb/myo
-mc ls aka/myb
-tree /mnt/akashic-storage
+mc mb aka/myb; echo
+mc cp file-up aka/myb/myo; echo
+mc ls aka/myb; echo
+tree $DIR
+
+echo -- daemon.log --
+cat /var/akashic-storage/log/daemon.log
+echo -- daemon.err --
+cat /var/akashic-storage/log/daemon.err
+echo -- error.log --
+cat /var/akashic-storage/log/error.log
+echo -- all.log --
+cat /var/akashic-storage/log/all.log
 
 echo "**** stop ****"
-sudo service akashic-storage stop
+service akashic-storage stop
 sleep 10
-sudo service akashic-storage status
+service akashic-storage status
 
 echo "**** start ****"
-sudo service akashic-storage start
+service akashic-storage start
 sleep 10
-sudo service akashic-storage status
-tree /mnt/akashic-storage
-mc ls aka
-mc ls aka/myb
-mc cat aka/myb/myo > file-down
+service akashic-storage status
+tree $DIR
+cat ~/.mc/config.json; echo
+mc ls aka; echo
+mc ls aka/myb; echo
+mc cat aka/myb/myo > file-down; echo
 diff file-up file-down
 
 echo -- error.log --
-sudo cat /var/log/akashic-storage/error.log
+cat /var/akashic-storage/log/error.log
 echo -- all.log --
-sudo cat /var/log/akashic-storage/all.log
+cat /var/akashic-storage/log/all.log

@@ -10,6 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object RunServer extends App {
+  // TODO impl --loglevel= option
   val config = ServerConfig(ConfigFactory.load("run-server.conf"))
   Files.createDirectories(config.mountpoint)
   server = Server(config, cleanup = true)
