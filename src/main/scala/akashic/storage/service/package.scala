@@ -95,6 +95,6 @@ package object service {
   trait AnonymousTask[T] extends Task[T] with Error.Reportable with RequestIdAllocable[T] with Measure[T]
   type AnonymousAPI = AnonymousTask[Route]
 
-  val logger = Logging.getLogger(system, getClass)
-  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult("service"))
+  val logger = Logging.getLogger(system, "akashic.storage.service")
+  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult(""))
 }

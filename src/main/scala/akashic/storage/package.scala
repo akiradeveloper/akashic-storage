@@ -13,6 +13,11 @@ package object storage {
   implicit var mat: ActorMaterializer = _
   implicit var ec: ExecutionContext = _
 
+  system = ActorSystem("akashic-storage")
+  mat = ActorMaterializer()
+  ec = system.dispatcher
+  sys.addShutdownHook(system.shutdown)
+
   var server: Server = _
-  val logger = LoggerFactory.getLogger(getClass)
+  val logger = Logging.getLogger(system, "akashic.storage")
 }

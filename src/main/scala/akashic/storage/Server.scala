@@ -19,11 +19,6 @@ import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
-  system = ActorSystem("akashic-storage")
-  mat = ActorMaterializer()
-  ec = system.dispatcher
-  sys.addShutdownHook(system.shutdown)
-
   require(Files.exists(config.mountpoint))
 
   if (cleanup) {

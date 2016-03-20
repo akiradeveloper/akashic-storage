@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 
 package object admin {
   // val logger = LoggerFactory.getLogger(getClass)
-  val logger = Logging.getLogger(system, getClass)
-  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult("admin"))
+  val logger = Logging.getLogger(system, "akashic.storage.admin")
+  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult(""))
   val authenticate = Auth.authenticate
 }
