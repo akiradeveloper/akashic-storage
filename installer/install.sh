@@ -5,7 +5,7 @@ if [ ! -e $NAME.jar ]; then
 fi
 mkdir -p /opt/$NAME
 mkdir -p /opt/$NAME/jar
-mkdir -p /var/$NAME; chmod 0666 /var/$NAME
+mkdir -p /var/$NAME; chmod o+rwx /var/$NAME
 cp $NAME.jar /opt/$NAME/jar
 cp $NAME /etc/init.d
 chmod +x /etc/init.d/$NAME

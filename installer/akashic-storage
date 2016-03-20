@@ -9,6 +9,7 @@ NAME=akashic-storage
 # JAVA_HOME=${JAVA_HOME-/usr/java/default}
 JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
 CLASS_PATH=/opt/$NAME/jar/$NAME.jar
+mkdir -p /var/$NAME/log
 LOG_OUT=/var/$NAME/log/daemon.log
 LOG_ERR=/var/$NAME/log/daemon.err
 PID=/var/$NAME/daemon.pid
