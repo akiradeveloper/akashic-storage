@@ -2,6 +2,8 @@
 
 whoami
 export
+echo $(dirname $(dirname $(readlink -f $(which javac))))
+echo $(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
 
 NAME=akashic-storage
 # JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
