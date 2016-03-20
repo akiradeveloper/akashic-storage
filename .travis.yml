@@ -12,7 +12,7 @@ scala:
 sudo: required
 before_install:
   - whoami
-  - sudo mkdir -p /var/akashic-storage; chmod o+rwx /var/akashic-storage
+  - sudo mkdir -p /var/akashic-storage; sudo chmod o+rwx /var/akashic-storage
   - echo JAVA_HOME="$JAVA_HOME"
   - sudo apt-get -y -qq update
   - unset GOROOT
