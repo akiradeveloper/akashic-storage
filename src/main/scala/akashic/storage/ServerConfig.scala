@@ -3,6 +3,7 @@ package akashic.storage
 import java.nio.file.{Path, Paths, Files}
 
 import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.scalalogging.StrictLogging
 
 trait ServerConfig {
   def mountpoint: Path

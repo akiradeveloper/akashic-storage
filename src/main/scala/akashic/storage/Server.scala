@@ -15,6 +15,7 @@ import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.util.ByteString
+import com.typesafe.scalalogging.StrictLogging
 import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 

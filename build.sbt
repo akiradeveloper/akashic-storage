@@ -14,6 +14,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.1.6",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.2",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 
   // "com.typesafe.akka" % "akka-stream-experimental_2.11" % "2.0.3",
   // "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0.3",
