@@ -18,7 +18,7 @@ class AnonymousTest extends ServerTestBase {
     test(FixtureParam(anon))
   }
 
-  test("ls bucket") { p =>
+  test("ls service") { p =>
     import p._
 
     cli.createBucket("myb1")
@@ -28,5 +28,19 @@ class AnonymousTest extends ServerTestBase {
     assert(res.forall(_.getOwner.getId === "anonymous"))
     assert(Set(res(0).getName, res(1).getName) === Set("myb1", "myb2"))
     assert(res.size === 2)
+  }
+
+  test("ls bucket") { p =>
+    import p._
+
+    cli.createBucket("myb")
+    val f = getTestFile("test.txt")
+    cli.putObject("myb", "myobj1", f)
+    cli.putObject("myb", "myobj2", f)
+    val objListing = cli.listObjects("myb")
+    assert(objListing.getBucketName == "myb")
+    val summaries = objListing.getObjectSummaries
+    assert(summaries.size === 2)
+    assert(summaries(0).getOwner.getId === "anonymous")
   }
 }
