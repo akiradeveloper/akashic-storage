@@ -53,6 +53,7 @@ sleep 10
 service akashic-storage status
 userId=`akashic-admin-add`
 echo "userId: $userId"
+akashic-admin-list
 tree $DIR
 cat ~/.mc/config.json; echo
 mc ls aka; echo
