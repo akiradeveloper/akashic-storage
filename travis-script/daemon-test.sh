@@ -37,28 +37,10 @@ cat ~/.mc/config.json; echo
 echo "akiradeveloper" > file-up
 mc mb aka/myb; echo
 mc cp file-up aka/myb/myo; echo
-echo -- daemon.log --
-cat /var/akashic-storage/log/daemon.log
-echo -- daemon.err --
-cat /var/akashic-storage/log/daemon.err
-echo -- error.log --
-cat /var/akashic-storage/log/error.log
-echo -- all.log --
-cat /var/akashic-storage/log/all.log
-
-mc ls aka/myb; echo
+mc ls aka/myb/; echo
 tree $DIR
 
 ls -lR /var/akashic-storage
-
-echo -- daemon.log --
-cat /var/akashic-storage/log/daemon.log
-echo -- daemon.err --
-cat /var/akashic-storage/log/daemon.err
-echo -- error.log --
-cat /var/akashic-storage/log/error.log
-echo -- all.log --
-cat /var/akashic-storage/log/all.log
 
 echo "**** stop ****"
 service akashic-storage stop
@@ -74,7 +56,7 @@ echo "userId: $userId"
 tree $DIR
 cat ~/.mc/config.json; echo
 mc ls aka; echo
-mc ls aka/myb; echo
+mc ls aka/myb/; echo
 mc cat aka/myb/myo > file-down; echo
 diff file-up file-down
 
