@@ -60,6 +60,16 @@ class McTest extends ServerTestBase {
     assert(mc(s"ls ${alias}").!!.split("\n").length === 2)
   }
 
+  test("ls bucket") { _ =>
+    mc(s"mb ${alias}/abc").!
+    val f = getTestFile("test.txt")
+    // in sbt test we need to add --quiet flag otherwise
+    // mc: <ERROR> Unable to get terminal size. Please use --quiet option. inappropriate ioctl for device
+    mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/aaaaa").!
+    mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/bbbbb").!
+    mc(s"ls ${alias}/abc/").!
+  }
+
   test("cp file and cat") { _ =>
     assert(mc(s"mb ${alias}/abc").! === 0)
 
