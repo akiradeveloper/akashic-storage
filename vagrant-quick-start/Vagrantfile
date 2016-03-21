@@ -28,9 +28,6 @@ Vagrant.configure(2) do |config|
       wget --no-check-certificate --no-cookies - --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.rpm
       sudo yum localinstall -y jdk-8u65-linux-x64.rpm
     fi
-    if [ -e /usr/java/default ]; then
-      echo "/usr/java/default exists [OK]"
-    fi
 
     # run `sh compile-jar.sh` in installer/ first
     # so you can avoid compiling jar file in this Vagrant script
@@ -42,7 +39,5 @@ Vagrant.configure(2) do |config|
     fi
     sudo make install
     cd -
-
-    sudo /etc/init.d/akashic-storage start
   SHELL
 end
