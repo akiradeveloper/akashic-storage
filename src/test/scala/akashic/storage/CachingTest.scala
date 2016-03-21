@@ -1,5 +1,6 @@
 package akashic.storage
 
+import java.nio.charset.Charset
 import java.nio.file.{Paths, Path}
 
 import akashic.storage.caching.{CacheMap, Cache}
@@ -19,9 +20,10 @@ class CachingTest extends FunSuite with BeforeAndAfterEach {
     guava.backing.invalidateAll()
 
     cache = new Cache[String] {
+      val UTF8 = Charset.forName("UTF-8")
       override val filePath: Path = Paths.get("/tmp/t")
-      override def writer: (String) => Array[Byte] = (a: String) => a.getBytes
-      override def reader: (Array[Byte]) => String = (a: Array[Byte]) => a.toString
+      override def writer: (String) => Array[Byte] = (a: String) => a.getBytes(UTF8)
+      override def reader: (Array[Byte]) => String = (a: Array[Byte]) => new String(a, UTF8)
       override def cacheMap: CacheMap[K, String] = guava
     }
   }
