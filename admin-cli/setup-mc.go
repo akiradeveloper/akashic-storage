@@ -1,5 +1,7 @@
 package main
 
+// only for testing
+
 import (
 	"./lib"
 	"bufio"
