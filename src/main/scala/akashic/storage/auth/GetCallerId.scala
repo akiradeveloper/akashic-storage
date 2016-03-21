@@ -13,7 +13,7 @@ case class GetCallerId(authKey: Option[String], requestId: String, resource: Str
         case None => failWith(Error.AccountProblem())
       }
     }
-    service.logger.debug(s"callerId: ${res}")
+    println(s"callerId: ${res}")
     res
   }
 }
