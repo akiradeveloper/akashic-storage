@@ -31,7 +31,7 @@ case class UserDB(root: Path) {
     override val filePath: Path = path
   }
   val dbData = makeCache(dbPath)
-  dbData.put(InMem(Map(), Map()))
+  dbData.put(InMem(Iterable()))
 
   object InMem {
     def apply(ls: Iterable[User.t]): InMem = {
@@ -70,7 +70,10 @@ case class UserDB(root: Path) {
   }
 
   def find(id: String): Option[User.t] = {
-    dbData.get.userMap.get(id)
+    id match {
+      case "anonymous" => Some(User.Anonymous)
+      case id => dbData.get.userMap.get(id)
+    }
   }
 
   def add(user: User.t): Unit = {

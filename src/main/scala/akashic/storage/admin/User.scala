@@ -17,6 +17,14 @@ object User {
       )
     }
   }
+  val Anonymous = t(
+    "",
+    "",
+    "",
+    name = "anonymous",
+    "",
+    displayName = "anonymous"
+  )
   def fromXML(xml: NodeSeq): User.t = {
     User.t(
       id = (xml \ "Id").text,
