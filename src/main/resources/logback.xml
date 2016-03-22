@@ -21,6 +21,9 @@
         </encoder>
     </appender>
 
+    <logger name="akashic.storage.auth" level="ERROR">
+        <appender-ref ref="ERROR_LOG"/>
+    </logger>
     <logger name="akashic.storage.service.acl" level="ERROR">
         <appender-ref ref="ERROR_LOG"/>
     </logger>

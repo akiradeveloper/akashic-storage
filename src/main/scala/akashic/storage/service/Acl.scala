@@ -29,7 +29,7 @@ object Acl {
       if (getPermission(callerId).contains(perm)) {
         true
       } else {
-        logger.error(s"callerId: ${callerId}, grants: ${grants}")
+        logger.error(s"failed to grant permission: callerId=${callerId} grants=${grants}")
         false
       }
     }

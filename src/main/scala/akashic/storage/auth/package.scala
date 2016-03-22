@@ -3,8 +3,11 @@ package akashic.storage
 import akashic.storage.server
 import akashic.storage.service.Error
 import akka.http.scaladsl.model.HttpRequest
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
 package object auth {
+  val logger = Logger(LoggerFactory.getLogger("akashic.storage.auth"))
   def doGetSecretKey(accessKey: String): String = {
     val id = server.users.getId(accessKey).get
     server.users.find(id).get.secretKey
@@ -15,7 +18,9 @@ package object auth {
     if (results.forall(_ == Some(""))) return Some("")
     results.filterNot(_ == Some("")).filter(_.isDefined).headOption match {
       case Some(a) => Some(a.get)
-      case None => None
+      case None =>
+        logger.error(s"failed to authorize: req=${req}")
+        None
     }
   }
 }
