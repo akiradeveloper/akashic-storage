@@ -36,7 +36,9 @@ cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > file-up
 mc mb aka/myb; echo
-mc cp file-up aka/myb/myo; echo
+mc --quiet cp file-up aka/myb/myo; echo
+mc cat aka/myb/myo > file-down-1; echo
+diff file-up file-down-1
 mc ls aka/myb/; echo
 tree $DIR
 
@@ -58,8 +60,8 @@ tree $DIR
 cat ~/.mc/config.json; echo
 mc ls aka; echo
 mc ls aka/myb/; echo
-mc cat aka/myb/myo > file-down; echo
-diff file-up file-down
+mc cat aka/myb/myo > file-down-2; echo
+diff file-up file-down-2
 
 echo -- daemon.log --
 cat /var/akashic-storage/log/daemon.log
