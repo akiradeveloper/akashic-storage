@@ -29,7 +29,7 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
   }
 
   override def afterEach {
-    server.stop
+    Await.ready(server.stop, Duration.Inf)
   }
 
   def getTestFile(name: String): File = {

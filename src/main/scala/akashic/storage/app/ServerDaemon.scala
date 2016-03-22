@@ -12,6 +12,7 @@ import java.io.File
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class ServerDaemon extends Daemon {
   override def init(context: DaemonContext): Unit = {
@@ -28,10 +29,10 @@ class ServerDaemon extends Daemon {
     server = Server(config, cleanup = false)
   }
   override def start(): Unit = {
-    server.start
+    Await.ready(server.start, Duration.Inf)
   }
   override def stop(): Unit = {
-    server.stop
+    Await.ready(server.stop, Duration.Inf)
   }
   override def destroy(): Unit = {}
 }

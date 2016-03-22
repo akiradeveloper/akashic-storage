@@ -123,7 +123,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     binding
   }
 
-  def stop: Unit = {
+  def stop = {
     logger.info("stop server")
     binding.flatMap(_.unbind)
   }
