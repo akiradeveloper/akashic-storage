@@ -39,6 +39,7 @@ mc mb aka/myb; echo
 mc --quiet cp file-up aka/myb/myo; echo
 mc cat aka/myb/myo > file-down-1; echo
 diff file-up file-down-1
+echo $?
 mc ls aka/myb/; echo
 tree $DIR
 
