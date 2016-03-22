@@ -31,7 +31,8 @@ case class UserDB(root: Path) {
     override val filePath: Path = path
   }
   val dbData = makeCache(dbPath)
-  dbData.put(InMem(Iterable()))
+  if (!Files.exists(dbPath))
+    dbData.put(InMem(Iterable()))
 
   object InMem {
     def apply(ls: Iterable[User.t]): InMem = {
