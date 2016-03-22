@@ -45,6 +45,17 @@ tree $DIR
 
 ls -lR /var/akashic-storage
 
+echo -- daemon.log --
+cat /var/akashic-storage/log/daemon.log
+echo -- daemon.err --
+cat /var/akashic-storage/log/daemon.err
+echo -- error.log --
+cat /var/akashic-storage/log/error.log
+echo -- admin.log --
+cat /var/akashic-storage/log/admin.log
+echo -- all.log --
+cat /var/akashic-storage/log/all.log
+
 echo "**** stop ****"
 service akashic-storage stop
 sleep 10
