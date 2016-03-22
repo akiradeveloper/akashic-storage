@@ -35,7 +35,7 @@ object PutObjectAcl {
         case None => failWith(Error.NoSuchKey())
       }
       val versionAcl = version.acl.get
-      if (!versionAcl.getPermission(callerId).contains(Acl.WriteAcp()))
+      if (!versionAcl.grant(callerId, Acl.WriteAcp()))
         failWith(Error.AccessDenied())
 
       val newAcl = if (xmlString.isDefined) {

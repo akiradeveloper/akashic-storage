@@ -62,7 +62,7 @@ object GetBucket {
         case None => failWith(Error.NoSuchBucket())
       }
       val bucketAcl = bucket.acl.get
-      if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
+      if (!bucketAcl.grant(callerId, Acl.Read()))
         failWith(Error.AccessDenied())
 
       import BucketListing._

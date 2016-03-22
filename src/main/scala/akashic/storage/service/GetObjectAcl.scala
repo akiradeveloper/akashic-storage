@@ -28,7 +28,7 @@ object GetObjectAcl {
         case None => failWith(Error.NoSuchKey())
       }
       val versionAcl = version.acl.get
-      if (!versionAcl.getPermission(callerId).contains(Acl.ReadAcp()))
+      if (!versionAcl.grant(callerId, Acl.ReadAcp()))
         failWith(Error.AccessDenied())
 
       val headers = ResponseHeaderList.builder

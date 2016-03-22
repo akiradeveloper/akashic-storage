@@ -65,7 +65,7 @@ object GetObject {
       }
 
       val versionAcl = version.acl.get
-      if (!versionAcl.getPermission(callerId).contains(Acl.Read()))
+      if (!versionAcl.grant(callerId, Acl.Read()))
         failWith(Error.AccessDenied())
 
       // TODO if this is a delete marker?

@@ -5,6 +5,8 @@ import java.nio.file.Path
 import akashic.storage.caching.CacheMap.Guava
 import akashic.storage.caching.{CacheMap, Cache}
 import com.google.common.cache.CacheBuilder
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
@@ -12,6 +14,7 @@ import scala.xml.NodeSeq
 import akashic.storage.server
 
 object Acl {
+  val logger = Logger(LoggerFactory.getLogger("akashic.storage.service.acl"))
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]): t = fromBytes(a)
   def makeCache(path: Path) = new Cache[Acl.t] {
@@ -22,10 +25,18 @@ object Acl {
   }
   case class t(owner: String, grants: Iterable[Grant]) {
     def toBytes: Array[Byte] = this.pickle.value
-    def getPermission(callerId: String): Set[Permission] = {
+    def grant(callerId: String, perm: Permission): Boolean = {
+      if (getPermission(callerId).contains(perm)) {
+        true
+      } else {
+        logger.error(s"callerId: ${callerId}, grants: ${grants}")
+        false
+      }
+    }
+    private def getPermission(callerId: String): Set[Permission] = {
       grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
     }
-    def ownerXML = {
+    private def ownerXML = {
       val displayName = server.users.find(owner).get.displayName
       <Owner>
         <ID>{owner}</ID>

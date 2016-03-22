@@ -36,7 +36,7 @@ object MakeObject {
       val bucket = findBucket(server.tree, bucketName)
       val bucketAcl = bucket.acl.get
 
-      if (!bucketAcl.getPermission(callerId).contains(Acl.Write()))
+      if (!bucketAcl.grant(callerId, Acl.Write()))
         failWith(Error.AccessDenied())
 
       Commit.once(bucket.keyPath(keyName)) { patch =>

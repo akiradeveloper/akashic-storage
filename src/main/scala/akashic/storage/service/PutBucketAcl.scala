@@ -31,7 +31,7 @@ object PutBucketAcl {
     override def runOnce: Route = {
       val bucket = findBucket(server.tree, bucketName)
       val bucketAcl = bucket.acl.get
-      if (!bucketAcl.getPermission(callerId).contains(Acl.WriteAcp()))
+      if (!bucketAcl.grant(callerId, Acl.WriteAcp()))
         failWith(Error.AccessDenied())
 
       val newAcl = if (body.isDefined) {

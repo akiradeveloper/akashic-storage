@@ -70,5 +70,7 @@ echo -- daemon.err --
 cat /var/akashic-storage/log/daemon.err
 echo -- error.log --
 cat /var/akashic-storage/log/error.log
+echo -- admin.log --
+cat /var/akashic-storage/log/admin.log
 echo -- all.log --
 cat /var/akashic-storage/log/all.log

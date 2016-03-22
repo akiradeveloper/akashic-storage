@@ -20,7 +20,7 @@ object HeadBucket {
       val bucket = findBucket(server.tree, bucketName)
 
       val bucketAcl = bucket.acl.get
-      if (!bucketAcl.getPermission(callerId).contains(Acl.Read()))
+      if (!bucketAcl.grant(callerId, Acl.Read()))
         failWith(Error.AccessDenied())
 
       val headers = ResponseHeaderList.builder
