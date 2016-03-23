@@ -26,7 +26,7 @@ object V2Presigned {
       if (computed.exists(_ == signature)) {
         accessKey
       } else {
-        computed.foreach(logger.error(_))
+        stringToSign.foreach(logger.error(_))
         assert(false)
         ""
       }

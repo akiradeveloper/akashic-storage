@@ -37,7 +37,7 @@ object V2 {
       if (computed.exists(_ == signature)) {
         accessKey
       } else {
-        computed.foreach(logger.error(_))
+        stringToSign.foreach(logger.error(_))
         assert(false)
         ""
       }
