@@ -38,10 +38,10 @@ cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > /tmp/file-up
 
-mc mb aka/myb; echo $?
-mc --debug --quiet cp /tmp/file-up aka/myb/myo; echo $?
-mc --debug --quiet cat aka/myb/myo; echo $?
-mc ls aka/myb/; echo $?
+mc mb aka/myb
+mc --debug --quiet cp /tmp/file-up aka/myb/myo
+mc --debug --quiet cat aka/myb/myo
+mc ls aka/myb/
 tree $DIR
 
 ls -lR /var/akashic-storage
@@ -70,10 +70,10 @@ userId=`akashic-admin-add`
 echo "userId: $userId"
 akashic-admin-list
 tree $DIR
-cat ~/.mc/config.json; echo $?
-mc ls aka; echo $?
-mc ls aka/myb/; echo $?
-mc cat aka/myb/myo; echo $?
+cat ~/.mc/config.json
+mc ls aka
+mc ls aka/myb/
+mc cat aka/myb/myo
 
 echo -- daemon.log --
 cat /var/akashic-storage/log/daemon.log
