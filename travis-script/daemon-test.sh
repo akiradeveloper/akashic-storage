@@ -1,3 +1,5 @@
+set -e
+
 cd ../installer
 make
 sudo make install
