@@ -35,12 +35,11 @@ INP
 cat ~/.mc/config.json; echo
 
 echo "akiradeveloper" > file-up
-mc mb aka/myb; echo
-mc --debug --quiet cp file-up aka/myb/myo; echo
-mc --debug --quiet cat aka/myb/myo > file-down-1; echo
-diff file-up file-down-1
-echo $?
-mc ls aka/myb/; echo
+
+mc mb aka/myb; echo $?
+mc --debug --quiet cp file-up aka/myb/myo; echo $?
+mc --debug --quiet cat aka/myb/myo; echo $?
+mc ls aka/myb/; echo $?
 tree $DIR
 
 ls -lR /var/akashic-storage
@@ -69,12 +68,10 @@ userId=`akashic-admin-add`
 echo "userId: $userId"
 akashic-admin-list
 tree $DIR
-cat ~/.mc/config.json; echo
-mc ls aka; echo
-mc ls aka/myb/; echo
-mc cat aka/myb/myo > file-down-2; echo
-diff file-up file-down-2
-echo $?
+cat ~/.mc/config.json; echo $?
+mc ls aka; echo $?
+mc ls aka/myb/; echo $?
+mc cat aka/myb/myo; echo $?
 
 echo -- daemon.log --
 cat /var/akashic-storage/log/daemon.log
