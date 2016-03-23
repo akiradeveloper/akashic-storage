@@ -39,3 +39,8 @@ libraryDependencies ++= Seq(
   // "org.scalaj" %% "scalaj-http" % "2.2.0"
   // "com.github.scopt" %% "scopt" % "3.3.0",
 )
+
+mergeStrategy in assembly := {
+  case "reference.conf" => MergeStrategy.concat
+  case _ => MergeStrategy.deduplicate
+}
