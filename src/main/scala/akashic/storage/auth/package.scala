@@ -9,7 +9,13 @@ import org.slf4j.LoggerFactory
 package object auth {
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.auth"))
   def doGetSecretKey(accessKey: String): String = {
-    val id = server.users.getId(accessKey).get
+    val id = server.users.getId(accessKey) match {
+      case Some(a) => a
+      case None =>
+        logger.error(s"no user for accessKey: ${accessKey}")
+        assert(false)
+        ""
+    }
     server.users.find(id).get.secretKey
   }
   val getSecretKey: String => String = (accessKey: String) => doGetSecretKey(accessKey)
@@ -19,7 +25,7 @@ package object auth {
     results.filterNot(_ == Some("")).filter(_.isDefined).headOption match {
       case Some(a) => Some(a.get)
       case None =>
-        logger.error(s"failed to authorize: req=${req}")
+        logger.error(s"failed to authorize: req=${req} db=${server.users.list}")
         None
     }
   }
