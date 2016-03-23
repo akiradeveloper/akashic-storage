@@ -23,8 +23,13 @@ object V2Presigned {
       val alg = V2Common(req, resource, paramList, headerList)
       val stringToSign = alg.stringToSign(expires)
       val computed = stringToSign.map(alg.computeSignature(_, getSecretKey(accessKey)))
-      require(computed.exists(_ == signature))
-      accessKey
+      if (computed.exists(_ == signature)) {
+        accessKey
+      } else {
+        computed.foreach(logger.error(_))
+        assert(false)
+        ""
+      }
     }.toOption
   }
 }
