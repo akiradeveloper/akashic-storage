@@ -1,5 +1,6 @@
 package akashic.storage
 
+import java.io.File
 import java.nio.file.{Paths, Files}
 
 import akashic.storage.server
@@ -99,5 +100,12 @@ class McTest extends ServerTestBase {
     println(url)
     val res = HttpClients.createDefault.execute(new HttpGet(url))
     assert(IOUtils.toString(res.getEntity.getContent) === "We love Scala!")
+  }
+
+  test("preproduce daemon-test") { _ =>
+    (Process("echo aaaaaa") #> new File("/tmp/file-up")).!
+    assert(mc(s"mb ${alias}/myb").! === 0)
+    assert(mc(s"--quiet cp /tmp/file-up ${alias}/myb/myo").! === 0)
+    assert(mc(s"--quiet cat ${alias}/myb/myo").! === 0)
   }
 }
