@@ -14,6 +14,8 @@ trait ServerConfig {
 
 object ServerConfig {
   def apply(configRoot: Config) = new ServerConfig {
+    logger.info("configRoot: {}", configRoot)
+
     val config = configRoot.getConfig("akashic.storage")
     override def mountpoint = Paths.get(config.getString("mountpoint"))
     override def ip = config.getString("ip")

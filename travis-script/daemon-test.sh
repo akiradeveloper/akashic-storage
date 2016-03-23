@@ -34,10 +34,10 @@ aka
 INP
 cat ~/.mc/config.json; echo
 
-echo "akiradeveloper" > file-up
+echo "akiradeveloper" > /tmp/file-up
 
 mc mb aka/myb; echo $?
-mc --debug --quiet cp file-up aka/myb/myo; echo $?
+mc --debug --quiet cp /tmp/file-up aka/myb/myo; echo $?
 mc --debug --quiet cat aka/myb/myo; echo $?
 mc ls aka/myb/; echo $?
 tree $DIR
