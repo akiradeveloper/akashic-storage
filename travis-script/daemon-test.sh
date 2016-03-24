@@ -40,7 +40,7 @@ dd if=/dev/urandom of=/tmp/file-up bs=1M count=32
 
 mc mb aka/myb
 mc --debug --quiet cp /tmp/file-up aka/myb/myo
-mc --debug --quiet cat aka/myb/myo
+mc --debug --quiet cat aka/myb/myo - > /dev/null
 mc ls aka/myb/
 tree $DIR
 
@@ -73,7 +73,7 @@ tree $DIR
 cat ~/.mc/config.json
 mc ls aka
 mc ls aka/myb/
-mc cat aka/myb/myo
+mc cat aka/myb/myo - > /dev/null
 
 echo -- daemon.log --
 cat /var/log/akashic-storage/daemon.log
