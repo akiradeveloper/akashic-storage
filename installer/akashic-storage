@@ -10,10 +10,9 @@ NAME=akashic-storage
 JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
 CLASS_PATH=/opt/$NAME/jar/$NAME.jar
 LOGBACK_PATH=/opt/$NAME/etc/logback.xml
-mkdir -p /var/$NAME/log
-LOG_OUT=/var/$NAME/log/daemon.log
-LOG_ERR=/var/$NAME/log/daemon.err
-PID=/var/$NAME/daemon.pid
+LOG_OUT=/var/log/$NAME/daemon.log
+LOG_ERR=/var/log/$NAME/daemon_error.log
+PID=/var/run/$NAME/daemon.pid
 JAVA_OPTS="-Dlogback.configurationFile=$LOGBACK_PATH"
 JSVC_PROG=`which jsvc`
 JSVC="${JSVC_PROG} -debug -home $JAVA_HOME ${JAVA_OPTS} -cp $CLASS_PATH -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID"

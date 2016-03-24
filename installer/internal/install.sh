@@ -10,7 +10,8 @@ mkdir -p /opt/$NAME/etc
 cp application_default.conf /opt/$NAME/etc/application.conf
 cp logback_default.xml /opt/$NAME/etc/logback.xml
 
-mkdir -p /var/$NAME; chmod o+rwx /var/$NAME
+mkdir -p /var/log/$NAME; chmod o+rwx /var/log/$NAME
+mkdir -p /var/run/$NAME; chmod o+rwx /var/run/$NAME
 
 cp $NAME /etc/init.d
 chmod o+x /etc/init.d/$NAME
