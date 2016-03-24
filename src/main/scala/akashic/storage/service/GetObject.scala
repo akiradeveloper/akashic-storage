@@ -40,7 +40,7 @@ object GetObject {
     matcherCommon &
     provide("GET Object")
 
-  val route = matcher.as(t)(_.run)
+  val route = withRangeSupport { matcher.as(t)(_.run) }
   case class t(
     bucketName: String, keyName: String,
     versionId: Option[String], // not used yet
