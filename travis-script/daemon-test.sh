@@ -37,13 +37,13 @@ INP
 cat ~/.mc/config.json; echo
 
 echo "aaaa" > /tmp/up-small
-dd if=/dev/urandom of=/tmp/up-large bs=1M count=32
+dd if=/dev/urandom of=/tmp/up-large bs=1M count=128
 
 mc mb aka/myb
 mc --debug --quiet cp /tmp/up-small aka/myb/myo-small
 mc --debug --quiet cp /tmp/up-large aka/myb/myo-large
-mc --debug --quiet cat aka/myb/myo-small - > /dev/null
-mc --debug --quiet cat aka/myb/myo-large - > /dev/null
+mc --debug --quiet cp aka/myb/myo-small down-small-1
+mc --debug --quiet cp aka/myb/myo-large down-large-1
 mc ls aka/myb/
 tree $DIR
 
@@ -76,8 +76,8 @@ tree $DIR
 cat ~/.mc/config.json
 mc ls aka
 mc ls aka/myb/
-mc --debug --quiet cat aka/myb/myo-small - > /dev/null
-mc --debug --quiet cat aka/myb/myo-large - > /dev/null
+mc --debug --quiet cp aka/myb/myo-small down-small-2
+mc --debug --quiet cp aka/myb/myo-large down-large-2
 
 echo -- daemon.log --
 cat /var/log/akashic-storage/daemon.log
