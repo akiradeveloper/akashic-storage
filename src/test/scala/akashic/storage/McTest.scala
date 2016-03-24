@@ -102,10 +102,20 @@ class McTest extends ServerTestBase {
     assert(IOUtils.toString(res.getEntity.getContent) === "We love Scala!")
   }
 
-  test("preproduce daemon-test") { _ =>
-    (Process("echo aaaaaa") #> new File("/tmp/file-up")).!
-    assert(mc(s"mb ${alias}/myb").! === 0)
-    assert(mc(s"--quiet cp /tmp/file-up ${alias}/myb/myo").! === 0)
-    assert(mc(s"--quiet cat ${alias}/myb/myo").! === 0)
+  test("cp file and cp (small)") { _ =>
+    (mc(s"mb ${alias}/abc").! === 0)
+    val f = getTestFile("test.txt")
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/aaa").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
+  }
+
+  test("cp file and cp (large)") { _ =>
+    val path = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(path, 32)
+    val f = path.toFile
+
+    assert(mc(s"mb ${alias}/abc").! === 0)
+    assert(mc(s"--quiet cp ${f.getAbsoluteFile} ${alias}/abc/aaa").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
   }
 }
