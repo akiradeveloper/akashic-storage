@@ -78,16 +78,20 @@ object GetObject {
 
       val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
+      val lastModified = DateTime(files.lastDate(filePath).getTime)
+
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
-        .withHeader(`Last-Modified`(DateTime(files.lastDate(filePath).getTime)))
+        .withHeader(`Last-Modified`(lastModified))
         .withHeader(ETag(meta.eTag))
         .withHeader(CONTENT_DISPOSITION, contentDisposition)
         .withHeader(meta.xattrs.unwrap)
         .build
 
       val ct: ContentType = ContentType.parse(contentType.get).right.get
-      complete(StatusCodes.OK, headers, HttpEntity(ct, filePath.toFile, 1 << 20))
+      conditional(EntityTag(meta.eTag), lastModified) {
+        complete(StatusCodes.OK, headers, HttpEntity(ct, filePath.toFile, 1 << 20))
+      }
     }
   }
 }
