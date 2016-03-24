@@ -36,7 +36,7 @@ aka
 INP
 cat ~/.mc/config.json; echo
 
-echo "akiradeveloper" > /tmp/file-up
+dd if=/dev/urandom of=/tmp/file-up bs=1M count=32
 
 mc mb aka/myb
 mc --debug --quiet cp /tmp/file-up aka/myb/myo
