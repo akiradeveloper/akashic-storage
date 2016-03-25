@@ -1,6 +1,6 @@
 package akashic.storage.service
 
-import akashic.storage.{files, server}
+import akashic.storage.server
 import akashic.storage.patch.{Data, Commit}
 import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
 import akka.http.scaladsl.model.headers.ETag
@@ -34,7 +34,7 @@ object UploadPart {
       val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
-      val computedMD5 = files.computeMD5(partData)
+      val computedMD5 = DigestUtils.md5(partData)
       for (md5 <- contentMd5)
         if (Base64.encodeBase64String(computedMD5) != md5)
           failWith(Error.BadDigest())

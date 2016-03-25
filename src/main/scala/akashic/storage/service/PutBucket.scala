@@ -31,7 +31,7 @@ object PutBucket {
     def runOnce = {
       val dest = server.tree.bucketPath(bucketName)
 
-      if (Files.exists(dest)) {
+      if (dest.exists) {
         val bucket = findBucket(server.tree, bucketName)
         val bucketAcl = bucket.acl.get
         if (bucketAcl.owner == callerId) {
@@ -42,7 +42,7 @@ object PutBucket {
       }
 
       Commit.once(dest) { patch =>
-        val bucketPatch = patch.asBucket
+        val bucketPatch = Bucket(patch.root)
         bucketPatch.init
 
         bucketPatch.acl.put {

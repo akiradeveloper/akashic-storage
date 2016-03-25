@@ -1,7 +1,9 @@
 package akashic.storage.service
 
+import java.util.Date
+
 import akashic.storage.service.Error.Reportable
-import akashic.storage.{server, files, patch}
+import akashic.storage.{server, patch}
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -25,7 +27,7 @@ object GetService {
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {
-        val date = files.lastDate(b.root)
+        val date = new Date(b.root.getAttr.creationTime)
         val creationDate = dates.format000Z(date)
         <Bucket>
           <Name>{b.name}</Name>

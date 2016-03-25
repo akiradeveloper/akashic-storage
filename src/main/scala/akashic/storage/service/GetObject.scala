@@ -1,6 +1,7 @@
 package akashic.storage.service
 
-import akashic.storage.{HeaderList, server, files}
+import akashic.storage.backend.NodePath
+import akashic.storage.{HeaderList, server}
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.headers.ETag
 import akka.http.scaladsl.model._
@@ -72,13 +73,13 @@ object GetObject {
 
       val meta = version.meta.get
       
-      val filePath = version.data.filePath
+      val filePath: NodePath = version.data.filePath
 
-      val contentType = responseContentType <+ Some(files.detectContentType(filePath))
+      val contentType = responseContentType <+ Some(filePath.detectContentType)
 
       val contentDisposition = responseContentDisposition <+ meta.attrs.find("Content-Disposition")
 
-      val lastModified = DateTime(files.lastDate(filePath).getTime)
+      val lastModified = DateTime(filePath.getAttr.creationTime)
 
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
@@ -90,7 +91,7 @@ object GetObject {
 
       val ct: ContentType = ContentType.parse(contentType.get).right.get
       conditional(EntityTag(meta.eTag), lastModified) {
-        complete(StatusCodes.OK, headers, HttpEntity(ct, filePath.toFile, 1 << 20))
+        complete(StatusCodes.OK, headers, HttpEntity.Default(ct, filePath.getAttr.length, filePath.getSource(1 << 20)))
       }
     }
   }

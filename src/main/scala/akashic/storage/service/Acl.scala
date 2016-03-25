@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import java.nio.file.Path
 
+import akashic.storage.backend.NodePath
 import akashic.storage.caching.CacheMap.Guava
 import akashic.storage.caching.{CacheMap, Cache}
 import com.google.common.cache.CacheBuilder
@@ -17,8 +18,8 @@ object Acl {
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.service.acl"))
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]): t = fromBytes(a)
-  def makeCache(path: Path) = new Cache[Acl.t] {
-    override val filePath: Path = path
+  def makeCache(path: NodePath) = new Cache[Acl.t] {
+    override val filePath = path
     override def writer: (Acl.t) => Array[Byte] = Acl.writer
     override def reader: (Array[Byte]) => Acl.t = Acl.reader
     override def cacheMap: CacheMap[K, Acl.t] = server.cacheMaps.forAcl

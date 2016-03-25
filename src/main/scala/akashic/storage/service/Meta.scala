@@ -3,6 +3,7 @@ package akashic.storage.service
 import java.nio.file.Path
 
 import akashic.storage.HeaderList
+import akashic.storage.backend.NodePath
 import akashic.storage.caching.CacheMap.Guava
 import akashic.storage.caching.{CacheMap, Cache}
 import com.google.common.cache.CacheBuilder
@@ -14,11 +15,11 @@ import akashic.storage.server
 object Meta {
   def writer(a: t): Array[Byte] = a.toBytes
   def reader(a: Array[Byte]) = fromBytes(a)
-  def makeCache(path: Path) = new Cache[Meta.t] {
+  def makeCache(path: NodePath) = new Cache[Meta.t] {
     override def cacheMap: CacheMap[K, t] = server.cacheMaps.forMeta
     override def writer: (t) => Array[Byte] = Meta.writer
     override def reader: (Array[Byte]) => t = Meta.reader
-    override val filePath: Path = path
+    override val filePath = path
   }
   case class t(isVersioned: Boolean,
                isDeleteMarker: Boolean,

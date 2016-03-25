@@ -3,6 +3,7 @@ package akashic.storage
 import java.nio.file.{Paths, Files}
 
 import akashic.storage.admin._
+import akashic.storage.backend.NodePath
 import akashic.storage.caching.CacheMaps
 import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
@@ -22,28 +23,31 @@ import scala.concurrent.Future
 case class Server(config: ServerConfig, cleanup: Boolean) {
   require(Files.exists(config.mountpoint))
 
+  fs = new backend.Local(config.mountpoint)
+  val root = NodePath(null, null, Some(fs.getRoot))
+
   if (cleanup) {
-    FileUtils.cleanDirectory(config.mountpoint.toFile)
+    root.cleanDir
     logger.info("mountpoint is cleaned up")
   }
 
-  if (files.children(config.mountpoint).isEmpty) {
+  if (root.listDir.isEmpty) {
     logger.info("initialize mountpoint")
-    Files.createDirectory(config.mountpoint.resolve("tree"))
-    Files.createDirectory(config.mountpoint.resolve("admin"))
-    Files.createDirectory(config.mountpoint.resolve("astral"))
+    root.resolve("tree").makeDir
+    root.resolve("admin").makeDir
+    root.resolve("astral").makeDir
   }
 
   val initialized =
-    Files.exists(config.mountpoint.resolve("tree")) &&
-    Files.exists(config.mountpoint.resolve("admin")) &&
-    Files.exists(config.mountpoint.resolve("astral"))
+    root.resolve("tree").exists &&
+    root.resolve("admin").exists &&
+    root.resolve("astral").exists
   require(initialized)
   logger.info("mountpoint is initialized")
 
-  val tree = Tree(config.mountpoint.resolve("tree"))
-  val users = UserDB(config.mountpoint.resolve("admin"))
-  val astral = Astral(config.mountpoint.resolve("astral"))
+  val tree = Tree(root.resolve("tree"))
+  val users = UserDB(root.resolve("admin"))
+  val astral = Astral(root.resolve("astral"))
   val cacheMaps = CacheMaps(config)
 
   val adminRoute =

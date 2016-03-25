@@ -1,7 +1,7 @@
 package akashic.storage.service
 
-import akashic.storage.patch.Commit
-import akashic.storage.{HeaderList, files, server}
+import akashic.storage.patch.{Version, Key, Commit}
+import akashic.storage.{HeaderList, server}
 import akka.http.scaladsl.model.headers.ETag
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Route
@@ -26,7 +26,7 @@ object MakeObject {
                requestId: String) extends Task[Result] with Error.Reportable {
     override def resource: String = Resource.forObject(bucketName, keyName)
     override def runOnce: Result = {
-      val computedMD5 = files.computeMD5(objectData)
+      val computedMD5 = DigestUtils.md5(objectData)
       for (md5 <- contentMd5)
         if (Base64.encodeBase64String(computedMD5) != md5)
           failWith(Error.BadDigest())
@@ -40,12 +40,12 @@ object MakeObject {
         failWith(Error.AccessDenied())
 
       Commit.once(bucket.keyPath(keyName)) { patch =>
-        val keyPatch = patch.asKey
+        val keyPatch = Key(bucket, patch.root)
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
       Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
-        val version = patch.asVersion
+        val version = Version(key, patch.root)
 
         version.acl.put {
           val grantsFromCanned = (cannedAcl <+ Some("private"))

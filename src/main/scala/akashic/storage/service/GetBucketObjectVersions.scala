@@ -1,6 +1,7 @@
 package akashic.storage.service
 
-import akashic.storage.files
+import java.util.Date
+
 import akashic.storage.patch.Version
 import akashic.storage.service.BucketListing.Filterable
 import akka.http.scaladsl.model.HttpRequest
@@ -43,7 +44,7 @@ object GetBucketObjectVersions {
             <Key>{name}</Key>
             <VersionId>{unwrap.name}</VersionId>
             <IsLatest>true</IsLatest>
-            <LastModified>{dates.format000Z(files.lastDate(unwrap.root))}</LastModified>
+            <LastModified>{dates.format000Z(new Date(unwrap.root.getAttr.creationTime))}</LastModified>
             <ETag>{quoteString(meta.eTag)}</ETag>
             <Size>{unwrap.data.length}</Size>
             <Owner>

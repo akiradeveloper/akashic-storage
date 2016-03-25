@@ -2,13 +2,14 @@ package akashic.storage.patch
 
 import java.nio.file.{Files, Path}
 
-case class Key(root: Path) extends Patch {
-  val bucket = Bucket(root.getParent.getParent)
-  val versions = Versions(root.resolve("versions"))
+import akashic.storage.backend.NodePath
+
+case class Key(bucket: Bucket, root: NodePath) extends Patch {
+  val versions = Versions(this, root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
   def init {
-    Files.createDirectory(versions.root)
-    Files.createDirectory(uploads.root)
+    versions.root.makeDir
+    uploads.root.makeDir
   }
   def findLatestVersion: Option[Version] = {
     versions.findLatestVersion
