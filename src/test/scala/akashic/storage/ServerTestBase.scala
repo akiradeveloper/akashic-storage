@@ -41,7 +41,7 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
     if (!Files.exists(path)) {
       val result = new Array[Byte](sizeMB * 1024 * 1024)
       new Random().nextBytes(result)
-      files.writeBytes(path, result)
+      Files.write(path, result)
     }
   }
 

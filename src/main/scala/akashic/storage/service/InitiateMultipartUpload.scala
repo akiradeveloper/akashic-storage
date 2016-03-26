@@ -1,7 +1,7 @@
 package akashic.storage.service
 
 import akashic.storage.{HeaderList, server}
-import akashic.storage.patch.Commit
+import akashic.storage.patch.{Upload, Key, Commit}
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -37,14 +37,14 @@ object InitiateMultipartUpload {
         failWith(Error.AccessDenied())
 
       Commit.once(bucket.keyPath(keyName)) { patch =>
-        val keyPatch = patch.asKey
+        val keyPatch = Key(bucket, patch.root)
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
 
       val uploadId = key.uploads.acquireNewUpload
       Commit.once(key.uploads.root.resolve(uploadId)) { patch =>
-        val upload = patch.asUpload
+        val upload = Upload(patch.root)
         upload.init
 
         upload.acl.put {

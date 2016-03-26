@@ -2,11 +2,12 @@ package akashic.storage.service
 
 import java.net.URLEncoder
 
+import akashic.storage.backend.NodePath
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 import java.nio.file.Path
 
-import akashic.storage.{files, server}
+import akashic.storage.server
 import akashic.storage.patch.{Commit, Patch, Version, Data}
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
@@ -63,16 +64,16 @@ object CompleteMultipartUpload {
       val lastPartNumber = parts.last.partNumber
 
       for (Part(partNumber, eTag) <- parts) {
-        val uploadedPart: Path = upload.findPart(partNumber).map(_.unwrap.filePath) match {
+        val uploadedPart: NodePath = upload.findPart(partNumber).map(_.unwrap.filePath) match {
           case Some(a) => a
           case None => failWith(Error.InvalidPart())
         }
-        val computedETag = Hex.encodeHexString(files.computeMD5(uploadedPart))
+        val computedETag = Hex.encodeHexString(uploadedPart.computeMD5)
         if (computedETag != eTag) {
           failWith(Error.InvalidPart())
         }
-        // Each part must be at least 5MB in size, expect the last part.
-        if (partNumber < lastPartNumber && files.fileSize(uploadedPart) < (5 << 20)) {
+        // Each part must be at least 5MB in size, except the last part.
+        if (partNumber < lastPartNumber && uploadedPart.getAttr.length < (5 << 20)) {
           failWith(Error.EntityTooSmall())
         }
       }
@@ -95,14 +96,14 @@ object CompleteMultipartUpload {
       val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
-          val versionPatch = patch.asVersion
+          val versionPatch = Version(key, patch.root)
 
-          files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
-            for (part <- parts) {
-              // parts are all valid so we don't need to call findPart
-              f.write(upload.part(part.partNumber).unwrap.get)
-            }
+          val os = versionPatch.data.root.getOutputStream
+          for (part <- parts) {
+            // parts are all valid so we don't need to call findPart
+            os.write(upload.part(part.partNumber).unwrap.get)
           }
+          os.close
 
           versionPatch.acl.put(upload.acl.get)
 

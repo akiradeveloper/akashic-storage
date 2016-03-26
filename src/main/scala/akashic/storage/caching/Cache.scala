@@ -3,22 +3,22 @@ package akashic.storage.caching
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{Files, Path}
 
-import akashic.storage.files
 import akashic.storage.patch.Data
 
 trait Cache[V] extends Data[V] {
+  /** not to cache */
   val NULL_KEY = ""
   type K = String
   private def computeLookupKey: K = {
-    Files.exists(filePath) match {
+    filePath.exists match {
       case true =>
-        val attr = Files.readAttributes(filePath, classOf[BasicFileAttributes])
-        attr.fileKey match {
+        val attr = filePath.getAttr
+        attr.uniqueKey match {
           // if the fileKey is null we can't safely cache objects.
           // because the filesystem returns null fileKey is not common case
           // I decided to not cache.
-          case null => NULL_KEY
-          case x => s"${x.hashCode}-${attr.creationTime.toMillis}"
+          case None => NULL_KEY
+          case Some(key) => s"${key}-${attr.creationTime}"
         }
       case false => NULL_KEY
     }
@@ -36,7 +36,7 @@ trait Cache[V] extends Data[V] {
     cacheMap.find(k) match {
       case Some(a) => a
       case None =>
-        val bytes = files.readBytes(filePath)
+        val bytes = filePath.readBytes
         val ret = reader(bytes)
         cacheMap.insert(k, ret)
         ret
@@ -46,7 +46,7 @@ trait Cache[V] extends Data[V] {
     cacheMap.find(k) match {
       case None =>
         val bytes = writer(v)
-        files.writeBytes(filePath, bytes)
+        filePath.writeBytes(bytes)
         cacheMap.insert(k, v)
       case _ =>
     }

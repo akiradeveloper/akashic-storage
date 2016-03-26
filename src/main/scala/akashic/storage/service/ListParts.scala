@@ -1,7 +1,9 @@
 package akashic.storage.service
 
+import java.util.Date
+
 import akashic.storage.patch.Part
-import akashic.storage.{files, server}
+import akashic.storage.server
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 
@@ -63,9 +65,9 @@ object ListParts {
         val filePath = part.unwrap.filePath
         <Part>
           <PartNumber>{part.id}</PartNumber>
-          <LastModified>{dates.format000Z(files.lastDate(filePath))}</LastModified>
-          <ETag>{files.computeMD5(filePath)}</ETag>
-          <Size>{files.fileSize(filePath)}</Size>
+          <LastModified>{dates.format000Z(new Date(filePath.getAttr.creationTime))}</LastModified>
+          <ETag>{filePath.computeMD5}</ETag>
+          <Size>{filePath.getAttr.length}</Size>
         </Part>
       }
 

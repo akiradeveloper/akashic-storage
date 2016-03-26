@@ -1,13 +1,17 @@
 package akashic.storage
 
 import java.nio.charset.Charset
-import java.nio.file.{Paths, Path}
+import java.nio.file.Paths
 
+import akashic.storage.backend.NodePath
 import akashic.storage.caching.{CacheMap, Cache}
 import com.google.common.cache.CacheBuilder
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
-class CachingTest extends FunSuite with BeforeAndAfterEach {
+class CachingTest extends ServerTestBase {
+  case class FixtureParam()
+  override protected def withFixture(test: OneArgTest) = {
+    test(FixtureParam())
+  }
 
   val guava = new CacheMap.Guava[String, String](
     CacheBuilder.newBuilder
@@ -17,18 +21,24 @@ class CachingTest extends FunSuite with BeforeAndAfterEach {
   var cache: Cache[String] = _
 
   override def beforeEach: Unit = {
+    super.beforeEach
+
     guava.backing.invalidateAll()
 
     cache = new Cache[String] {
       val UTF8 = Charset.forName("UTF-8")
-      override val filePath: Path = Paths.get("/tmp/t")
+      override val filePath = NodePath(Paths.get("/tmp"), "t", None)
       override def writer: (String) => Array[Byte] = (a: String) => a.getBytes(UTF8)
       override def reader: (Array[Byte]) => String = (a: Array[Byte]) => new String(a, UTF8)
       override def cacheMap: CacheMap[K, String] = guava
     }
   }
 
-  test("simple get") {
+  override def afterEach = {
+    super.afterEach
+  }
+
+  test("simple get") { _ =>
     cache.put("hoge")
     val r0 = cache.get
     assert(r0 === "hoge")
@@ -36,7 +46,7 @@ class CachingTest extends FunSuite with BeforeAndAfterEach {
     assert(r1 === "hoge")
   }
 
-  test("invalidate and get") {
+  test("invalidate and get") { _ =>
     cache.put("hige")
     assert(cache.get === "hige")
     guava.backing.invalidateAll()

@@ -2,21 +2,22 @@ package akashic.storage.admin
 
 import java.nio.file.{Files, Path}
 
+import akashic.storage.backend.NodePath
 import akashic.storage.caching.{CacheMap, Cache}
 import akashic.storage.patch.{Data, Commit}
-import akashic.storage.{files, strings}
+import akashic.storage.strings
 import com.google.common.cache.CacheBuilder
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 
-case class UserDB(root: Path) {
+case class UserDB(root: NodePath) {
   val cache = new CacheMap.Guava[String, InMem](CacheBuilder.newBuilder
     .maximumSize(1)
     .build())
 
   val dbPath = root.resolve("db")
-  def makeCache(path: Path) = new Cache[InMem] {
+  def makeCache(path: NodePath) = new Cache[InMem] {
     override def cacheMap: CacheMap[K, InMem] = cache
     private def doWriter(a: InMem): Array[Byte] = {
       a.toByteArray
@@ -28,10 +29,10 @@ case class UserDB(root: Path) {
     }
     override def writer: (InMem) => Array[Byte] = doWriter
     override def reader = doReader
-    override val filePath: Path = path
+    override val filePath = path
   }
   val dbData = makeCache(dbPath)
-  if (!Files.exists(dbPath))
+  if (!dbPath.exists)
     dbData.put(InMem(Iterable()))
 
   object InMem {

@@ -1,9 +1,11 @@
 package akashic.storage.service
 
+import java.util.Date
+
 import akashic.storage.patch.Version
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
-import akashic.storage.{files, server}
+import akashic.storage.server
 import akka.http.scaladsl.server.Route
 import scala.xml.NodeSeq
 import scala.util.Try
@@ -37,7 +39,7 @@ object GetBucket {
         override def toXML = {
           <Contents>
             <Key>{decodeKeyName(key.name)}</Key>
-            <LastModified>{dates.format000Z(files.lastDate(version.root))}</LastModified>
+            <LastModified>{dates.format000Z(new Date(version.root.getAttr.creationTime))}</LastModified>
             <ETag>{quoteString(meta.eTag)}</ETag>
             <Size>{version.data.length}</Size>
             <StorageClass>STANDARD</StorageClass>
@@ -78,7 +80,7 @@ object GetBucket {
           val meta = version.meta.get
           !meta.isDeleteMarker
         }
-        .sortBy(_.key.name)
+        .toSeq.sortBy(_.key.name)
         .map(a => Single(Contents(a)))
         .takesOnlyAfter(marker)
         .filterByPrefix(prefix)

@@ -2,16 +2,15 @@ package akashic.storage.patch
 
 import java.nio.file.{Files, Path}
 
-import akashic.storage.files
+import akashic.storage.backend.NodePath
 
-case class Versions(root: Path) {
-  def key = Key(root.getParent)
-  def acquireWriteDest: Version = {
+case class Versions(key: Key, root: NodePath) {
+  def acquireWriteDest: Patch = {
     // versioning disabled
-    Version(root.resolve("0"))
+    Patch.apply(root.resolve("0"))
   }
-  private def acquireNewLoc: Path = {
-    val xs = files.children(root).map(files.basename(_).toInt)
+  private def acquireNewLoc: NodePath = {
+    val xs = root.listDir.map(_.name.toInt)
     val newId = if (xs.isEmpty) {
       1
     } else {
@@ -20,15 +19,15 @@ case class Versions(root: Path) {
     root.resolve(newId.toString)
   }
   def listVersions: Seq[Version] = {
-    files.children(root).map(Version(_)).sortBy(-1 * _.name.toInt)
+    root.listDir.map(Version(key, _)).toSeq.sortBy(-1 * _.name.toInt)
   }
-  def versionPath(id: Int): Path = root.resolve(id.toString)
+  def versionPath(id: Int) = root.resolve(id.toString)
   def findLatestVersion: Option[Version] = {
     listVersions.headOption
   }
   def findVersion(id: Int): Option[Version] = {
-    val a = Version(versionPath(id))
-    if (Files.exists(a.root)) {
+    val a = Version(key, versionPath(id))
+    if (a.root.exists) {
       Some(a)
     } else None
   }
