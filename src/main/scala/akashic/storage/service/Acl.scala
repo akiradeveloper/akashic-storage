@@ -16,44 +16,16 @@ import akashic.storage.server
 
 object Acl {
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.service.acl"))
-  def writer(a: t): Array[Byte] = a.toBytes
-  def reader(a: Array[Byte]): t = fromBytes(a)
-  def makeCache(path: NodePath) = new Cache[Acl.t] {
+  def writer(a: Acl): Array[Byte] = a.toBytes
+  def reader(a: Array[Byte]): Acl = fromBytes(a)
+  def makeCache(path: NodePath) = new Cache[Acl] {
     override val filePath = path
-    override def writer: (Acl.t) => Array[Byte] = Acl.writer
-    override def reader: (Array[Byte]) => Acl.t = Acl.reader
-    override def cacheMap: CacheMap[K, Acl.t] = server.cacheMaps.forAcl
+    override def writer: (Acl) => Array[Byte] = Acl.writer
+    override def reader: (Array[Byte]) => Acl = Acl.reader
+    override def cacheMap: CacheMap[K, Acl] = server.cacheMaps.forAcl
   }
-  case class t(owner: String, grants: Iterable[Grant]) {
-    def toBytes: Array[Byte] = this.pickle.value
-    def grant(callerId: String, perm: Permission): Boolean = {
-      if (getPermission(callerId).contains(perm)) {
-        true
-      } else {
-        logger.error(s"failed to grant permission: callerId=${callerId} grants=${grants}")
-        false
-      }
-    }
-    private def getPermission(callerId: String): Set[Permission] = {
-      grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
-    }
-    private def ownerXML = {
-      val displayName = server.users.find(owner).get.displayName
-      <Owner>
-        <ID>{owner}</ID>
-        <DisplayName>{displayName}</DisplayName>
-      </Owner>
-    }
-    def toXML = {
-      <AccessControlPolicy>
-        {ownerXML}
-        <AccessControlList>
-          { for (grant <- grants) yield grant.toXML }
-        </AccessControlList>
-      </AccessControlPolicy>
-    }
-  }
-  def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
+
+  def fromBytes(bytes: Array[Byte]): Acl = BinaryPickle(bytes).unpickle[Acl]
 
   case class Grant(grantee: Grantee, perm: Permission) {
     def getPermission(callerId: String): Set[Permission] = {
@@ -145,7 +117,7 @@ object Acl {
   case class WriteAcp() extends Permission // bucket only
   case class ReadAcp() extends Permission
 
-  def parseXML(xml: NodeSeq): t = {
+  def parseXML(xml: NodeSeq): Acl = {
     val owner = (xml \ "Owner" \ "ID").text
 
     val grants = (xml \ "AccessControlList" \ "Grant").map { a =>
@@ -160,7 +132,7 @@ object Acl {
       }
       Grant(grantee, perm)
     }
-    t(owner, grants)
+    Acl(owner, grants)
   }
 
   sealed trait CannedAcl {
@@ -246,5 +218,36 @@ object Acl {
         case "x-amz-grant-full-control" => GrantFullControl(grantees)
       }
     }
+  }
+}
+
+import Acl._
+case class Acl(owner: String, grants: Iterable[Grant]) {
+  def toBytes: Array[Byte] = this.pickle.value
+  def grant(callerId: String, perm: Permission): Boolean = {
+    if (getPermission(callerId).contains(perm)) {
+      true
+    } else {
+      logger.error(s"failed to grant permission: callerId=${callerId} grants=${grants}")
+      false
+    }
+  }
+  private def getPermission(callerId: String): Set[Permission] = {
+    grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
+  }
+  private def ownerXML = {
+    val displayName = server.users.find(owner).get.displayName
+    <Owner>
+      <ID>{owner}</ID>
+      <DisplayName>{displayName}</DisplayName>
+    </Owner>
+  }
+  def toXML = {
+    <AccessControlPolicy>
+      {ownerXML}
+      <AccessControlList>
+        { for (grant <- grants) yield grant.toXML }
+      </AccessControlList>
+    </AccessControlPolicy>
   }
 }
