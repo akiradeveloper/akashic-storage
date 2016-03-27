@@ -33,10 +33,10 @@ case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implici
   def purgeDir = {
     fs.purgeDirectory(self)
   }
-  def getOutputStream = fs.getFileOutputStream(dir, name)
   def getSource(chunkSize: Int) = fs.getSource(self, chunkSize)
-  def writeBytes(data: Array[Byte]) = fs.createFile(dir, name, data)
-  def readBytes: Array[Byte] = fs.getBytes(self)
+  def createFile(data: Stream[Option[Array[Byte]]]) = fs.createFile(dir, name, data)
+  def createFile(data: Array[Byte]) = fs.createFile(dir, name, data)
+  def readFile: Array[Byte] = fs.getBytes(self)
   def getAttr: FileAttr = fs.getFileAttr(lookup.get)
   def moveTo(dir: Node, name: String, replaceIfExists: Boolean) = fs.moveNode(self, dir, name, replaceIfExists)
   def computeMD5 = fs.computeMD5(self)

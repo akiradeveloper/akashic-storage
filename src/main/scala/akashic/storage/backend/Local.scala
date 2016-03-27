@@ -46,8 +46,15 @@ class Local(mountpoint: Path) extends FileSystemLike {
   override def getFileInputStream(n: Node): InputStream = {
     Files.newInputStream(n)
   }
-  override def getFileOutputStream(dir: Node, name: String): OutputStream =
-    Files.newOutputStream(dir.resolve(name))
+  override def createFile(dir: Node, name: String, data: Stream[Option[Array[Byte]]]): Unit = {
+    using(Files.newOutputStream(dir.resolve(name))) { inp =>
+      val validData = data.takeWhile(_.isDefined)
+      validData.foreach {
+        case Some(buf) => inp.write(buf)
+        case None =>
+      }
+    }
+  }
   override def getFileAttr(n: Node): FileAttr = {
     val attr = Files.readAttributes(n, classOf[BasicFileAttributes])
     val creationTime = attr.creationTime().toMillis
@@ -57,9 +64,6 @@ class Local(mountpoint: Path) extends FileSystemLike {
       case a => Some(a.hashCode.toString)
     }
     FileAttr(creationTime, length, uniqueKey)
-  }
-  override def createFile(dir: Node, name: String, data: Array[Byte]): Unit = {
-    Files.write(dir.resolve(name), data)
   }
   override def lookup(dir: Node, name: String): Option[Node] = {
     val p = dir.resolve(name)

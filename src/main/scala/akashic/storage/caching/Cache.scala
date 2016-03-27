@@ -36,7 +36,7 @@ trait Cache[V] extends Data[V] {
     cacheMap.find(k) match {
       case Some(a) => a
       case None =>
-        val bytes = filePath.readBytes
+        val bytes = filePath.readFile
         val ret = reader(bytes)
         cacheMap.insert(k, ret)
         ret
@@ -46,7 +46,7 @@ trait Cache[V] extends Data[V] {
     cacheMap.find(k) match {
       case None =>
         val bytes = writer(v)
-        filePath.writeBytes(bytes)
+        filePath.createFile(bytes)
         cacheMap.insert(k, v)
       case _ =>
     }

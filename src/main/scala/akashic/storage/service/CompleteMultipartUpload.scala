@@ -2,7 +2,7 @@ package akashic.storage.service
 
 import java.net.URLEncoder
 
-import akashic.storage.backend.NodePath
+import akashic.storage.backend.{Streams, NodePath}
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Directives._
 import java.nio.file.Path
@@ -41,7 +41,7 @@ object CompleteMultipartUpload {
       val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
-      val parts = Try {
+      val parts: Seq[Part] = Try {
         val xml = XML.loadString(data)
         (xml \ "Part").map { a =>
           Part(
@@ -98,12 +98,9 @@ object CompleteMultipartUpload {
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = Version(key, patch.root)
 
-          val os = versionPatch.data.root.getOutputStream
-          for (part <- parts) {
-            // parts are all valid so we don't need to call findPart
-            os.write(upload.part(part.partNumber).unwrap.get)
-          }
-          os.close
+          val streamedPartData: Stream[Option[Array[Byte]]] =
+            parts.toStream.map(part => Some(upload.part(part.partNumber).unwrap.get)) #::: Streams.eod
+          versionPatch.data.root.createFile(streamedPartData)
 
           versionPatch.acl.put(upload.acl.get)
 

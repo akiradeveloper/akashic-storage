@@ -15,8 +15,8 @@ trait Data[V] extends Patch {
 
 object Data {
   case class Pure(filePath: NodePath) extends Data[Array[Byte]] {
-    override def get: Array[Byte] = root.readBytes
-    override def put(v: Array[Byte]): Unit = root.writeBytes(v)
+    override def get: Array[Byte] = root.readFile
+    override def put(v: Array[Byte]): Unit = root.createFile(v)
   }
   object Pure {
     def make(path: NodePath) = Pure(path)

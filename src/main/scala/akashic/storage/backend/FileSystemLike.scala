@@ -20,84 +20,20 @@ trait FileSystemLike {
     }
   }
 
-  /**
-   * Get the root of the backend
-   * We can then traverse the tree structure by calling lookups
-   * @return
-   */
   def getRoot: Node
-
-  /**
-   *
-   * @param n
-   * @return true if it's a file otherwise false
-   */
   def isFile(n: Node): Boolean
-
-  /**
-   *
-   * @param n
-   * @param dir
-   * @param name
-   * @param replaceIfExists
-   */
   def moveNode(n: Node, dir: Node, name: String, replaceIfExists: Boolean)
-
-  /**
-   *
-   * @param n
-   */
   def removeNode(n: Node)
-
-  /**
-   *
-   * @param dir
-   * @param name
-   * @return
-   */
   def makeDirectory(dir: Node, name: String): Unit
-
-  /**
-   * Lookup the child node (but maybe)
-   * @param dir parent node
-   * @param name relative name of the child
-   * @return
-   */
   def lookup(dir: Node, name: String): Option[Node]
- /**
-   *
-   * @param n
-   * @return
-   */
   def listDirectory(n: Node): Iterable[(String, Node)]
-
-  /**
-   *
-   * @param dir
-   * @param name
-   * @return
-   */
-  def getFileOutputStream(dir: Node, name: String): OutputStream
-
-  /**
-   *
-   * @param n
-   * @return
-   */
+  def createFile(dir: Node, name: String, data: Stream[Option[Array[Byte]]]): Unit
   def getFileInputStream(n: Node): InputStream
-
-  /**
-   *
-   * @param n
-   * @return
-   */
   def getFileAttr(n: Node): FileAttr
 
   private[backend] def exists(dir: Node, name: String): Boolean = lookup(dir, name).isDefined
   private[backend] def createFile(dir: Node, name: String, data: Array[Byte]): Unit = {
-    using(getFileOutputStream(dir, name)) { f =>
-      f.write(data)
-    }
+    createFile(dir, name, Seq(Some(data), None).toStream)
   }
   private[backend] def getBytes(n: Node): Array[Byte] = IOUtils.toByteArray(getFileInputStream(n))
   private[backend] def getSource(n: Node, chunkSize: Int) = StreamConverters.fromInputStream(() => getFileInputStream(n), chunkSize)
