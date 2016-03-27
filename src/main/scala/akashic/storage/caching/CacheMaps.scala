@@ -9,7 +9,7 @@ case class CacheMaps(config: ServerConfig) {
     CacheBuilder.newBuilder
       .maximumSize(32)
       .build())
-  val forLocation = new CacheMap.Guava[String, Location.t](
+  val forLocation = new CacheMap.Guava[String, Location](
     CacheBuilder.newBuilder
       .maximumSize(32)
       .build())

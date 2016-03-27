@@ -59,7 +59,7 @@ object PutBucket {
         bucketPatch.location.put {
           // [spec] empty string (for the US East (N. Virginia) region)
           val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
-          Location.t(loc.get)
+          Location(loc.get)
         }
       }
 
