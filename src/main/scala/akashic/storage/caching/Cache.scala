@@ -13,7 +13,7 @@ trait Cache[V] extends Data[V] {
     filePath.exists match {
       case true =>
         val attr = filePath.getAttr
-        attr.uniqueKey match {
+        attr.cacheKey match {
           // if the fileKey is null we can't safely cache objects.
           // because the filesystem returns null fileKey is not common case
           // I decided to not cache.
