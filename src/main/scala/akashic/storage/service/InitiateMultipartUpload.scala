@@ -55,7 +55,7 @@ object InitiateMultipartUpload {
         }
 
         upload.meta.put(
-          Meta.t(
+          Meta(
             isVersioned = false,
             isDeleteMarker = false,
             eTag = "",

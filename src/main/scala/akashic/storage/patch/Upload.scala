@@ -1,11 +1,8 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
 
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
 import akashic.storage.service.{Acl, Meta}
-import akashic.storage.service.Meta.t
 
 case class Upload(root: NodePath) extends Patch {
   val parts = root.resolve("parts")

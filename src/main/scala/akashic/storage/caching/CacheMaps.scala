@@ -17,7 +17,7 @@ case class CacheMaps(config: ServerConfig) {
     CacheBuilder.newBuilder
       .maximumSize(2048)
       .build())
-  val forMeta = new CacheMap.Guava[String, Meta.t](
+  val forMeta = new CacheMap.Guava[String, Meta](
     CacheBuilder.newBuilder
       .maximumSize(2048)
       .build()

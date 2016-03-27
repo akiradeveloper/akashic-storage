@@ -55,7 +55,7 @@ object MakeObject {
         }
         version.data.put(objectData)
         version.meta.put(
-          Meta.t(
+          Meta(
             isVersioned = false,
             isDeleteMarker = false,
             eTag = computedETag,
