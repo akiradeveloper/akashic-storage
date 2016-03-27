@@ -21,7 +21,7 @@ object Local {
 class Local(mountpoint: Path) extends FileSystemLike {
   implicit def convertImplicitly(n: Node): Path = n.asInstanceOf[Path]
   override def getRoot: Node = mountpoint
-  override def isFile(n: Node): Boolean = !Files.isDirectory(n)
+  override def isDirectory(n: Node): Boolean = Files.isDirectory(n)
   override def moveNode(n: Node, dir: Node, name: String, replaceIfExists: Boolean): Unit = {
     if (replaceIfExists) {
       Files.move(n, dir.resolve(name), StandardCopyOption.REPLACE_EXISTING)

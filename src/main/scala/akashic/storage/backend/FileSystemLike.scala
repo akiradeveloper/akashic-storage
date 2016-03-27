@@ -21,7 +21,7 @@ trait FileSystemLike {
   }
 
   def getRoot: Node
-  def isFile(n: Node): Boolean
+  def isDirectory(n: Node): Boolean
   def moveNode(n: Node, dir: Node, name: String, replaceIfExists: Boolean)
   def removeNode(n: Node)
   def makeDirectory(dir: Node, name: String): Unit
@@ -31,6 +31,7 @@ trait FileSystemLike {
   def getFileInputStream(n: Node): InputStream
   def getFileAttr(n: Node): FileAttr
 
+  private[backend] def isFile(n: Node): Boolean = !isDirectory(n)
   private[backend] def exists(dir: Node, name: String): Boolean = lookup(dir, name).isDefined
   private[backend] def createFile(dir: Node, name: String, data: Array[Byte]): Unit = {
     createFile(dir, name, Seq(Some(data), None).toStream)
