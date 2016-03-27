@@ -6,11 +6,6 @@ import java.nio.file.{StandardCopyOption, Files, Paths, Path}
 
 import com.typesafe.config.Config
 
-/** Config (Local)
-  * backend {
-  *   mountpoint = /mnt/akashic-storage
-  * }
-  */
 object Local {
   def fromConfig(config: Config): Local = {
     val mp = Paths.get(config.getString("mountpoint"))
