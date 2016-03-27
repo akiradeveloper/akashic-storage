@@ -49,17 +49,17 @@ object PutBucket {
           val grantsFromCanned = (cannedAcl <+ Some("private"))
             .map(Acl.CannedAcl.forName(_, callerId, callerId))
             .map(_.makeGrants).get
-          Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders)
+          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
 
         bucketPatch.versioning.put {
-          Versioning.t(Versioning.UNVERSIONED)
+          Versioning(Versioning.UNVERSIONED)
         }
 
         bucketPatch.location.put {
           // [spec] empty string (for the US East (N. Virginia) region)
           val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
-          Location.t(loc.get)
+          Location(loc.get)
         }
       }
 

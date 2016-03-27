@@ -42,11 +42,11 @@ object PutObjectAcl {
         val xml = XML.loadString(xmlString.get)
         Acl.parseXML(xml)
       } else if (!grantsFromHeaders.isEmpty) {
-        Acl.t(versionAcl.owner, grantsFromHeaders)
+        Acl(versionAcl.owner, grantsFromHeaders)
       } else {
         val owner = versionAcl.owner
         val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, owner, owner)).map(_.makeGrants).get
-        Acl.t(versionAcl.owner, grantsFromCanned)
+        Acl(versionAcl.owner, grantsFromCanned)
       }
 
       Commit.replaceData(version.acl, Acl.makeCache) { data =>

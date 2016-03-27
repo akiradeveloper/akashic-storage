@@ -1,11 +1,7 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
-
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
 import akashic.storage.service.{Location, Versioning, Acl}
-import akashic.storage.service.Acl.t
 
 case class Bucket(root: NodePath) extends Patch {
   val acl = Acl.makeCache(root.resolve("acl"))

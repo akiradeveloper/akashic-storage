@@ -1,10 +1,6 @@
 package akashic.storage.patch
 
-import java.nio.file.Path
-
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
-import akashic.storage.service.Meta.t
 import akashic.storage.service.{Acl, Meta}
 
 case class Version(key: Key, root: NodePath) extends Patch {
