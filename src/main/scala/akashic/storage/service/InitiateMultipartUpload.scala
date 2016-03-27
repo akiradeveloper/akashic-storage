@@ -51,7 +51,7 @@ object InitiateMultipartUpload {
           val grantsFromCanned = (cannedAcl <+ Some("private"))
             .map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner))
             .map(_.makeGrants).get
-          Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders)
+          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
 
         upload.meta.put(

@@ -38,11 +38,11 @@ object PutBucketAcl {
         val xml = XML.loadString(body.get)
         Acl.parseXML(xml)
       } else if (!grantsFromHeaders.isEmpty) {
-        Acl.t(bucketAcl.owner, grantsFromHeaders)
+        Acl(bucketAcl.owner, grantsFromHeaders)
       } else {
         val owner = bucketAcl.owner
         val grantsFromCanned = (cannedAcl <+ Some("private")).map(Acl.CannedAcl.forName(_, owner, owner)).map(_.makeGrants).get
-        Acl.t(bucketAcl.owner, grantsFromCanned)
+        Acl(bucketAcl.owner, grantsFromCanned)
       }
 
       Commit.replaceData(bucket.acl, Acl.makeCache) { data =>
