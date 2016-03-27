@@ -21,8 +21,6 @@ import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
-  require(Files.exists(config.mountpoint))
-
   fs = new BackendFactory(config.rawConfig.getConfig("backend")).build
   val root = NodePath(null, null, Some(fs.getRoot))
 

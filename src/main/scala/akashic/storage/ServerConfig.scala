@@ -7,7 +7,6 @@ import com.typesafe.scalalogging.StrictLogging
 
 trait ServerConfig {
   def rawConfig: Config
-  def mountpoint: Path
   def ip: String
   def port: Int
   def adminPassword: String
@@ -18,11 +17,10 @@ object ServerConfig {
     logger.info("configRoot: {}", configRoot)
 
     val rawConfig = configRoot.getConfig("akashic.storage")
-    override def mountpoint = Paths.get(rawConfig.getString("mountpoint"))
     override def ip = rawConfig.getString("ip")
     override def port: Int = rawConfig.getInt("port")
     override def adminPassword = rawConfig.getString("admin-passwd")
 
-    logger.info("config: {}", (mountpoint, ip, port, adminPassword))
+    logger.info("config: {}", (ip, port, adminPassword))
   }
 }

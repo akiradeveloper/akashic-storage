@@ -9,6 +9,7 @@ import org.scalatest.FunSuite
 class BackendFactoryTest extends FunSuite {
   test("read test config to build local fs") {
     val fs = new BackendFactory(ConfigFactory.parseResources("backend-local.conf").getConfig("backend")).build
+    Files.createDirectories(Paths.get("/tmp/l"))
     val root = fs.getRoot.asInstanceOf[Path]
     assert(root === Paths.get("/tmp/l"))
   }

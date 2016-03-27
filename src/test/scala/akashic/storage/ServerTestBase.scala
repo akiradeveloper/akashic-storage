@@ -1,7 +1,7 @@
 package akashic.storage
 
 import java.io.{FileInputStream, File}
-import java.nio.file.{Files, Path}
+import java.nio.file.{Paths, Files, Path}
 
 import com.amazonaws.services.s3.model.S3Object
 import com.typesafe.config._
@@ -18,7 +18,8 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
 
   override def beforeEach {
     val config = makeConfig
-    Files.createDirectories(config.mountpoint)
+    val mountpoint = Paths.get(config.rawConfig.getConfig("backend").getString("mountpoint"))
+    Files.createDirectories(mountpoint)
     server = Server(config, cleanup = true)
 
     Await.ready(server.start, Duration.Inf)
