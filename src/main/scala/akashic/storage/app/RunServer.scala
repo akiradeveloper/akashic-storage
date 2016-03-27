@@ -1,6 +1,6 @@
 package akashic.storage.app
 
-import java.nio.file.Files
+import java.nio.file.{Paths, Files}
 
 import akashic.storage._
 import akashic.storage.admin.TestUsers
@@ -12,7 +12,8 @@ import scala.concurrent.duration.Duration
 object RunServer extends App {
   // TODO impl --loglevel= option
   val config = ServerConfig(ConfigFactory.load("run-server.conf"))
-  Files.createDirectories(config.mountpoint)
+  val mountpoint = Paths.get(config.rawConfig.getConfig("backend").getString("mountpoint"))
+  Files.createDirectories(mountpoint)
   server = Server(config, cleanup = true)
 
   val fut = server.start

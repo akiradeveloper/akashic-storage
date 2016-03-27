@@ -3,7 +3,7 @@ package akashic.storage
 import java.nio.file.{Paths, Files}
 
 import akashic.storage.admin._
-import akashic.storage.backend.NodePath
+import akashic.storage.backend.{BackendFactory, NodePath}
 import akashic.storage.caching.CacheMaps
 import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
@@ -21,9 +21,7 @@ import org.apache.commons.io.FileUtils
 import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
-  require(Files.exists(config.mountpoint))
-
-  fs = new backend.Local(config.mountpoint)
+  fs = new BackendFactory(config.rawConfig.getConfig("backend")).build
   val root = NodePath(null, null, Some(fs.getRoot))
 
   if (cleanup) {
