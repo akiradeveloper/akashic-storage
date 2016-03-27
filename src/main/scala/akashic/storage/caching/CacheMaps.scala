@@ -13,7 +13,7 @@ case class CacheMaps(config: ServerConfig) {
     CacheBuilder.newBuilder
       .maximumSize(32)
       .build())
-  val forAcl = new CacheMap.Guava[String, Acl](
+  val forAcl = new CacheMap.Guava[String, Acl.t](
     CacheBuilder.newBuilder
       .maximumSize(2048)
       .build())

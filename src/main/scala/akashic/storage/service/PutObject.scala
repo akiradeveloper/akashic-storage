@@ -51,7 +51,7 @@ object MakeObject {
           val grantsFromCanned = (cannedAcl <+ Some("private"))
             .map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner))
             .map(_.makeGrants).get
-          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
+          Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
         version.data.put(objectData)
         version.meta.put(

@@ -49,7 +49,7 @@ object PutBucket {
           val grantsFromCanned = (cannedAcl <+ Some("private"))
             .map(Acl.CannedAcl.forName(_, callerId, callerId))
             .map(_.makeGrants).get
-          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
+          Acl.t(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
 
         bucketPatch.versioning.put {
