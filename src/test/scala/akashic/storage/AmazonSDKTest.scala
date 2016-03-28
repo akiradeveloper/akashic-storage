@@ -82,6 +82,26 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  // FIXME
+  // Akka-HTTP has some bug on parsing If-None-Match header
+  // it parsed as rawheader("if-none-match", xxx) and can't be matched
+  // by `If-None-Match` under conditional directive
+  ignore("conditional get test") { p =>
+    import p._
+    client.createBucket("a.b")
+    val f = getTestFile("test.txt")
+    val putRes = client.putObject("a.b", "myobj.txt", f)
+
+    val get = new GetObjectRequest("a.b", "myobj.txt")
+      .withNonmatchingETagConstraint(putRes.getETag)
+    try {
+      client.getObject(get)
+      assert(false)
+    } catch {
+      case _: Throwable =>
+    }
+  }
+
   test("put key delimited") { p =>
     import p._
     client.createBucket("myb")
