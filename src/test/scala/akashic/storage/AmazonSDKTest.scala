@@ -82,6 +82,21 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("partial get") { p =>
+    import p._
+
+    client.createBucket("a.b")
+    val f = getTestFile("test.txt")
+    client.putObject("a.b", "myobj.txt", f)
+
+    val get = new GetObjectRequest("a.b", "myobj.txt")
+      .withRange(4, 8)
+
+    val obj = client.getObject(get)
+    val s = IOUtils.toString(obj.getObjectContent)
+    assert(s === "ove S")
+  }
+
   test("put key delimited") { p =>
     import p._
     client.createBucket("myb")
