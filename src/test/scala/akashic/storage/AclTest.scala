@@ -56,10 +56,7 @@ class AclTest extends ServerTestBase {
   }
 
   def shouldThrow[A](fn: => A): Unit = {
-    try {
-      fn
-      fail
-    } catch { case _: Throwable => }
+    intercept[Exception](fn)
   }
 
   test("anon user can't access to auth resources") { p =>

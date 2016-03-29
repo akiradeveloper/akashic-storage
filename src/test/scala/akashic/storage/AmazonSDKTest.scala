@@ -97,7 +97,7 @@ class AmazonSDKTest extends ServerTestBase {
     assert(s === "ove S")
   }
 
-  test("conditional get test") { p =>
+  ignore("conditional get test") { p =>
     import p._
     client.createBucket("a.b")
     val f = getTestFile("test.txt")
@@ -106,14 +106,7 @@ class AmazonSDKTest extends ServerTestBase {
     val get = new GetObjectRequest("a.b", "myobj.txt")
       .withNonmatchingETagConstraint(putRes.getETag)
 
-    // FIXME this doesn't test anything!
-    // reaching fail will be catched
-    try {
-      client.getObject(get)
-      fail
-    } catch {
-      case _: Throwable =>
-    }
+    intercept(client.getObject(get))
   }
 
   test("put key delimited") { p =>
