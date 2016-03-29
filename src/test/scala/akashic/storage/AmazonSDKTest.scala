@@ -106,7 +106,8 @@ class AmazonSDKTest extends ServerTestBase {
     val get = new GetObjectRequest("a.b", "myobj.txt")
       .withNonmatchingETagConstraint(s""""${putRes.getETag}"""")
 
-    intercept(client.getObject(get))
+    val res = client.getObject(get)
+    assert(res == null)
   }
 
   test("put key delimited") { p =>
