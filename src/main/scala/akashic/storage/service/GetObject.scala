@@ -41,7 +41,7 @@ object GetObject {
     matcherCommon &
     provide("GET Object")
 
-  val route = withRangeSupport { matcher.as(t)(_.run) }
+  val route = matcher.as(t)(_.run)
   case class t(
     bucketName: String, keyName: String,
     versionId: Option[String], // not used yet
@@ -91,7 +91,9 @@ object GetObject {
 
       val ct: ContentType = ContentType.parse(contentType.get).right.get
       conditional(EntityTag(meta.eTag), lastModified) {
-        complete(StatusCodes.OK, headers, HttpEntity.Default(ct, filePath.getAttr.length, filePath.getSource(1 << 20)))
+        withRangeSupport {
+          complete(StatusCodes.OK, headers, HttpEntity.Default(ct, filePath.getAttr.length, filePath.getSource(1 << 20)))
+        }
       }
     }
   }
