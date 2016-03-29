@@ -97,14 +97,14 @@ class AmazonSDKTest extends ServerTestBase {
     assert(s === "ove S")
   }
 
-  ignore("conditional get test") { p =>
+  test("conditional get test") { p =>
     import p._
     client.createBucket("a.b")
     val f = getTestFile("test.txt")
     val putRes = client.putObject("a.b", "myobj.txt", f)
 
     val get = new GetObjectRequest("a.b", "myobj.txt")
-      .withNonmatchingETagConstraint(putRes.getETag)
+      .withNonmatchingETagConstraint(s""""${putRes.getETag}"""")
 
     intercept(client.getObject(get))
   }
