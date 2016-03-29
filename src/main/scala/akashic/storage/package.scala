@@ -1,6 +1,6 @@
 package akashic
 
-import akashic.storage.backend.FileSystemLike
+import akashic.storage.backend.BAL
 import akashic.storage.service._
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
@@ -17,7 +17,7 @@ package object storage {
   sys.addShutdownHook(system.shutdown)
 
   var server: Server = _
-  implicit var fs: FileSystemLike = _
+  implicit var fs: BAL = _
 
   val logger = Logger(LoggerFactory.getLogger("akashic.storage"))
 

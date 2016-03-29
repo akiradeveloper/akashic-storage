@@ -13,7 +13,7 @@ object Local {
   }
 }
 
-class Local(mountpoint: Path) extends FileSystemLike {
+class Local(mountpoint: Path) extends BAL {
   implicit def convertImplicitly(n: Node): Path = n.asInstanceOf[Path]
   override def getRoot: Node = {
     require(Files.exists(mountpoint))

@@ -1,6 +1,6 @@
 package akashic.storage.backend
 
-case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implicit fs: FileSystemLike) {
+case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implicit fs: BAL) {
   def self = lookup.get
   def resolve(name: String): NodePath = {
     NodePath(self, name, None)

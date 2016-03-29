@@ -2,8 +2,8 @@ package akashic.storage.backend
 
 import com.typesafe.config.Config
 
-class BackendFactory(config: Config) {
-  def build: FileSystemLike = {
+class BALFactory(config: Config) {
+  def build: BAL = {
     // println(config)
     val klass = Class.forName(config.getString("type") + "$")
     // println(klass)
@@ -11,7 +11,7 @@ class BackendFactory(config: Config) {
     // println(obj)
     val method = klass.getMethod("fromConfig", classOf[Config])
     // println(method)
-    val result = method.invoke(obj, config).asInstanceOf[FileSystemLike]
+    val result = method.invoke(obj, config).asInstanceOf[BAL]
     // println(result)
     result
   }

@@ -8,10 +8,10 @@ import org.apache.commons.io.IOUtils
 import org.apache.tika.Tika
 
 /**
- * Any backend stores can talk with akashic-storage by implementing FileSystemLike.
+ * Any backend stores can talk with akashic-storage by implementing Backend Abstraction Layer (BAL).
  * The idea is like FSAL in nfs-ganesha or Virtual File System (VFS) but is more simpler.
  */
-trait FileSystemLike {
+trait BAL {
   def using[A <: AutoCloseable, B](resource: A)(f: A => B): B = {
     try {
       f(resource)
