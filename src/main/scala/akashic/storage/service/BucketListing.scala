@@ -26,22 +26,24 @@ object BucketListing {
   }
 
   implicit class Filtering[T <: Filterable](value: Seq[Single[T]]) {
-    def takesOnlyAfter(lastName: Option[String]) = {
-      lastName match {
-        case Some(a) => value.dropWhile(_.get.name <= a)
+    def takesOnlyAfter(lastName: Option[String]) =
+      dropWhile(lastName.map(ln => (single: Single[T]) => single.get.name <= ln))
+
+    def filterByPrefix(prefix: Option[String]) =
+      filter(prefix.map(pf => (single: Single[T]) => single.get.name.startsWith(pf)))
+
+    def filter(fn: Option[Single[T] => Boolean]) = {
+      fn match {
+        case Some(p) => value.filter(p)
         case None => value
       }
     }
 
-    def filterByPrefix(prefix: Option[String]) = {
-      prefix match {
-        case Some(a) => value.filter(_.get.name.startsWith(a))
+    def dropWhile(fn: Option[Single[T] => Boolean]) = {
+      fn match {
+        case Some(p) => value.dropWhile(p)
         case None => value
       }
-    }
-
-    def dropWhile(fn: Single[T] => Boolean) = {
-      value.dropWhile(fn)
     }
   }
 
