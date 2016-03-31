@@ -73,7 +73,7 @@ object GetBucket {
         case None => 1000 // dafault
       }
 
-      val result = bucket.listKeys
+      val allContents = bucket.listKeys
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
         .filter { version =>
@@ -82,8 +82,11 @@ object GetBucket {
         }
         .toSeq.sortBy(_.key.name)
         .map(a => Single(Contents(a)))
-        .takesOnlyAfter(marker)
-        .filterByPrefix(prefix)
+
+      val result =
+        allContents
+        .dropWhile(marker.map(ln => (single: Single[Contents]) => single.get.name <= ln))
+        .filter(prefix.map(pf => (single: Single[Contents]) => single.get.name.startsWith(pf)))
         .groupByDelimiter(delimiter)
         .truncateByMaxLen(len)
 
@@ -101,7 +104,7 @@ object GetBucket {
           { delimiter match { case Some(a) => <Delimiter>{a}</Delimiter>; case None => NodeSeq.Empty } }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
-          { delimiter match { case Some(a) if result.truncated => <NextMarker>{result.nextMarker.get}</NextMarker>; case _ => NodeSeq.Empty } }
+          { delimiter match { case Some(a) if result.truncated => <NextMarker>{result.nextMarker.get.get.name}</NextMarker>; case _ => NodeSeq.Empty } }
           <IsTruncated>{result.truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>
