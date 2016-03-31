@@ -4,6 +4,7 @@ import java.net.{URLEncoder, URLDecoder}
 import java.util.concurrent.TimeUnit
 
 import akashic.storage.admin._
+import akashic.storage.auth.GetCallerId
 import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
 import akka.actor.ActorSystem
@@ -99,4 +100,10 @@ package object service {
 
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.service"))
   val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult(""))
+
+  def authorizeS3v2(resource: String, requestId: String): Directive1[String] =
+    extractRequest.map { req =>
+      val authKey = auth.authorize(resource, req)
+      GetCallerId(authKey, requestId, resource).run
+    }
 }
