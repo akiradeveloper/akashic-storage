@@ -98,13 +98,13 @@ object GetBucket {
       val xml =
         <ListBucketResult>
           <Name>{bucketName}</Name>
-          { prefix.map(a => <Prefix>${a}</Prefix>).getOrElse(<Prefix></Prefix>) }
-          { marker.map(a => <Marker>${a}</Marker>).getOrElse(<Marker></Marker>) }
-          { maxKeys.map(a => <MaxKeys>${a}</MaxKeys>).getOrElse(<MaxKeys>1000</MaxKeys>) }
-          { delimiter.map(a => <Delimiter>${a}</Delimiter>).getOrElse(NodeSeq.Empty) }
+          { prefix.map(a => <Prefix>{a}</Prefix>).getOrElse(<Prefix></Prefix>) }
+          { marker.map(a => <Marker>{a}</Marker>).getOrElse(<Marker></Marker>) }
+          { maxKeys.map(a => <MaxKeys>{a}</MaxKeys>).getOrElse(<MaxKeys>1000</MaxKeys>) }
+          { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
-          { result.nextMarker.filter(_ => delimiter.isDefined).map(a => <NextMarker>${a.get.name}</NextMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.filter(_ => delimiter.isDefined).map(a => <NextMarker>{a.get.name}</NextMarker>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>

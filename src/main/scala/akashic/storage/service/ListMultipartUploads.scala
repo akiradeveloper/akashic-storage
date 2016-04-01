@@ -46,25 +46,25 @@ object ListMultipartUploads {
         val displayName = server.users.find(ownerId).get.displayName
         val initiatedDate = dates.format000Z(new Date(upload.root.getAttr.creationTime))
         <Upload>
-          <Key>${keyName}</Key>
-          <UploadId>${upload.name}</UploadId>
+          <Key>{keyName}</Key>
+          <UploadId>{upload.name}</UploadId>
           <Initiator>
-            <ID>${ownerId}</ID>
-            <DisplayName>${displayName}</DisplayName>
+            <ID>{ownerId}</ID>
+            <DisplayName>{displayName}</DisplayName>
           </Initiator>
           <Owner>
-            <ID>#{ownerId}</ID>
-            <DisplayName>${displayName}</DisplayName>
+            <ID>{ownerId}</ID>
+            <DisplayName>{displayName}</DisplayName>
           </Owner>
           <StorageClass>STANDARD</StorageClass>
-          <Initiated>${initiatedDate}</Initiated>
+          <Initiated>{initiatedDate}</Initiated>
         </Upload>
       }
     }
     case class CommonPrefixes(uploads: Seq[UploadWrap], prefix: String) extends Xmlable {
       override def toXML: NodeSeq = {
         <CommonPrefixes>
-          <Prefix>${prefix}</Prefix>
+          <Prefix>{prefix}</Prefix>
         </CommonPrefixes>
       }
     }
@@ -105,13 +105,13 @@ object ListMultipartUploads {
       val resultingXML =
         <ListMultipartUploadsResult>
           <Bucket>${bucketName}</Bucket>
-          { keyMarker.map(a => <KeyMarker>${a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
-          { uploadIdMarker.map(a => <UploadIdMarker>${a}</UploadIdMarker>).getOrElse(NodeSeq.Empty) }
-          { delimiter.map(a => <Delimiter>${a}</Delimiter>).getOrElse(NodeSeq.Empty) }
-          { result.nextMarker.map(a => <NextKeyMarker>${a.get.keyName}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
-          { result.nextMarker.map(a => <NextUploadIdMarker>${a.get.upload.name}</NextUploadIdMarker>).getOrElse(NodeSeq.Empty) }
-          { maxUploads.map(a => <MaxUploads>${a}</MaxUploads>).getOrElse(NodeSeq.Empty) }
-          <IsTruncated>${result.truncated}</IsTruncated>
+          { keyMarker.map(a => <KeyMarker>{a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
+          { uploadIdMarker.map(a => <UploadIdMarker>{a}</UploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextKeyMarker>{a.get.keyName}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextUploadIdMarker>{a.get.upload.name}</NextUploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { maxUploads.map(a => <MaxUploads>{a}</MaxUploads>).getOrElse(NodeSeq.Empty) }
+          <IsTruncated>{result.truncated}</IsTruncated>
           { for (group <- groups) yield group.toXML }
         </ListMultipartUploadsResult>
 
