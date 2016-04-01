@@ -80,8 +80,8 @@ object BucketListing {
       // you can use the value of the last Key in the response as the marker in the subsequent request
       // to get the next set of object keys.
       val nextMarker = truncated match {
-        case true if len > 0 => Some(newValue(len-1))
-        case _ => None
+        case true => Some(newValue(len-1))
+        case false => None
       }
       Result(newValue, truncated, nextMarker)
     }
