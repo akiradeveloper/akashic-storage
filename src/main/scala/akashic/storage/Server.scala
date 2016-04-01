@@ -66,6 +66,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
   val serviceRoute =
+    ListMultipartUploads.route ~    // GET    /bucketName?uploads
     GetBucketAcl.route ~            // GET    /bucketName?acl
     GetBucketLocation.route ~       // GET    /bucketName?location
     GetBucket.route ~               // GET    /bucketName
