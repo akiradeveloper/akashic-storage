@@ -4,12 +4,13 @@ import java.util.Date
 
 import akashic.storage.patch.{Upload, Bucket}
 import akashic.storage.service.BucketListing.{Group, Container, Single}
-import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 
 import akashic.storage.server
 import scala.xml.NodeSeq
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object ListMultipartUploads {
 
@@ -101,7 +102,24 @@ object ListMultipartUploads {
         case Group(a, prefix) => CommonPrefixes(a.map(_.get), prefix)
       }
 
-      complete("")
+      val resultingXML =
+        <ListMultipartUploadsResult>
+          <Bucket>${bucketName}</Bucket>
+          { keyMarker.map(a => <KeyMarker>${a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
+          { uploadIdMarker.map(a => <UploadIdMarker>${a}</UploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { delimiter.map(a => <Delimiter>${a}</Delimiter>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextKeyMarker>${a.get.keyName}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextUploadIdMarker>${a.get.upload.name}</NextUploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { maxUploads.map(a => <MaxUploads>${a}</MaxUploads>).getOrElse(NodeSeq.Empty) }
+          <IsTruncated>${result.truncated}</IsTruncated>
+          { for (group <- groups) yield group.toXML }
+        </ListMultipartUploadsResult>
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, resultingXML)
     }
   }
 }
