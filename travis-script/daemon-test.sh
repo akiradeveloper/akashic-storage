@@ -47,8 +47,6 @@ mc --debug --quiet cp aka/myb/myo-large down-large-1
 mc ls aka/myb/
 tree $DIR
 
-ls -lR /var/akashic-storage
-
 echo -- daemon.log --
 cat /var/log/akashic-storage/daemon.log
 echo -- daemon_error.log --

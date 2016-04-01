@@ -73,7 +73,7 @@ object GetBucket {
         case None => 1000 // dafault
       }
 
-      val result = bucket.listKeys
+      val allContents = bucket.listKeys
         .map(_.findLatestVersion)
         .filter(_.isDefined).map(_.get) // List[Version]
         .filter { version =>
@@ -82,8 +82,11 @@ object GetBucket {
         }
         .toSeq.sortBy(_.key.name)
         .map(a => Single(Contents(a)))
-        .takesOnlyAfter(marker)
-        .filterByPrefix(prefix)
+
+      val result =
+        allContents
+        .dropWhile(marker.map(ln => (single: Single[Contents]) => single.get.name <= ln))
+        .filter(prefix.map(pf => (single: Single[Contents]) => single.get.name.startsWith(pf)))
         .groupByDelimiter(delimiter)
         .truncateByMaxLen(len)
 
@@ -95,13 +98,13 @@ object GetBucket {
       val xml =
         <ListBucketResult>
           <Name>{bucketName}</Name>
-          { prefix match { case Some(a) => <Prefix>{a}</Prefix>; case None => <Prefix></Prefix> } }
-          { marker match { case Some(a) => <Marker>{a}</Marker>; case None => <Marker></Marker> } }
-          { maxKeys match { case Some(a) => <MaxKeys>{a}</MaxKeys>; case None => <MaxKeys>1000</MaxKeys> } }
-          { delimiter match { case Some(a) => <Delimiter>{a}</Delimiter>; case None => NodeSeq.Empty } }
+          { prefix.map(a => <Prefix>{a}</Prefix>).getOrElse(<Prefix></Prefix>) }
+          { marker.map(a => <Marker>{a}</Marker>).getOrElse(<Marker></Marker>) }
+          { maxKeys.map(a => <MaxKeys>{a}</MaxKeys>).getOrElse(<MaxKeys>1000</MaxKeys>) }
+          { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
-          { delimiter match { case Some(a) if result.truncated => <NextMarker>{result.nextMarker.get}</NextMarker>; case _ => NodeSeq.Empty } }
+          { result.nextMarker.filter(_ => delimiter.isDefined).map(a => <NextMarker>{a.get.name}</NextMarker>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>

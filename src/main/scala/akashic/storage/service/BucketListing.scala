@@ -6,7 +6,7 @@ object BucketListing {
     def name: String
   }
 
-  trait Container[T <: Filterable] {
+  sealed trait Container[T <: Filterable] {
     def get: T
   }
   case class Single[T <: Filterable](x: T) extends Container[T] {
@@ -26,12 +26,6 @@ object BucketListing {
   }
 
   implicit class Filtering[T <: Filterable](value: Seq[Single[T]]) {
-    def takesOnlyAfter(lastName: Option[String]) =
-      dropWhile(lastName.map(ln => (single: Single[T]) => single.get.name <= ln))
-
-    def filterByPrefix(prefix: Option[String]) =
-      filter(prefix.map(pf => (single: Single[T]) => single.get.name.startsWith(pf)))
-
     def filter(fn: Option[Single[T] => Boolean]) = {
       fn match {
         case Some(p) => value.filter(p)
@@ -69,7 +63,7 @@ object BucketListing {
   }
 
   implicit class Truncation[T <: Filterable](value: Seq[Container[T]]) {
-    case class Result(value: Seq[Container[T]], truncated: Boolean, nextMarker: Option[String])
+    case class Result(value: Seq[Container[T]], truncated: Boolean, nextMarker: Option[Container[T]])
     def truncateByMaxLen(len: Int) = {
       val truncated = if (len == 0) {
         false
@@ -79,15 +73,15 @@ object BucketListing {
       // [spec] All of the keys rolled up in a common prefix count
       // as a single return when calculating the number of returns.
       // So truncate the list after grouping into CommonPrefixes
-      val newValue = value.take(len)
+      val newValue: Seq[Container[T]] = value.take(len)
 
       // [spec] This element is returned only if you have delimiter request parameter specified.
       // If response does not include the NextMaker and it is truncated,
       // you can use the value of the last Key in the response as the marker in the subsequent request
       // to get the next set of object keys.
       val nextMarker = truncated match {
-        case true if len > 0 => Some(newValue(len-1).get.name)
-        case _ => None
+        case true => Some(newValue(len-1))
+        case false => None
       }
       Result(newValue, truncated, nextMarker)
     }

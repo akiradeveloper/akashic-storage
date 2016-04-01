@@ -1,15 +1,36 @@
 package akashic.storage.service
 
-import akashic.storage.patch.Bucket
-import akka.http.scaladsl.model.HttpRequest
+import java.util.Date
+
+import akashic.storage.patch.{Upload, Bucket}
+import akashic.storage.service.BucketListing.{Group, Container, Single}
+import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 
 import akashic.storage.server
 import scala.xml.NodeSeq
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object ListMultipartUploads {
-  case class t(bucketName: String, req: HttpRequest) extends AuthorizedAPI {
+
+  val matcher =
+    get &
+    extractBucket &
+    withParameter("uploads") &
+    parameters("delimiter"?, "encoding-type"?, "key-marker"?, "upload-id-marker"?, "max-uploads".as[Int]?, "prefix"?) &
+    extractRequest
+
+  val route = matcher.as(t)(_.run)
+
+  case class t(bucketName: String,
+               delimiter: Option[String],
+               encodingType: Option[String],
+               keyMarker: Option[String],
+               uploadIdMarker: Option[String],
+               maxUploads: Option[Int],
+               prefix: Option[String],
+               req: HttpRequest) extends AuthorizedAPI {
     override def name: String = "List Multipart Uploads"
 
     override def resource: String = Resource.forBucket(bucketName)
@@ -17,12 +38,35 @@ object ListMultipartUploads {
     sealed trait Xmlable {
       def toXML: NodeSeq
     }
-    case class Upload(keyName: String, uploadId: String) extends Xmlable with BucketListing.Filterable {
-      override def name: String = ???
-      override def toXML: NodeSeq = ???
+    case class UploadWrap(keyName: String, upload: Upload) extends Xmlable with BucketListing.Filterable {
+      override def name: String = keyName
+      override def toXML: NodeSeq = {
+        val acl = upload.acl.get
+        val ownerId = acl.owner
+        val displayName = server.users.find(ownerId).get.displayName
+        val initiatedDate = dates.format000Z(new Date(upload.root.getAttr.creationTime))
+        <Upload>
+          <Key>{keyName}</Key>
+          <UploadId>{upload.name}</UploadId>
+          <Initiator>
+            <ID>{ownerId}</ID>
+            <DisplayName>{displayName}</DisplayName>
+          </Initiator>
+          <Owner>
+            <ID>{ownerId}</ID>
+            <DisplayName>{displayName}</DisplayName>
+          </Owner>
+          <StorageClass>STANDARD</StorageClass>
+          <Initiated>{initiatedDate}</Initiated>
+        </Upload>
+      }
     }
-    case class CommonPrefixes(uploads: Seq[Upload], prefix: String) extends Xmlable {
-      override def toXML: NodeSeq = ???
+    case class CommonPrefixes(uploads: Seq[UploadWrap], prefix: String) extends Xmlable {
+      override def toXML: NodeSeq = {
+        <CommonPrefixes>
+          <Prefix>{prefix}</Prefix>
+        </CommonPrefixes>
+      }
     }
 
     override def runOnce: Route = {
@@ -34,12 +78,48 @@ object ListMultipartUploads {
       if (!bucketAcl.grant(callerId, Acl.Read()))
         failWith(Error.AccessDenied())
 
-      val allUploads: Seq[Upload] = bucket.listKeys.toSeq
-        .sortBy(_.name)
-        .map(key => key.uploads.listUploads.map(_.name).toSeq.sorted.map(Upload(key.name, _)))
-        .flatten
+      val len = maxUploads match {
+        case Some(a) => a
+        case None => 1000 // dafault
+      }
 
-      complete("")
+      val allUploads: Seq[Single[UploadWrap]] = bucket.listKeys.toSeq
+        .sortBy(_.name)
+        .map(key => key.uploads.listUploads.toSeq.sortBy(_.name).map(UploadWrap(key.name, _)))
+        .flatten
+        .map(BucketListing.Single(_))
+
+      val result =
+        allUploads
+        .dropWhile(keyMarker.map(km => (a: Single[UploadWrap]) => a.get.keyName <= km))
+        .dropWhile(uploadIdMarker.map(uim => (a: Single[UploadWrap]) => a.get.upload.name <= uim))
+        .filter(prefix.map(pf => (a: Single[UploadWrap]) => a.get.name.startsWith(pf)))
+        .groupByDelimiter(delimiter)
+        .truncateByMaxLen(len)
+
+      val groups: Seq[Xmlable] = result.value.map {
+        case Single(a) => a
+        case Group(a, prefix) => CommonPrefixes(a.map(_.get), prefix)
+      }
+
+      val resultingXML =
+        <ListMultipartUploadsResult>
+          <Bucket>${bucketName}</Bucket>
+          { keyMarker.map(a => <KeyMarker>{a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
+          { uploadIdMarker.map(a => <UploadIdMarker>{a}</UploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextKeyMarker>{a.get.keyName}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextUploadIdMarker>{a.get.upload.name}</NextUploadIdMarker>).getOrElse(NodeSeq.Empty) }
+          { maxUploads.map(a => <MaxUploads>{a}</MaxUploads>).getOrElse(NodeSeq.Empty) }
+          <IsTruncated>{result.truncated}</IsTruncated>
+          { for (group <- groups) yield group.toXML }
+        </ListMultipartUploadsResult>
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, resultingXML)
     }
   }
 }
