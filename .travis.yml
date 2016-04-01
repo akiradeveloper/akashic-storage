@@ -28,7 +28,7 @@ install:
   # install Admin CLI
   - cd admin-cli; make; sudo make install; ls /usr/local/bin; cd -
   # install minio/mc
-  - wget https://dl.minio.io/client/mc/release/linux-amd64/mc; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
+  - wget https://dl.minio.io/client/mc/release/linux-amd64/mc.tar.gz; tar -xzf mc.tar.gz; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
   # install virtualenv for s3-tests
   - sudo apt-get -y -qq install python-virtualenv jsvc tree
   - jsvc -help
