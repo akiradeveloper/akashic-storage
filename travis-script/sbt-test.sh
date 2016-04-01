@@ -1,3 +1,4 @@
+set -e
 sudo mkdir -p /var/log/akashic-storage; sudo chmod o+rwx /var/log/akashic-storage
 
 cd ..
