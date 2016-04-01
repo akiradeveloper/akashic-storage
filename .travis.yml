@@ -16,7 +16,6 @@ before_install:
   - whoami
   - echo JAVA_HOME="$JAVA_HOME"
   - export
-  - sudo mkdir -p /var/log/akashic-storage; sudo chmod o+rwx /var/log/akashic-storage
   - sudo apt-get -y -qq update
   - unset GOROOT
   - export GOPATH="$HOME/go"
