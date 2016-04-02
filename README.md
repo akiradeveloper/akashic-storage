@@ -7,5 +7,5 @@
 
 You can learn more about **akashic-storage** in our [Wiki](https://github.com/akiradeveloper/akashic-storage/wiki)
 
-![Concept](https://rawgit.com/akiradeveloper/akashic-storage/develop/concept.svg)
+![Concept](https://rawgit.com/akiradeveloper/akashic-storage/develop/resources/concept.svg)
 
