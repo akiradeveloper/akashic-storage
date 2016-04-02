@@ -109,7 +109,8 @@ class AmazonSDKTest extends ServerTestBase {
     assert(res1.getVersionSummaries.size == 0)
 
     val res2 = client.listVersions("myb", "myo")
-    assert(res2.getVersionSummaries.size == 2) // [myo1, myo2]
+    assert(res2.getVersionSummaries.size === 2) // [myo1, myo2]
+    assert(res2.getVersionSummaries.get(0).isDeleteMarker === false)
 
     val req = new ListVersionsRequest()
       .withBucketName("myb")
