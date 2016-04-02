@@ -36,7 +36,7 @@ object GetService {
         </Bucket>
       }
 
-      if (callerId == "") {
+      if (callerId == "anonymous") {
         failWith(Error.AccessDenied())
       }
 
