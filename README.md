@@ -6,6 +6,3 @@
 **akashic-storage** is a Amazon S3 compatible storage layer on top of any storage backend. The ultimate goal is to offer the most popular on-premise S3 storage world-wide. It's build on top of akka-http and fully written in Scala.
 
 You can learn more about **akashic-storage** in our [Wiki](https://github.com/akiradeveloper/akashic-storage/wiki)
-
-![Concept](https://rawgit.com/akiradeveloper/akashic-storage/develop/resources/concept.svg)
-
