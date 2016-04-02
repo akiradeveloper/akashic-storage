@@ -80,7 +80,7 @@ object ListMultipartUploads {
 
       val len = maxUploads match {
         case Some(a) => a
-        case None => 1000 // dafault
+        case None => 1000 // default
       }
 
       val allUploads: Seq[Single[UploadWrap]] = bucket.listKeys.toSeq

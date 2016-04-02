@@ -69,6 +69,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     ListMultipartUploads.route ~    // GET    /bucketName?uploads
     GetBucketAcl.route ~            // GET    /bucketName?acl
     GetBucketLocation.route ~       // GET    /bucketName?location
+    GetBucketObjectVersions.route ~       // GET    /bucketName?versions
     GetBucket.route ~               // GET    /bucketName
     ListParts.route ~               // GET    /bucketName/keyName?uploadId=***
     GetObjectAcl.route ~            // GET    /bucketName/keyName&acl
