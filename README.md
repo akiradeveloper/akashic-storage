@@ -1,5 +1,3 @@
-# akashic-storage
-
 ![Logo](https://raw.githubusercontent.com/akiradeveloper/akashic-storage/develop/resources/logo-transparent.png)
 
 [![Build Status](https://travis-ci.org/akiradeveloper/akashic-storage.svg)](https://travis-ci.org/akiradeveloper/akashic-storage)
