@@ -4,11 +4,13 @@ import akka.http.scaladsl.model.HttpRequest
 
 import scala.collection.mutable
 
+case class HeaderList(unwrap: Seq[(String, String)]) {
+  def find(k: String) = unwrap.find(_._1.toLowerCase == k.toLowerCase).map(_._2)
+}
+
 object HeaderList {
-  case class t(unwrap: Seq[(String, String)]) {
-    def find(k: String) = unwrap.find(_._1.toLowerCase == k.toLowerCase).map(_._2)
-  }
-  val empty = t(Seq())
+  type t = HeaderList
+  val empty = HeaderList(Seq())
   def builder: Builder = Builder()
   case class Builder() {
     private val l = mutable.ListBuffer[(String, String)]()
@@ -23,9 +25,9 @@ object HeaderList {
       }
       this
     }
-    def build = t(l)
+    def build = HeaderList(l)
   }
   def fromRequest(req: HttpRequest): t = {
-    t(req.headers.map(a => (a.name, a.value)))
+    HeaderList(req.headers.map(a => (a.name, a.value)))
   }
 }

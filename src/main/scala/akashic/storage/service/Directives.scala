@@ -27,7 +27,7 @@ trait Directives {
     }
   }
 
-  val extractMetadata: Directive1[HeaderList.t] =
+  val extractMetadata: Directive1[HeaderList] =
     extractRequest.map(a => a.headers
          .filter(_.name.startsWith("x-amz-meta-"))
          .map(a => (a.name, a.value))

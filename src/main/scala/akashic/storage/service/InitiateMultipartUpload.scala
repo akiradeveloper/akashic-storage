@@ -24,7 +24,7 @@ object InitiateMultipartUpload {
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
-               metadata: HeaderList.t) extends AuthorizedAPI {
+               metadata: HeaderList) extends AuthorizedAPI {
     def name = "Initiate Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

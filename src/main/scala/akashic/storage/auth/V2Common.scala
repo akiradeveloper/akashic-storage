@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.HmacUtils
 
 object V2Common {
-  def apply(req: HttpRequest, resource: String, paramList: ParamList.t, headerList: HeaderList.t): V2Common = {
+  def apply(req: HttpRequest, resource: String, paramList: ParamList, headerList: HeaderList): V2Common = {
     // Workaround:
     // - mediaType.value
     // akka-http appends charset to the Content-Type
@@ -25,7 +25,7 @@ object V2Common {
   }
 }
 
-case class V2Common(method: String, resource: String, paramList: ParamList.t,
+case class V2Common(method: String, resource: String, paramList: ParamList,
                     headerList: HeaderList.t, contentTypes: Stream[String]) {
   // http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
   val subresources = Set("cors", "acl", "lifecycle", "location", "logging", "notification", "partNumber", "policy", "requestPayment", "torrent", "uploadId", "uploads", "versionId", "versioning", "versions", "website")

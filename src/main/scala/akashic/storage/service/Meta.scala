@@ -9,8 +9,8 @@ import scala.pickling.binary._
 
 case class Meta(versionId: String,
                 eTag: String,
-                attrs: HeaderList.t,
-                xattrs: HeaderList.t) {
+                attrs: HeaderList,
+                xattrs: HeaderList) {
   def toBytes: Array[Byte] = this.pickle.value
   def isDeleteMarker = eTag == Meta.DELETE_MARKER
   def versionType(versionIndex: Int): Versioning = {

@@ -28,7 +28,7 @@ object PutObject {
                contentType: Option[String],
                contentDisposition: Option[String],
                contentMd5: Option[String],
-               metadata: HeaderList.t) extends AuthorizedAPI {
+               metadata: HeaderList) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
