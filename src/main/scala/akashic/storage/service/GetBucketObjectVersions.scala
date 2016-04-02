@@ -62,8 +62,8 @@ object GetBucketObjectVersions {
           </DeleteMarker>
         override def toXML: NodeSeq = {
           meta.isDeleteMarker match {
-            case true => asNormalVersion
-            case false => asDeleteMarker
+            case false => asNormalVersion
+            case true => asDeleteMarker
           }
         }
       }
