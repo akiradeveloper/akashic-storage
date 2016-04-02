@@ -14,10 +14,10 @@ import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import scala.xml.NodeSeq
 
 object GetService {
-  val matcher = get & extractRequest
+  val matcher = get & provide(())
   val route = matcher.as(t)(_.run)
 
-  case class t(req: HttpRequest) extends AuthorizedAPI {
+  case class t(n: Unit) extends AuthorizedAPI {
     def name = "GET Service"
     def resource = Resource.forRoot
 

@@ -7,13 +7,11 @@ import akka.http.scaladsl.server.Directives._
 object HeadBucket {
   val matcher =
     head &
-    extractBucket &
-    extractRequest
+    extractBucket
 
   val route = matcher.as(t)(_.run)
 
-  case class t(bucketName: String,
-               req: HttpRequest) extends AuthorizedAPI {
+  case class t(bucketName: String) extends AuthorizedAPI {
     def name = "HEAD Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

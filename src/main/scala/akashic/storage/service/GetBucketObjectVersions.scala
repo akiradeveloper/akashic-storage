@@ -17,8 +17,7 @@ object GetBucketObjectVersions {
     get &
     extractBucket &
     withParameter("versions") &
-    parameters("delimiter"?, "encoding-type"?, "key-marker"?, "max-keys".as[Int]?, "prefix"?, "version-id-marker"?) &
-    extractRequest
+    parameters("delimiter"?, "encoding-type"?, "key-marker"?, "max-keys".as[Int]?, "prefix"?, "version-id-marker"?)
 
   val route =
     matcher.as(t)(_.run)
@@ -29,8 +28,7 @@ object GetBucketObjectVersions {
                keyMarker: Option[String],
                maxKeys: Option[Int],
                prefix: Option[String],
-               versionIdMarker: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               versionIdMarker: Option[String]) extends AuthorizedAPI {
     override def name: String = "GET Bucket Object versions"
     override def resource: String = Resource.forBucket(bucketName)
     override def runOnce: Route = {

@@ -20,8 +20,7 @@ object PutObject {
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     optionalHeaderValueByName("Content-MD5") &
-    extractMetadata &
-    extractRequest
+    extractMetadata
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
@@ -30,8 +29,7 @@ object PutObject {
                contentType: Option[String],
                contentDisposition: Option[String],
                contentMd5: Option[String],
-               metadata: HeaderList.t,
-               req: HttpRequest) extends AuthorizedAPI {
+               metadata: HeaderList.t) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

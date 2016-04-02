@@ -14,16 +14,14 @@ object ListParts {
   val matcher =
     get &
     extractObject &
-    parameters("uploadId", "part-number-marker".as[Int]?, "max-parts".as[Int]?) &
-    extractRequest
+    parameters("uploadId", "part-number-marker".as[Int]?, "max-parts".as[Int]?)
 
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumberMarker: Option[Int],
-               maxParts: Option[Int],
-               req: HttpRequest) extends AuthorizedAPI {
+               maxParts: Option[Int]) extends AuthorizedAPI {
     def name = "List Parts"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

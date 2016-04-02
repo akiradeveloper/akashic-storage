@@ -33,8 +33,7 @@ object GetObject {
       "response-expires"?,
       "response-cache-control"?,
       "response-content-disposition"?,
-      "response-content-encoding"?) &
-    extractRequest
+      "response-content-encoding"?)
 
   val matcher =
     get &
@@ -51,7 +50,6 @@ object GetObject {
     responseCacheControl: Option[String],
     responseContentDisposition: Option[String],
     responseContentEncoding: Option[String],
-    req: HttpRequest,
     _name: String
   ) extends AuthorizedAPI {
     def name = _name

@@ -18,14 +18,12 @@ object PutBucket {
     extractBucket &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
-    optionalStringBody &
-    extractRequest
+    optionalStringBody
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Grant],
-               entity: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               entity: Option[String]) extends AuthorizedAPI {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {

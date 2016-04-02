@@ -16,8 +16,7 @@ object UploadPart {
     extractObject &
     parameters("uploadId", "partNumber".as[Int]) &
     entity(as[Array[Byte]]) &
-    optionalHeaderValueByName("Content-MD5") &
-    extractRequest
+    optionalHeaderValueByName("Content-MD5")
 
   val route = matcher.as(t)(_.run)
 
@@ -25,8 +24,7 @@ object UploadPart {
                uploadId: String,
                partNumber: Int,
                partData: Array[Byte],
-               contentMd5: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               contentMd5: Option[String]) extends AuthorizedAPI {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

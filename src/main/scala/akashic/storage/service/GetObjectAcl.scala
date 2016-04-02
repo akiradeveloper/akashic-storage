@@ -11,13 +11,11 @@ object GetObjectAcl {
   val matcher =
     get &
     extractObject &
-    withParameter("acl") &
-    extractRequest
+    withParameter("acl")
 
   val route = matcher.as(t)(_.run)
 
-  case class t(bucketName: String, keyName: String,
-               req: HttpRequest) extends AuthorizedAPI {
+  case class t(bucketName: String, keyName: String) extends AuthorizedAPI {
     override def name: String = "GET Object ACL"
     override def resource: String = Resource.forObject(bucketName, keyName)
     override def runOnce: Route = {

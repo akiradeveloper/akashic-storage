@@ -9,7 +9,6 @@ import akka.http.scaladsl.model.HttpRequest
 trait Authorizable extends Runnable {
   def requestId: String
   def resource: String
-  def req: HttpRequest
   var callerId: String = ""
   abstract override def run = {
     authorizeS3v2(resource, requestId) { ci =>
