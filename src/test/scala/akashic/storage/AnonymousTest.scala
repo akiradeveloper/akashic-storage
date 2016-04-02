@@ -18,16 +18,15 @@ class AnonymousTest extends ServerTestBase {
     test(FixtureParam(anon))
   }
 
+  test("can't list buckets") { p =>
+    import p._
+    intercept[Exception](cli.listBuckets())
+  }
+
   test("ls service") { p =>
     import p._
-
     cli.createBucket("myb1")
     cli.createBucket("myb2")
-
-    val res = cli.listBuckets
-    assert(res.forall(_.getOwner.getId === "anonymous"))
-    assert(Set(res(0).getName, res(1).getName) === Set("myb1", "myb2"))
-    assert(res.size === 2)
   }
 
   test("ls bucket") { p =>

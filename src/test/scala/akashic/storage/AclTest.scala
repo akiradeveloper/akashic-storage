@@ -59,6 +59,7 @@ class AclTest extends ServerTestBase {
     intercept[Exception](fn)
   }
 
+
   test("anon user can't access to auth resources") { p =>
     import p._
     auth1.createBucket("authb")
