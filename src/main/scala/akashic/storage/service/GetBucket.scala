@@ -70,7 +70,7 @@ object GetBucket {
       import BucketListing._
       val len = maxKeys match {
         case Some(a) => a
-        case None => 1000 // dafault
+        case None => 1000 // default
       }
 
       val allContents = bucket.listKeys
