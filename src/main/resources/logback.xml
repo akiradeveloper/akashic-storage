@@ -3,7 +3,7 @@
         <file>/var/log/akashic-storage/error.log</file>
         <append>false</append>
         <encoder>
-            <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
@@ -13,14 +13,14 @@
         <file>/var/log/akashic-storage/admin.log</file>
         <append>false</append>
         <encoder>
-            <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
     </appender>
     <appender name="ALL_LOG" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/akashic-storage/all.log</file>
         <append>false</append>
         <encoder>
-            <pattern>%-5r %d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5le %lo{36} [%file:%line] - %msg %n</pattern>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
     </appender>
 
