@@ -92,11 +92,11 @@ package object service {
     case (bucketName: String, keyName: String) => (bucketName, encodeKeyName(keyName))
   }
 
-  trait AuthorizableTask[T] extends Task[T] with Error.Reportable with Authorizable[T] with RequestIdAllocable[T] with Measure[T]
-  type AuthorizedAPI = AuthorizableTask[Route]
+  trait AuthorizableTask extends Task with Error.Reportable with Authorizable with RequestIdAllocable with Measure
+  type AuthorizedAPI = AuthorizableTask
 
-  trait AnonymousTask[T] extends Task[T] with Error.Reportable with RequestIdAllocable[T] with Measure[T]
-  type AnonymousAPI = AnonymousTask[Route]
+  trait AnonymousTask extends Task with Error.Reportable with RequestIdAllocable with Measure
+  type AnonymousAPI = AnonymousTask
 
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.service"))
   val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult(""))

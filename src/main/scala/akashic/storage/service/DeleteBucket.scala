@@ -8,12 +8,10 @@ import akka.http.scaladsl.server.Route
 object DeleteBucket {
   val matcher =
     delete &
-    extractBucket &
-    extractRequest
+    extractBucket
   val route = matcher.as(t)(_.run)
 
-  case class t(bucketName: String,
-               req: HttpRequest) extends AuthorizedAPI {
+  case class t(bucketName: String) extends AuthorizedAPI {
     override def name: String = "DELETE Bucket"
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {

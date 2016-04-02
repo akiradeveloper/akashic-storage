@@ -1,8 +1,10 @@
 package akashic.storage.service
 
-trait Task[T] extends Runnable[T] {
-  def runOnce: T
-  def run: T = {
+import akka.http.scaladsl.server.Route
+
+trait Task extends Runnable {
+  def runOnce: Route
+  def run = {
     var retry = 0
     val result = try {
       runOnce

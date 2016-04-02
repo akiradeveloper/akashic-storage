@@ -15,16 +15,14 @@ object PutObjectAcl {
     withParameter("acl") &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
-    optionalStringBody &
-    extractRequest
+    optionalStringBody
 
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
                cannedAcl: Option[String],
                grantsFromHeaders :Iterable[Acl.Grant],
-               xmlString: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               xmlString: Option[String]) extends AuthorizedAPI {
     override def name: String = "PUT Object ACL"
     override def resource: String = Resource.forObject(bucketName, keyName)
     override def runOnce: Route = {

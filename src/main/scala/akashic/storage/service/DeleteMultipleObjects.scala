@@ -14,14 +14,12 @@ object DeleteMultipleObjects {
     post &
     extractBucket &
     withParameter("delete") &
-    entity(as[String]) &
-    extractRequest
+    entity(as[String])
 
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String,
-               xmlString: String,
-               req: HttpRequest) extends AuthorizedAPI {
+               xmlString: String) extends AuthorizedAPI {
     override def name = "DELETE Multiple Objects"
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {

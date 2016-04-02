@@ -11,13 +11,11 @@ object GetBucketLocation {
   val matcher =
     get &
     extractBucket &
-    withParameter("location") &
-    extractRequest
+    withParameter("location")
 
   val route = matcher.as(t)(_.run)
 
-  case class t(bucketName: String,
-               req: HttpRequest) extends AuthorizedAPI {
+  case class t(bucketName: String) extends AuthorizedAPI {
     override def name: String = "GET Bucket Location"
     override def resource: String = Resource.forBucket(bucketName)
     override def runOnce: Route = {

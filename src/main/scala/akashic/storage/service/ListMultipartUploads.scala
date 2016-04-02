@@ -18,8 +18,7 @@ object ListMultipartUploads {
     get &
     extractBucket &
     withParameter("uploads") &
-    parameters("delimiter"?, "encoding-type"?, "key-marker"?, "upload-id-marker"?, "max-uploads".as[Int]?, "prefix"?) &
-    extractRequest
+    parameters("delimiter"?, "encoding-type"?, "key-marker"?, "upload-id-marker"?, "max-uploads".as[Int]?, "prefix"?)
 
   val route = matcher.as(t)(_.run)
 
@@ -29,8 +28,7 @@ object ListMultipartUploads {
                keyMarker: Option[String],
                uploadIdMarker: Option[String],
                maxUploads: Option[Int],
-               prefix: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               prefix: Option[String]) extends AuthorizedAPI {
     override def name: String = "List Multipart Uploads"
 
     override def resource: String = Resource.forBucket(bucketName)

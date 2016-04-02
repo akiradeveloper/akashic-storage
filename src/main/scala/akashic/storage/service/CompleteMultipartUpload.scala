@@ -24,15 +24,13 @@ object CompleteMultipartUpload {
     post &
     extractObject &
     parameter("uploadId") &
-    entity(as[String]) &
-    extractRequest
+    entity(as[String])
 
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
                uploadId: String,
-               data: String,
-               req: HttpRequest) extends AuthorizedAPI {
+               data: String) extends AuthorizedAPI {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {

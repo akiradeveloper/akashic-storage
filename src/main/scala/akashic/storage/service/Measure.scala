@@ -1,8 +1,8 @@
 package akashic.storage.service
 
-trait Measure[T] extends Runnable[T] {
+trait Measure extends Runnable {
   def name: String
-  abstract override def run: T = {
+  abstract override def run = {
     logger.debug(s"-> ${name}")
     val start = System.currentTimeMillis
     val result = super.run

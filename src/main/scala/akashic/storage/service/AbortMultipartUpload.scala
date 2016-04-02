@@ -8,13 +8,11 @@ object AbortMultipartUpload {
   val matcher =
     delete &
     extractObject &
-    parameter("uploadId") &
-    extractRequest
+    parameter("uploadId")
 
   val route = matcher.as(t)(_.run)
 
-  case class t(bucketName: String, keyName: String, uploadId: String,
-               req: HttpRequest) extends AuthorizedAPI {
+  case class t(bucketName: String, keyName: String, uploadId: String) extends AuthorizedAPI {
     override def name: String = "Abort Multipart Upload"
     override def resource = Resource.forObject(bucketName, keyName)
 

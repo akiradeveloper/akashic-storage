@@ -15,16 +15,14 @@ object GetBucket {
   val matcher =
     get &
     extractBucket &
-    parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys".as[Int]?, "prefix"?) &
-    extractRequest
+    parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys".as[Int]?, "prefix"?)
   val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],
                marker: Option[String],
                maxKeys: Option[Int],
-               prefix: Option[String],
-               req: HttpRequest) extends AuthorizedAPI {
+               prefix: Option[String]) extends AuthorizedAPI {
     def name = "GET Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
