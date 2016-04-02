@@ -82,6 +82,28 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("list versions") { p =>
+    import p._
+    client.createBucket("myb")
+
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "myo2", f)
+    client.putObject("myb", "myo1", f)
+
+    val res1 = client.listVersions("myb", "myooooo") // []
+    assert(res1.getVersionSummaries.size == 0)
+
+    val res2 = client.listVersions("myb", "myo")
+    assert(res2.getVersionSummaries.size == 2) // [myo1, myo2]
+
+    val req = new ListVersionsRequest()
+      .withBucketName("myb")
+      .withDelimiter("o")
+    val res3 = client.listVersions(req) // [myo(1,2)]
+    assert(res3.getVersionSummaries.size == 0)
+    assert(res3.getCommonPrefixes.size == 1)
+  }
+
   test("partial get") { p =>
     import p._
 
