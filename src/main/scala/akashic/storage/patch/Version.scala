@@ -10,4 +10,6 @@ case class Version(key: Key, root: NodePath) extends Patch {
   // [spec] All objects (including all object versions and delete markers)
   // in the bucket must be deleted before the bucket itself can be deleted.
   val deletable = false
+  def versionId = meta.get.versionId
+  def isDeleteMarker = meta.get.isDeleteMarker
 }

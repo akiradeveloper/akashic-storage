@@ -13,7 +13,6 @@ import scala.xml.NodeSeq
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object GetBucketObjectVersions {
-
   val matcher =
     get &
     extractBucket &
@@ -96,13 +95,13 @@ object GetBucketObjectVersions {
 
       val allVersions: Seq[Single[VersionWrap]] = bucket.listKeys.toSeq
         .sortBy(_.name)
-        .map(key => key.versions.listVersions.sortBy(v => v.meta.get.versionId).map(VersionWrap(_)))
+        .map(key => key.versions.listVersions.sortBy(v => v.versionId).map(VersionWrap(_)))
         .flatten
         .map(BucketListing.Single(_))
 
       val result = allVersions
        .dropWhile(keyMarker.map(km => (a: Single[VersionWrap]) => a.get.unwrap.key.name <= km))
-       .dropWhile(versionIdMarker.map(vim => (a: Single[VersionWrap]) => a.get.unwrap.meta.get.versionId <= vim))
+       .dropWhile(versionIdMarker.map(vim => (a: Single[VersionWrap]) => a.get.unwrap.versionId <= vim))
        .filter(prefix.map(pf => (a: Single[VersionWrap]) => a.get.name.startsWith(pf)))
        .groupByDelimiter(delimiter)
        .truncateByMaxLen(len)
@@ -119,7 +118,7 @@ object GetBucketObjectVersions {
           { versionIdMarker.map(a => <VersionIdMarker>{a}</VersionIdMarker>).getOrElse(NodeSeq.Empty) }
           { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
           { result.nextMarker.map(a => <NextKeyMarker>{a.get.unwrap.key.name}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
-          { result.nextMarker.map(a => <NextVersionIdMarker>{a.get.unwrap.meta.get.versionId}</NextVersionIdMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextVersionIdMarker>{a.get.unwrap.versionId}</NextVersionIdMarker>).getOrElse(NodeSeq.Empty) }
           { maxKeys.map(a => <MaxKeys>{a}</MaxKeys>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>
           { for (group <- groups) yield group.toXML }
