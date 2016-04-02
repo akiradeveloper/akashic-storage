@@ -85,7 +85,6 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     DeleteBucket.route ~            // DELETE /bucketName
     AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
     DeleteObject.route ~            // DELETE /bucketName/keyName
-    // PostObject.route ~              // POST   /bucketName
     DeleteMultipleObjects.route ~   // POST   /bucketName
     InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
     CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
