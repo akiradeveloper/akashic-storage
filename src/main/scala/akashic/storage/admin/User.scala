@@ -2,22 +2,23 @@ package akashic.storage.admin
 
 import scala.xml.NodeSeq
 
-object User {
-  case class t(id: String,
-               accessKey: String,
-               secretKey: String,
-               name: String,
-               email: String,
-               displayName: String) {
-    def modifyWith(xml: NodeSeq): User.t = {
-      this.copy(
-        name = (xml \ "Name").headOption.map(_.text).getOrElse(this.name),
-        email = (xml \ "Email").headOption.map(_.text).getOrElse(this.email),
-        displayName = (xml \ "DisplayName").headOption.map(_.text).getOrElse(this.displayName)
-      )
-    }
+case class User(id: String,
+                accessKey: String,
+                secretKey: String,
+                name: String,
+                email: String,
+                displayName: String) {
+  def modifyWith(xml: NodeSeq): User = {
+    this.copy(
+      name = (xml \ "Name").headOption.map(_.text).getOrElse(this.name),
+      email = (xml \ "Email").headOption.map(_.text).getOrElse(this.email),
+      displayName = (xml \ "DisplayName").headOption.map(_.text).getOrElse(this.displayName)
+    )
   }
-  val Anonymous = t(
+}
+
+object User {
+  val Anonymous = User(
     "",
     "",
     "",
@@ -25,8 +26,8 @@ object User {
     "",
     displayName = "anonymous"
   )
-  def fromXML(xml: NodeSeq): User.t = {
-    User.t(
+  def fromXML(xml: NodeSeq): User = {
+    User(
       id = (xml \ "Id").text,
       accessKey = (xml \ "AccessKey").text,
       secretKey = (xml \ "SecretKey").text,
@@ -36,7 +37,7 @@ object User {
     )
   }
 
-  def toXML(user: User.t): NodeSeq = {
+  def toXML(user: User): NodeSeq = {
     <User>
       <Id>{user.id}</Id>
       <AccessKey>{user.accessKey}</AccessKey>

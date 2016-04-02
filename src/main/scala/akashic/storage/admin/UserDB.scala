@@ -23,7 +23,7 @@ case class UserDB(root: NodePath) {
       a.toByteArray
     }
     private def doReader(a: Array[Byte]): InMem = {
-      val list = BinaryPickle(a).unpickle[Seq[User.t]]
+      val list = BinaryPickle(a).unpickle[Seq[User]]
       val userMap = list.map(a => (a.id, a)).toMap
       InMem(userMap.values)
     }
@@ -36,7 +36,7 @@ case class UserDB(root: NodePath) {
     dbData.put(InMem(Iterable()))
 
   object InMem {
-    def apply(ls: Iterable[User.t]): InMem = {
+    def apply(ls: Iterable[User]): InMem = {
       val newUserMap = ls.map(a => (a.id, a)).toMap
       val newIdMap = newUserMap.map {
         case (id, user) => (user.accessKey, id)
@@ -45,11 +45,11 @@ case class UserDB(root: NodePath) {
     }
   }
   case class InMem(
-    userMap: Map[String, User.t], // id -> User
+    userMap: Map[String, User], // id -> User
     idMap: Map[String, String] // accessKey -> id
   ){
-    def add(user: User.t): InMem = add(user.id, user)
-    def add(id: String, user: User.t): InMem = {
+    def add(user: User): InMem = add(user.id, user)
+    def add(id: String, user: User): InMem = {
       val newUserMap = userMap + (id -> user)
       InMem(newUserMap.values)
     }
@@ -71,19 +71,19 @@ case class UserDB(root: NodePath) {
     dbData.get.idMap.get(accessKey)
   }
 
-  def find(id: String): Option[User.t] = {
+  def find(id: String): Option[User] = {
     id match {
       case "anonymous" => Some(User.Anonymous)
       case id => dbData.get.userMap.get(id)
     }
   }
 
-  def add(user: User.t): Unit = {
+  def add(user: User): Unit = {
     dbData.get.add(user).commit
   }
 
-  private def mkRandUser: User.t = {
-    User.t(
+  private def mkRandUser: User = {
+    User(
       id = strings.random(64),
       accessKey = strings.random(20).toUpperCase,
       secretKey = strings.random(40),
@@ -93,17 +93,17 @@ case class UserDB(root: NodePath) {
     )
   }
 
-  def mkUser: User.t = {
+  def mkUser: User = {
     val newUser = mkRandUser
     dbData.get.add(newUser).commit
     newUser
   }
 
-  def update(id: String, user: User.t): Unit = {
+  def update(id: String, user: User): Unit = {
     dbData.get.remove(id).add(user).commit
   }
 
-  def list: Iterable[User.t] = {
+  def list: Iterable[User] = {
     dbData.get.userMap.values
   }
 }
