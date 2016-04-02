@@ -82,6 +82,21 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("list objects with / delimiter") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "a/b", f)
+    client.putObject("myb", "a/c", f)
+    val req = new ListObjectsRequest()
+      .withBucketName("myb")
+      .withDelimiter("/")
+    val res = client.listObjects(req)
+    assert(res.getCommonPrefixes.size == 1)
+    val cp: String = res.getCommonPrefixes.get(0)
+    assert(cp == "a")
+  }
+
   test("list versions") { p =>
     import p._
     client.createBucket("myb")
