@@ -8,6 +8,7 @@ object DeleteBucket {
   val matcher =
     delete &
     extractBucket
+
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String) extends AuthorizedAPI {
@@ -24,6 +25,7 @@ object DeleteBucket {
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .build
+
       complete(StatusCodes.NoContent, headers, HttpEntity.Empty)
     }
   }

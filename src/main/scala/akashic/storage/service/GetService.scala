@@ -11,6 +11,7 @@ import akka.http.scaladsl.server.Directives._
 
 object GetService {
   val matcher = get & provide(())
+
   val route = matcher.as(t)(_.run)
 
   case class t(n: Unit) extends AuthorizedAPI {

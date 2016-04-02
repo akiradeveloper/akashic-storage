@@ -18,10 +18,7 @@ object GetBucketObjectVersions {
     extractBucket &
     withParameter("versions") &
     parameters("delimiter"?, "encoding-type"?, "key-marker"?, "max-keys".as[Int]?, "prefix"?, "version-id-marker"?)
-
-  val route =
-    matcher.as(t)(_.run)
-
+  val route = matcher.as(t)(_.run)
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],

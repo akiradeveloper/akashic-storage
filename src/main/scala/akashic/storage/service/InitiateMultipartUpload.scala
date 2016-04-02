@@ -16,7 +16,9 @@ object InitiateMultipartUpload {
     optionalHeaderValueByName("Content-Type") &
     optionalHeaderValueByName("Content-Disposition") &
     extractMetadata
+
   val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Acl.Grant],

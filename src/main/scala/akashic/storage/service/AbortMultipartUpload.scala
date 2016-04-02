@@ -24,6 +24,7 @@ object AbortMultipartUpload {
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)
         .build
+
       complete(StatusCodes.NoContent, headers, HttpEntity.Empty)
     }
   }

@@ -13,7 +13,6 @@ import akka.http.scaladsl.server.Route
 import scala.xml.NodeSeq
 
 object ListMultipartUploads {
-
   val matcher =
     get &
     extractBucket &

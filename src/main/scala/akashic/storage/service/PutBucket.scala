@@ -15,7 +15,9 @@ object PutBucket {
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalStringBody
+
   val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String,
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Grant],

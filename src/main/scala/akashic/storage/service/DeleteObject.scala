@@ -37,6 +37,7 @@ object DeleteObject {
     parameters("versionId".as[Int]?)
 
   val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                versionId: Option[Int]) extends AuthorizedAPI {
     def name = "DELETE Object"

@@ -9,7 +9,7 @@ import akashic.storage.service.Acl.Grant
 import akka.http.scaladsl.model.Multipart
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.DebuggingDirectives
-import akka.http.scaladsl.server.{Directive, Directive1}
+import akka.http.scaladsl.server.{Directive0, Directive, Directive1}
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
@@ -27,7 +27,7 @@ package object service {
       }
   }
 
-  def withParameter(name: String) = parameter(name).tflatMap(a => pass)
+  def withParameter(name: String): Directive0 = parameter(name).tflatMap(a => pass)
 
   private val extractGrantHeaders: Directive1[immutable.Seq[Acl.GrantHeader]] =
     extractRequest.map(a => a.headers

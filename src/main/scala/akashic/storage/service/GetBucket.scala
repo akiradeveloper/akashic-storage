@@ -15,7 +15,9 @@ object GetBucket {
     get &
     extractBucket &
     parameters("delimiter"?, "encoding-type"?, "marker"?, "max-keys".as[Int]?, "prefix"?)
+
   val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String,
                delimiter: Option[String],
                encodingType: Option[String],

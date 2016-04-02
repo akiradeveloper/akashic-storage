@@ -3,7 +3,6 @@ package akashic.storage.service
 import akashic.storage.patch.{Bucket, Key, Tree, Upload}
 
 object Error {
-
   sealed trait t
   case class AccessDenied() extends t
   case class AccountProblem() extends t

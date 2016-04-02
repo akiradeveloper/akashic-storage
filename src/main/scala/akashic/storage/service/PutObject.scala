@@ -18,7 +18,9 @@ object PutObject {
     optionalHeaderValueByName("Content-Disposition") &
     optionalHeaderValueByName("Content-MD5") &
     extractMetadata
+
   val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
                cannedAcl: Option[String],
@@ -74,6 +76,7 @@ object PutObject {
         .withHeader(X_AMZ_VERSION_ID, "null")
         .withHeader(ETag(computedETag))
         .build
+
       complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
