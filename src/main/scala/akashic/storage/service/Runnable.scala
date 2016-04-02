@@ -1,5 +1,7 @@
 package akashic.storage.service
 
-trait Runnable[T] {
-  def run: T
+import akka.http.scaladsl.server.Route
+
+trait Runnable {
+  def run: Route
 }
