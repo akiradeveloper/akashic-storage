@@ -4,7 +4,7 @@ import akashic.storage._
 import akashic.storage.service.Error
 
 case class GetCallerId(authKey: Option[String], requestId: String, resource: String) extends Error.Reportable {
-  def run: String = {
+  def apply(): String = {
     if (authKey.isEmpty) failWith(Error.SignatureDoesNotMatch())
     val res = authKey.get match {
       case "" => CallerId.ANONYMOUS

@@ -104,6 +104,6 @@ package object service {
   def authorizeS3v2(resource: String, requestId: String): Directive1[String] =
     extractRequest.map { req =>
       val authKey = auth.authorize(resource, req)
-      GetCallerId(authKey, requestId, resource).run
+      GetCallerId(authKey, requestId, resource)()
     }
 }

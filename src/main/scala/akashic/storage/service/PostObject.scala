@@ -43,7 +43,7 @@ object PostObject {
     override def resource = Resource.forBucket(bucketName)
     override def runOnce = {
       val authKey: Option[String] = V2Post(policy, accessKey, signature).authorize
-      val callerId = GetCallerId(authKey, requestId, resource).run
+      val callerId = GetCallerId(authKey, requestId, resource)()
 
       val keyName = encodeKeyName(keyNameSlashed)
       val result = MakeObject.t(bucketName, keyName, data, acl, Seq.empty, contentType, contentDisposition,

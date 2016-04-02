@@ -12,7 +12,7 @@ trait Authorizable[T] extends Runnable[T] {
   var callerId: String = ""
   abstract override def run = {
     val authKey = auth.authorize(resource, req)
-    callerId = GetCallerId(authKey, requestId, resource).run
+    callerId = GetCallerId(authKey, requestId, resource)()
     super.run
   }
 }
