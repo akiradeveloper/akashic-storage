@@ -60,19 +60,6 @@ package object service {
          .build
       )
 
-  // torima impl
-  @deprecated
-  def extractMetadataFromFields: Directive1[HeaderList.t] =
-    entity(as[Multipart.FormData]).map { a =>
-      val fut = a.toStrict(FiniteDuration.apply(30, TimeUnit.SECONDS))
-      val strict = Await.result(fut, Duration.apply(30, TimeUnit.SECONDS))
-      strict.strictParts
-        .map(a => (a.name, a.entity.getData().decodeString("UTF-8")))
-        .filter { case (k, _) => k.startsWith("x-amz-meta-") }
-        .foldLeft(HeaderList.builder) { case (acc, (k, v)) => acc.append(k, v) }
-        .build
-    }
-
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
