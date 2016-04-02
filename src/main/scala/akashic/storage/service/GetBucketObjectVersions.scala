@@ -16,7 +16,7 @@ object GetBucketObjectVersions {
   val matcher =
     get &
     extractBucket &
-    withParameter("uploads") &
+    withParameter("versions") &
     parameters("delimiter"?, "encoding-type"?, "key-marker"?, "max-keys".as[Int]?, "prefix"?, "version-id-marker"?) &
     extractRequest
 
