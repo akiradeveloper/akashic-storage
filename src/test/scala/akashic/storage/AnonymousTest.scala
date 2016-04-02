@@ -1,6 +1,7 @@
 package akashic.storage
 
 import akashic.storage.admin.TestUsers
+import akashic.storage.auth.CallerId
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
@@ -40,6 +41,6 @@ class AnonymousTest extends ServerTestBase {
     assert(objListing.getBucketName == "myb")
     val summaries = objListing.getObjectSummaries
     assert(summaries.size === 2)
-    assert(summaries(0).getOwner.getId === "anonymous")
+    assert(summaries(0).getOwner.getId === CallerId.ANONYMOUS)
   }
 }

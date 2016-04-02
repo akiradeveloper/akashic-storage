@@ -2,6 +2,7 @@ package akashic.storage.admin
 
 import java.nio.file.{Files, Path}
 
+import akashic.storage.auth.CallerId
 import akashic.storage.backend.NodePath
 import akashic.storage.caching.{CacheMap, Cache}
 import akashic.storage.patch.{Data, Commit}
@@ -73,7 +74,7 @@ case class UserDB(root: NodePath) {
 
   def find(id: String): Option[User] = {
     id match {
-      case "anonymous" => Some(User.Anonymous)
+      case CallerId.ANONYMOUS => Some(User.Anonymous)
       case id => dbData.get.userMap.get(id)
     }
   }

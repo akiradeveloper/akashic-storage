@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import java.util.Date
 
+import akashic.storage.auth.CallerId
 import akashic.storage.patch.Bucket
 import akashic.storage.service.Error.Reportable
 import akashic.storage.{server, patch}
@@ -36,7 +37,7 @@ object GetService {
         </Bucket>
       }
 
-      if (callerId == "anonymous") {
+      if (callerId == CallerId.ANONYMOUS) {
         failWith(Error.AccessDenied())
       }
 

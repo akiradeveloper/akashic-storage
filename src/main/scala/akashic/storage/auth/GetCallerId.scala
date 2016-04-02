@@ -7,7 +7,7 @@ case class GetCallerId(authKey: Option[String], requestId: String, resource: Str
   def run: String = {
     if (authKey.isEmpty) failWith(Error.SignatureDoesNotMatch())
     val res = authKey.get match {
-      case "" => "anonymous"
+      case "" => CallerId.ANONYMOUS
       case a => server.users.getId(a) match {
         case Some(id) => id
         case None => failWith(Error.AccountProblem())

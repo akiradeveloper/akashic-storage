@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import akashic.storage.auth.CallerId
 import akashic.storage.backend.NodePath
 import akashic.storage.caching.{CacheMap, Cache}
 import com.typesafe.scalalogging.Logger
@@ -76,7 +77,7 @@ object Acl {
       this match {
         case ById(id: String) => {
           id match {
-            case "anonymous" =>
+            case CallerId.ANONYMOUS =>
               true
             case _ =>
               id == callerId
@@ -85,7 +86,7 @@ object Acl {
         case ByEmail(email: String) =>
           server.users.find(callerId).get.email == email
         case AuthenticatedUsers() =>
-          callerId != "anonymous"
+          callerId != CallerId.ANONYMOUS
         case AllUsers() =>
           true
       }
@@ -168,7 +169,7 @@ object Acl {
     def makeGrants: Set[Grant] = {
       def default(owner: String) = {
         val grantee = owner match {
-          case "anonymous" => AllUsers()
+          case CallerId.ANONYMOUS => AllUsers()
           case _ => ById(owner)
         }
         Grant(grantee, FullControl())

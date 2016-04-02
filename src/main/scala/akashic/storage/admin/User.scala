@@ -1,5 +1,7 @@
 package akashic.storage.admin
 
+import akashic.storage.auth.CallerId
+
 import scala.xml.NodeSeq
 
 case class User(id: String,
@@ -19,7 +21,7 @@ case class User(id: String,
 
 object User {
   val Anonymous = User(
-    "",
+    CallerId.ANONYMOUS,
     "",
     "",
     name = "anonymous",
