@@ -5,22 +5,24 @@ import java.nio.file.{Path, Paths, Files}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
 
-trait ServerConfig {
-  def rawConfig: Config
-  def ip: String
-  def port: Int
-  def adminPassword: String
-}
+case class ServerConfig(
+  rawConfig: Config,
+  ip: String,
+  port: Int,
+  adminPassword: String
+)
 
 object ServerConfig {
-  def apply(configRoot: Config) = new ServerConfig {
+  def fromConfig(configRoot: Config) = {
     logger.info("configRoot: {}", configRoot)
 
     val rawConfig = configRoot.getConfig("akashic.storage")
-    override def ip = rawConfig.getString("ip")
-    override def port: Int = rawConfig.getInt("port")
-    override def adminPassword = rawConfig.getString("admin-passwd")
+    val ip = rawConfig.getString("ip")
+    val port: Int = rawConfig.getInt("port")
+    val adminPassword = rawConfig.getString("admin-passwd")
 
     logger.info("config: {}", (ip, port, adminPassword))
+
+    ServerConfig(rawConfig, ip, port, adminPassword)
   }
 }

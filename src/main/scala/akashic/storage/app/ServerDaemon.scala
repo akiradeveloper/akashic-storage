@@ -23,7 +23,7 @@ class ServerDaemon extends Daemon {
     StatusPrinter.print(lc)
 
     println("load config")
-    val config = ServerConfig(
+    val config = ServerConfig.fromConfig(
         ConfigFactory.parseFile(new File("/opt/akashic-storage/etc/application.conf"))
         .withFallback(ConfigFactory.load()))
     server = Server(config, cleanup = false)

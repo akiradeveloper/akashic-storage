@@ -14,7 +14,7 @@ import scala.concurrent.duration.Duration
 import scala.util.Random
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
-  def makeConfig = ServerConfig(ConfigFactory.load("test.conf"))
+  def makeConfig = ServerConfig.fromConfig(ConfigFactory.load("test.conf"))
 
   override def beforeEach {
     val config = makeConfig
