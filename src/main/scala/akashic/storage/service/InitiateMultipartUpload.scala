@@ -56,8 +56,7 @@ object InitiateMultipartUpload {
 
         upload.meta.put(
           Meta(
-            isVersioned = false,
-            isDeleteMarker = false,
+            versionId = "null",
             eTag = "",
             attrs = HeaderList.builder
               .appendOpt("Content-Type", contentType)

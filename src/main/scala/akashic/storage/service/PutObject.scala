@@ -56,8 +56,7 @@ object MakeObject {
         version.data.put(objectData)
         version.meta.put(
           Meta(
-            isVersioned = false,
-            isDeleteMarker = false,
+            versionId = "null",
             eTag = computedETag,
             attrs = HeaderList.builder
               .appendOpt("Content-Type", contentType)

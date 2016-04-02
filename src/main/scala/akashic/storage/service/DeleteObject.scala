@@ -15,7 +15,7 @@ object DeleteObject {
     // x-amz-version-id
     // Returns the version ID of the delete marker created as a result of the DELETE operation.
     // If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
-    val versioning = bucket.versioning.get.value
+    val versioning = bucket.versioning.get
     if (versionId.isDefined) {
       assert(false)
       None

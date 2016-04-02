@@ -53,7 +53,7 @@ object PutBucket {
         }
 
         bucketPatch.versioning.put {
-          Versioning(Versioning.UNVERSIONED)
+          Versioning.UNVERSIONED
         }
 
         bucketPatch.location.put {
