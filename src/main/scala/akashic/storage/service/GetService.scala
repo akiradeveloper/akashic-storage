@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import java.util.Date
 
+import akashic.storage.patch.Bucket
 import akashic.storage.service.Error.Reportable
 import akashic.storage.{server, patch}
 import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
@@ -34,11 +35,21 @@ object GetService {
           <CreationDate>{creationDate}</CreationDate>
         </Bucket>
       }
+
+      if (callerId == "") {
+        failWith(Error.AccessDenied())
+      }
+
+      val allBuckets: Iterable[Bucket] = server.tree.listBuckets
+      val listing = allBuckets.filter { bucket =>
+        bucket.acl.get.owner == callerId
+      }
+
       val xml =
         <ListAllMyBucketsResult>
           {Owner(callerId)}
           <Buckets>
-            {for (b <- server.tree.listBuckets) yield Bucket(b)}
+            {listing.map(Bucket)}
           </Buckets>
         </ListAllMyBucketsResult>
 
