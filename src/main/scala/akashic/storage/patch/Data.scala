@@ -1,9 +1,6 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
-
 import akashic.storage.backend.NodePath
-import org.apache.commons.io.FileUtils
 
 trait Data[V] extends Patch {
   val filePath: NodePath

@@ -1,10 +1,9 @@
 package akashic.storage.service
 
-import akashic.storage.patch.{Key, Bucket}
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akashic.storage.patch.{Bucket, Key}
 import akashic.storage.server
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 
 object DeleteObject {
   def deleteObject(bucket: Bucket, key: Key, versionId: Option[Int]): Option[Int] = {

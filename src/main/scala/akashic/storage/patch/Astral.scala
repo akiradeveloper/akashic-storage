@@ -1,8 +1,9 @@
 package akashic.storage.patch
 
-import java.nio.file.{FileAlreadyExistsException, Files, NoSuchFileException, Path}
+import java.nio.file.{FileAlreadyExistsException, NoSuchFileException}
+
 import akashic.storage.backend.NodePath
-import akashic.storage.{fs, strings}
+import akashic.storage.strings
 
 /** Astral is where everything is given birth and die */
 case class Astral(root: NodePath) {

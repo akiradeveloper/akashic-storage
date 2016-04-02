@@ -1,23 +1,19 @@
 package akashic.storage.service
 
-import java.net.URLEncoder
-
-import akashic.storage.backend.{Streams, NodePath}
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Directives._
-import java.nio.file.Path
-
+import akashic.storage.backend.{NodePath, Streams}
+import akashic.storage.patch.{Commit, Version}
 import akashic.storage.server
-import akashic.storage.patch.{Commit, Patch, Version, Data}
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
 import org.apache.commons.codec.binary.Hex
-import org.apache.commons.io.FileUtils
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.xml.{XML, NodeSeq}
-import scala.concurrent.ExecutionContext.Implicits.global
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import scala.xml.{NodeSeq, XML}
 
 object CompleteMultipartUpload {
   val matcher =

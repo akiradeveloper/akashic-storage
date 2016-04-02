@@ -1,10 +1,9 @@
 package akashic.storage
 
-import akka.event.Logging
-import akka.http.scaladsl.server.directives.{LoggingMagnet, DebuggingDirectives}
-import com.typesafe.scalalogging.{Logger, StrictLogging}
-import org.slf4j.LoggerFactory
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.DebuggingDirectives
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
 package object admin {
   val logger = Logger(LoggerFactory.getLogger("akashic.storage.admin"))

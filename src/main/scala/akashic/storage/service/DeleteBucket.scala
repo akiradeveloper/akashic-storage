@@ -1,9 +1,8 @@
 package akashic.storage.service
 
 import akashic.storage.server
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 
 object DeleteBucket {
   val matcher =

@@ -1,7 +1,7 @@
 package akashic.storage.service
 
 import akashic.storage.server
-import akka.http.scaladsl.model.{HttpRequest, HttpEntity, StatusCodes}
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 
 object HeadBucket {

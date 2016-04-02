@@ -1,7 +1,5 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
-
 import akashic.storage.backend.NodePath
 
 case class Key(bucket: Bucket, root: NodePath) extends Patch {

@@ -1,7 +1,7 @@
 package akashic.storage.caching
 
 import akashic.storage.ServerConfig
-import akashic.storage.service.{Location, Meta, Acl, Versioning}
+import akashic.storage.service.{Acl, Location, Meta, Versioning}
 import com.google.common.cache.CacheBuilder
 
 case class CacheMaps(config: ServerConfig) {

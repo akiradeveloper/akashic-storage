@@ -1,11 +1,10 @@
 package akashic.storage.service
 
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akashic.storage.server
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import scala.xml.NodeSeq
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
-import akashic.storage.server
 
 object GetBucketAcl {
   val matcher =

@@ -1,23 +1,17 @@
 package akashic.storage
 
-import java.nio.file.{Paths, Files}
-
 import akashic.storage.admin._
 import akashic.storage.backend.{BALFactory, NodePath}
 import akashic.storage.caching.CacheMaps
-import akashic.storage.service._
 import akashic.storage.patch.{Astral, Tree}
-import akka.actor.ActorSystem
+import akashic.storage.service._
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, StatusCode}
-import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.{Directive0, ExceptionHandler, Route}
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.{HttpEntity, StatusCode, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Directive0, ExceptionHandler, Route}
 import akka.util.ByteString
-import com.typesafe.scalalogging.StrictLogging
-import org.apache.commons.io.FileUtils
+
 import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {

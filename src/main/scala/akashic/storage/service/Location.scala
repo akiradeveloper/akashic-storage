@@ -1,14 +1,11 @@
 package akashic.storage.service
 
-import java.nio.file.Path
-
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
-import com.google.common.cache.CacheBuilder
+import akashic.storage.caching.{Cache, CacheMap}
+import akashic.storage.server
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
-import akashic.storage.server
 
 case class Location(value: String) {
   def toBytes: Array[Byte] = this.pickle.value

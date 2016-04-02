@@ -1,8 +1,6 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
-
-import akashic.storage.backend.{NodePath, Node}
+import akashic.storage.backend.NodePath
 
 case class Tree(root: NodePath) {
   def bucketPath(name: String): NodePath = root.resolve(name)

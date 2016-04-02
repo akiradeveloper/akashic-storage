@@ -1,8 +1,5 @@
 package akashic.storage.caching
 
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{Files, Path}
-
 import akashic.storage.patch.Data
 
 trait Cache[V] extends Data[V] {

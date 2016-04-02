@@ -1,7 +1,5 @@
 package akashic.storage.patch
 
-import java.nio.file.Path
-
 import akashic.storage.backend.NodePath
 
 object Part {

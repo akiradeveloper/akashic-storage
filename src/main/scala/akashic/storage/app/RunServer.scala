@@ -1,6 +1,6 @@
 package akashic.storage.app
 
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Files, Paths}
 
 import akashic.storage._
 import akashic.storage.admin.TestUsers

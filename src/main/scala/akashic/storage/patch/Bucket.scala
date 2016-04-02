@@ -1,7 +1,7 @@
 package akashic.storage.patch
 
 import akashic.storage.backend.NodePath
-import akashic.storage.service.{Location, Versioning, Acl}
+import akashic.storage.service.{Acl, Location, Versioning}
 
 case class Bucket(root: NodePath) extends Patch {
   val acl = Acl.makeCache(root.resolve("acl"))

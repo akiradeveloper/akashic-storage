@@ -3,13 +3,12 @@ package akashic.storage.service
 import java.util.Date
 
 import akashic.storage.patch.Version
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Directives._
 import akashic.storage.server
-import akka.http.scaladsl.server.Route
-import scala.xml.NodeSeq
-import scala.util.Try
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
+
+import scala.xml.NodeSeq
 
 object GetBucket {
   val matcher =

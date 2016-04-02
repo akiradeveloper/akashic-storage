@@ -1,7 +1,7 @@
 package akashic.storage.service
 
 import java.text.SimpleDateFormat
-import java.util.{Locale, Date, TimeZone}
+import java.util.{Date, Locale, TimeZone}
 
 object dates {
   def format000Z(date: Date): String = {

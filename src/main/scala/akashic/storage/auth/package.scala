@@ -1,7 +1,5 @@
 package akashic.storage
 
-import akashic.storage.server
-import akashic.storage.service.Error
 import akka.http.scaladsl.model.HttpRequest
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory

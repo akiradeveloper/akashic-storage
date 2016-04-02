@@ -1,7 +1,6 @@
 package akashic.storage.auth
 
 import akashic.storage.HeaderList
-import akashic.storage.admin.TestUsers
 import akka.http.scaladsl.model.HttpRequest
 
 import scala.util.Try

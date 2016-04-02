@@ -1,11 +1,10 @@
 package akashic
 
 import akashic.storage.backend.BAL
-import akashic.storage.service._
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
-import com.typesafe.scalalogging.{StrictLogging, Logger}
+import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext

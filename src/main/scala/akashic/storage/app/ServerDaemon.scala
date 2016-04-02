@@ -1,14 +1,12 @@
 package akashic.storage.app
 
-import akashic.storage.{Server, ServerConfig, server}
-import akashic.storage.admin.TestUsers
-import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.classic.joran.JoranConfigurator
-import ch.qos.logback.core.util.StatusPrinter
-import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.commons.daemon.{DaemonContext, Daemon}
 import java.io.File
 
+import akashic.storage.{Server, ServerConfig, server}
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.core.util.StatusPrinter
+import com.typesafe.config.ConfigFactory
+import org.apache.commons.daemon.{Daemon, DaemonContext}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await

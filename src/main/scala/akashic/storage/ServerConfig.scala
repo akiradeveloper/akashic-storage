@@ -1,9 +1,6 @@
 package akashic.storage
 
-import java.nio.file.{Path, Paths, Files}
-
-import com.typesafe.config.{Config, ConfigFactory}
-import com.typesafe.scalalogging.StrictLogging
+import com.typesafe.config.Config
 
 case class ServerConfig(
   rawConfig: Config,

@@ -1,7 +1,5 @@
 package akashic.storage.service
 
-import java.net.URLDecoder
-
 object Resource {
   val forRoot = "/"
   def forBucket(bucketName: String) = forRoot + bucketName + "/"

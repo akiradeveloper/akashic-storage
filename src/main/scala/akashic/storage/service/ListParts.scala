@@ -4,11 +4,11 @@ import java.util.Date
 
 import akashic.storage.patch.Part
 import akashic.storage.server
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 
 import scala.xml.NodeSeq
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object ListParts {
   val matcher =

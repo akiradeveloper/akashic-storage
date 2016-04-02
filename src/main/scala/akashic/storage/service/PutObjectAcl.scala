@@ -2,7 +2,7 @@ package akashic.storage.service
 
 import akashic.storage._
 import akashic.storage.patch.Commit
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 

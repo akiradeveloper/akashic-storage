@@ -2,15 +2,15 @@ package akashic.storage.service
 
 import java.util.Date
 
-import akashic.storage.patch.{Upload, Bucket}
-import akashic.storage.service.BucketListing.{Group, Container, Single}
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.Directives._
-
+import akashic.storage.patch.{Bucket, Upload}
 import akashic.storage.server
-import scala.xml.NodeSeq
+import akashic.storage.service.BucketListing.{Group, Single}
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+
+import scala.xml.NodeSeq
 
 object ListMultipartUploads {
 

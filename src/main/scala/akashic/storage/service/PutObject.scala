@@ -1,15 +1,12 @@
 package akashic.storage.service
 
-import akashic.storage.patch.{Version, Key, Commit}
+import akashic.storage.patch.{Commit, Key, Version}
 import akashic.storage.{HeaderList, server}
 import akka.http.scaladsl.model.headers.ETag
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Route
-import com.google.common.net.HttpHeaders._
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import org.apache.commons.codec.binary.{Hex, Base64}
+import org.apache.commons.codec.binary.{Base64, Hex}
 import org.apache.commons.codec.digest.DigestUtils
-import scala.collection.immutable
 
 object PutObject {
   val matcher = put &

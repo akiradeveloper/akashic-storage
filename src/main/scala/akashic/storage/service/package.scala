@@ -1,27 +1,21 @@
 package akashic.storage
 
-import java.net.{URLEncoder, URLDecoder}
+import java.net.{URLDecoder, URLEncoder}
 import java.util.concurrent.TimeUnit
 
 import akashic.storage.admin._
 import akashic.storage.auth.GetCallerId
-import akashic.storage.patch.Version
 import akashic.storage.service.Acl.Grant
-import akka.actor.ActorSystem
-import akka.event.Logging
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.Multipart
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.DebuggingDirectives
-import akka.http.scaladsl.server.util.ConstructFromTuple
-import akka.stream.{Materializer, ActorMaterializer}
-import com.typesafe.scalalogging.{Logger, StrictLogging}
+import akka.http.scaladsl.server.{Directive, Directive1}
+import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
+
+import scala.collection.immutable
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.xml.NodeSeq
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Directive1, Directive, Route}
-import scala.collection.immutable
 
 package object service {
   // first appearance wins

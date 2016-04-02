@@ -1,11 +1,11 @@
 package akashic.storage.admin
 
+import akashic.storage.server
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
 
 import scala.util.{Failure, Success, Try}
 import scala.xml.XML
-import akka.http.scaladsl.server.Directives._
-import akashic.storage.server
 
 object Update {
   val matcher =

@@ -1,13 +1,12 @@
 package akashic.storage.service
 
-import java.lang.{IllegalArgumentException, RuntimeException}
-
 import akashic.storage.server
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+
 import scala.util.{Failure, Success, Try}
 import scala.xml.{NodeSeq, XML}
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object DeleteMultipleObjects {
   val matcher =

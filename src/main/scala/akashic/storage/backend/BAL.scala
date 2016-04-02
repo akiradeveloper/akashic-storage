@@ -1,6 +1,6 @@
 package akashic.storage.backend
 
-import java.io.{OutputStream, InputStream}
+import java.io.InputStream
 
 import akka.stream.scaladsl.StreamConverters
 import org.apache.commons.codec.digest.DigestUtils

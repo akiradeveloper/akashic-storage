@@ -1,12 +1,11 @@
 package akashic.storage.service
 
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
-import scala.pickling.Defaults._
-import scala.pickling.binary._
+import akashic.storage.caching.{Cache, CacheMap}
 import akashic.storage.server
 
-import Versioning._
+import scala.pickling.Defaults._
+import scala.pickling.binary._
 case class Versioning(value: Int) {
   def toBytes: Array[Byte] = this.pickle.value
 }

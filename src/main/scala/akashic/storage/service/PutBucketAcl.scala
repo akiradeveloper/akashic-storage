@@ -1,11 +1,10 @@
 package akashic.storage.service
 
-import akashic.storage.patch.{Data, Commit}
-import akka.http.scaladsl.model.{HttpEntity, StatusCodes, HttpRequest}
+import akashic.storage.patch.Commit
+import akashic.storage.server
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-
-import akashic.storage.server
 
 import scala.xml.XML
 

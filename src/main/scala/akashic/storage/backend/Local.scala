@@ -1,8 +1,8 @@
 package akashic.storage.backend
 
-import java.io.{OutputStream, InputStream}
+import java.io.InputStream
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{StandardCopyOption, Files, Paths, Path}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import com.typesafe.config.Config
 

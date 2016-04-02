@@ -4,13 +4,13 @@ import java.util.Date
 
 import akashic.storage._
 import akashic.storage.patch.{Bucket, Version}
-import akashic.storage.service.BucketListing.{Group, Single, Filterable}
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Route
+import akashic.storage.service.BucketListing.{Filterable, Group, Single}
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 
 import scala.xml.NodeSeq
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 
 object GetBucketObjectVersions {
   val matcher =

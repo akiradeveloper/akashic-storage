@@ -1,14 +1,11 @@
 package akashic.storage.service
 
 import akashic.storage.backend.NodePath
-import akashic.storage.{HeaderList, server}
-import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.headers.ETag
+import akashic.storage.server
 import akka.http.scaladsl.model._
-import com.google.common.net.HttpHeaders._
-
+import akka.http.scaladsl.model.headers.{ETag, _}
 import akka.http.scaladsl.server.Directives._
-import org.apache.commons.codec.binary.{Hex, Base64}
+import com.google.common.net.HttpHeaders._
 
 object HeadObject {
   val matcher =

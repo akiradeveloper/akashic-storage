@@ -1,8 +1,8 @@
 package akashic.storage.admin
 
-import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.Directives._
 import akashic.storage.server
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.Credentials
 
 object Auth {
   def authenticator(credentials: Credentials): Option[String] = {

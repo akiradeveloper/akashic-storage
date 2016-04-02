@@ -1,16 +1,12 @@
 package akashic.storage.service
 
-import java.nio.file.Files
-
-import akashic.storage.server
 import akashic.storage.patch._
+import akashic.storage.server
 import akashic.storage.service.Acl.Grant
-import akashic.storage.service.Error.Reportable
-import akka.http.scaladsl.model.{StatusCodes, HttpEntity, HttpRequest}
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 
-import scala.xml.{XML, NodeSeq}
+import scala.xml.{NodeSeq, XML}
 
 object PutBucket {
   val matcher =

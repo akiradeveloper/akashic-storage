@@ -1,11 +1,9 @@
 package akashic.storage.admin
 
-import java.nio.file.{Files, Path}
-
 import akashic.storage.auth.CallerId
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
-import akashic.storage.patch.{Data, Commit}
+import akashic.storage.caching.{Cache, CacheMap}
+import akashic.storage.patch.Commit
 import akashic.storage.strings
 import com.google.common.cache.CacheBuilder
 

@@ -1,12 +1,10 @@
 package akashic.storage.service
 
+import akashic.storage.patch.{Commit, Key, Upload}
 import akashic.storage.{HeaderList, server}
-import akashic.storage.patch.{Upload, Key, Commit}
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import scala.xml.NodeSeq
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 
 object InitiateMultipartUpload {
   val matcher =

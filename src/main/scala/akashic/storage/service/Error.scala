@@ -1,6 +1,6 @@
 package akashic.storage.service
 
-import akashic.storage.patch.{Upload, Key, Bucket, Tree}
+import akashic.storage.patch.{Bucket, Key, Tree, Upload}
 
 object Error {
 

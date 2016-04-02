@@ -1,6 +1,6 @@
 package akashic.storage
 
-import akka.http.scaladsl.model.{ContentTypes, ContentType, HttpRequest}
+import akka.http.scaladsl.model.HttpRequest
 
 import scala.collection.mutable
 

@@ -3,7 +3,7 @@ package akashic.storage.service
 import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.model.headers.RawHeader
 
-import scala.collection.{mutable, immutable}
+import scala.collection.{immutable, mutable}
 
 object ResponseHeaderList {
   def builder = Builder()

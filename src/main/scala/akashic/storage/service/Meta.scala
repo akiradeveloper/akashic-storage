@@ -1,16 +1,11 @@
 package akashic.storage.service
 
-import java.nio.file.Path
-
-import akashic.storage.HeaderList
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.CacheMap.Guava
-import akashic.storage.caching.{CacheMap, Cache}
-import com.google.common.cache.CacheBuilder
+import akashic.storage.caching.{Cache, CacheMap}
+import akashic.storage.{HeaderList, server}
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
-import akashic.storage.server
 
 case class Meta(versionId: String,
                 eTag: String,

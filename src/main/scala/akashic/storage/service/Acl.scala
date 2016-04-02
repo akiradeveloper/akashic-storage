@@ -2,16 +2,15 @@ package akashic.storage.service
 
 import akashic.storage.auth.CallerId
 import akashic.storage.backend.NodePath
-import akashic.storage.caching.{CacheMap, Cache}
+import akashic.storage.caching.{Cache, CacheMap}
+import akashic.storage.server
+import akashic.storage.service.Acl._
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 import scala.xml.NodeSeq
-import akashic.storage.server
-
-import Acl._
 case class Acl(owner: String, grants: Iterable[Grant]) {
   def toBytes: Array[Byte] = this.pickle.value
   def grant(callerId: String, perm: Permission): Boolean = {

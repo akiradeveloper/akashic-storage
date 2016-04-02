@@ -4,14 +4,10 @@ import java.util.Date
 
 import akashic.storage.auth.CallerId
 import akashic.storage.patch.Bucket
-import akashic.storage.service.Error.Reportable
-import akashic.storage.{server, patch}
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akashic.storage.{patch, server}
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
-
-import scala.xml.NodeSeq
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 
 object GetService {
   val matcher = get & provide(())
