@@ -117,7 +117,7 @@ object GetBucketObjectVersions {
           { keyMarker.map(a => <KeyMarker>{a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
           { versionIdMarker.map(a => <VersionIdMarker>{a}</VersionIdMarker>).getOrElse(NodeSeq.Empty) }
           { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
-          { result.nextMarker.map(a => <NextKeyMarker>{a.get.unwrap.key.name}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextKeyMarker>{decodeKeyName(a.get.unwrap.key.name)}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
           { result.nextMarker.map(a => <NextVersionIdMarker>{a.get.unwrap.versionId}</NextVersionIdMarker>).getOrElse(NodeSeq.Empty) }
           { maxKeys.map(a => <MaxKeys>{a}</MaxKeys>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>

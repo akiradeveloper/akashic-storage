@@ -104,7 +104,7 @@ object GetBucket {
           { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
           // [spec] When response is truncated (the IsTruncated element value in the response is true),
           // you can use the key name in this field as marker in the subsequent request to get next set of objects.
-          { result.nextMarker.filter(_ => delimiter.isDefined).map(a => <NextMarker>{a.get.name}</NextMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.filter(_ => delimiter.isDefined).map(a => <NextMarker>{decodeKeyName(a.get.name)}</NextMarker>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>
           { for (g <- groups) yield g.toXML }
         </ListBucketResult>

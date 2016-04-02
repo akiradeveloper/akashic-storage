@@ -108,7 +108,7 @@ object ListMultipartUploads {
           { keyMarker.map(a => <KeyMarker>{a}</KeyMarker>).getOrElse(NodeSeq.Empty) }
           { uploadIdMarker.map(a => <UploadIdMarker>{a}</UploadIdMarker>).getOrElse(NodeSeq.Empty) }
           { delimiter.map(a => <Delimiter>{a}</Delimiter>).getOrElse(NodeSeq.Empty) }
-          { result.nextMarker.map(a => <NextKeyMarker>{a.get.keyName}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
+          { result.nextMarker.map(a => <NextKeyMarker>{decodeKeyName(a.get.keyName)}</NextKeyMarker>).getOrElse(NodeSeq.Empty) }
           { result.nextMarker.map(a => <NextUploadIdMarker>{a.get.upload.name}</NextUploadIdMarker>).getOrElse(NodeSeq.Empty) }
           { maxUploads.map(a => <MaxUploads>{a}</MaxUploads>).getOrElse(NodeSeq.Empty) }
           <IsTruncated>{result.truncated}</IsTruncated>
