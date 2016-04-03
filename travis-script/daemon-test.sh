@@ -48,15 +48,15 @@ mc ls aka/myb/
 tree $DIR
 
 echo -- daemon.log --
-cat /var/log/akashic-storage/daemon.log
+cat /opt/akashic-storage/log/daemon.log
 echo -- daemon_error.log --
-cat /var/log/akashic-storage/daemon_error.log
+cat /opt/akashic-storage/log/daemon_error.log
 echo -- error.log --
-cat /var/log/akashic-storage/error.log
+cat /opt/akashic-storage/log/error.log
 echo -- admin.log --
-cat /var/log/akashic-storage/admin.log
+cat /opt/akashic-storage/log/admin.log
 echo -- all.log --
-cat /var/log/akashic-storage/all.log
+cat /opt/akashic-storage/log/all.log
 
 echo "**** stop ****"
 service akashic-storage stop
@@ -78,12 +78,12 @@ mc --debug --quiet cp aka/myb/myo-small down-small-2
 mc --debug --quiet cp aka/myb/myo-large down-large-2
 
 echo -- daemon.log --
-cat /var/log/akashic-storage/daemon.log
+cat /opt/akashic-storage/log/daemon.log
 echo -- daemon_error.log --
-cat /var/log/akashic-storage/daemon_error.log
+cat /opt/akashic-storage/log/daemon_error.log
 echo -- error.log --
-cat /var/log/akashic-storage/error.log
+cat /opt/akashic-storage/log/error.log
 echo -- admin.log --
-cat /var/log/akashic-storage/admin.log
+cat /opt/akashic-storage/log/admin.log
 echo -- all.log --
-cat /var/log/akashic-storage/all.log
+cat /opt/akashic-storage/log/all.log
