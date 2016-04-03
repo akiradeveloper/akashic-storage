@@ -7,4 +7,5 @@
 
 We have an open storage! Access here and get an account [http://27.120.80.37:10947/](http://27.120.80.37:10947/)
 
-You can learn more about **akashic-storage** in our [Wiki](https://github.com/akiradeveloper/akashic-storage/wiki)
+You can learn more about **akashic-storage** in our [Wiki](https://github.com/akiradeveloper/akashic-storage/wiki).
+To contribute to the Wiki, please send your PRs to [akashic-storage-wiki](https://github.com/akiradeveloper/akashic-storage-wiki)
