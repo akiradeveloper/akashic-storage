@@ -82,13 +82,14 @@ case class UserDB(root: NodePath) {
   }
 
   private def mkRandUser: User = {
+    val randName = strings.random(20)
     User(
       id = strings.random(64),
       accessKey = strings.random(20).toUpperCase,
       secretKey = strings.random(40),
-      name = "noname",
-      email = "noname@noname.org",
-      displayName = "noname"
+      name = randName,
+      email = s"${randName}@noname.com",
+      displayName = randName
     )
   }
 
