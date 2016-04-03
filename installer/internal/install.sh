@@ -3,15 +3,18 @@ if [ ! -e $NAME.jar ]; then
   echo "$NAME.jar not found. please run make [NG]"
   exit 1
 fi
-mkdir -p /opt/$NAME
-mkdir -p /opt/$NAME/jar
-cp $NAME.jar /opt/$NAME/jar
-mkdir -p /opt/$NAME/etc
-cp application_default.conf /opt/$NAME/etc/application.conf
-cp logback_default.xml /opt/$NAME/etc/logback.xml
+OPT=/opt/$NAME
+mkdir -p $OPT
 
-mkdir -p /var/log/$NAME; chmod o+rwx /var/log/$NAME
-mkdir -p /var/run/$NAME; chmod o+rwx /var/run/$NAME
+mkdir -p $OPT/jar
+cp $NAME.jar $OPT/jar
+
+mkdir -p $OPT/etc
+cp application_default.conf $OPT/etc/application.conf
+cp logback_default.xml $OPT/etc/logback.xml
+
+mkdir -p $OPT/log; chmod o+rwx $OPT/log
+mkdir -p $OPT/run; chmod o+rwx $OPT/run
 
 cp $NAME /etc/init.d
 chmod o+x /etc/init.d/$NAME
