@@ -18,3 +18,20 @@ get "/" do
   @secret_key = gettext(doc, "SecretKey")
   erb :index
 end
+
+put "*" do |id|
+  ok = true
+  begin
+    name = params["name"]
+    email = params["email"]
+    dpname = params["display-name"]
+    xml = `akashic-admin-update #{id} -name=#{name} -email=#{email} -display-name=#{dpname}`
+  rescue
+    ok = false
+  end
+  if ok
+    "OK"
+  else
+    "NG"
+  end
+end
