@@ -1,101 +1,127 @@
 package akashic.storage
 
-import java.nio.file.Files
-
 import akashic.storage.admin._
+import akashic.storage.backend.{BALFactory, NodePath}
+import akashic.storage.caching.CacheMaps
+import akashic.storage.patch.{Astral, Tree}
 import akashic.storage.service._
-import akashic.storage.compactor.{CompactorQueue, GarbageCan, TreeCompactor}
-import akashic.storage.patch.Tree
-import com.twitter.util.Future
-import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.finagle.{Http, NullServer, ListeningServer, SimpleFilter, Service}
-import com.twitter.finagle.transport.Transport
-import com.twitter.util.Await
-import io.finch._
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.{HttpEntity, StatusCode, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Directive0, ExceptionHandler, Route}
+import akka.util.ByteString
 
-import scala.xml.NodeSeq
+import scala.concurrent.Future
 
-case class Server(config: ServerConfig) {
-  Files.createDirectory(config.mountpoint.resolve("tree"))
-  val tree = Tree(config.mountpoint.resolve("tree"))
+case class Server(config: ServerConfig, cleanup: Boolean) {
+  fs = new BALFactory(config.rawConfig.getConfig("backend")).build
+  val root = NodePath(null, null, Some(fs.getRoot))
 
-  Files.createDirectory(config.mountpoint.resolve("admin"))
-  val users = UserTable(config.mountpoint.resolve("admin"))
+  if (cleanup) {
+    root.cleanDir
+    logger.info("mountpoint is cleaned up")
+  }
 
-  Files.createDirectory(config.mountpoint.resolve("garbage"))
-  val garbageCan = GarbageCan(config.mountpoint.resolve("garbage"))
+  if (root.listDir.isEmpty) {
+    logger.info("initialize mountpoint")
+    root.resolve("tree").makeDir
+    root.resolve("admin").makeDir
+    root.resolve("astral").makeDir
+  }
 
-  // compact the store on reboot
-  val compactorQueue = CompactorQueue()
-  compactorQueue.queue(TreeCompactor(tree))
+  val initialized =
+    root.resolve("tree").exists &&
+    root.resolve("admin").exists &&
+    root.resolve("astral").exists
+  require(initialized)
+  logger.info("mountpoint is initialized")
 
-  val adminService =
-    post("admin" / "user") {
-      val result = MakeUser.run(users)
-      Ok(result.xml)
-    } :+:
-    get("admin" / "user" / string) { id: String =>
-      val result = GetUser.run(users, id)
-      Ok(result.xml)
-    } :+:
-    delete("admin" / "user" / string) { id: String =>
-      Output.Payload("", Status.NotImplemented)
-    } :+:
-    put("admin" / "user" / string ? body) { (id: String, body: String) =>
-      UpdateUser.run(users, id, body)
-      Ok("")
-    }
+  val tree = Tree(root.resolve("tree"))
+  val users = UserDB(root.resolve("admin"))
+  val astral = Astral(root.resolve("astral"))
+  val cacheMaps = CacheMaps(config)
 
-  val api =
-    HeadObject.endpoint              :+: // HEAD   /bucketName/keyName
-    HeadBucket.endpoint              :+: // HEAD   /bucketName
-    ListParts.endpoint               :+: // GET    /bucketName/keyname?uploadId=***
-    GetObject.endpoint               :+: // GET    /bucketName/keyName
-    GetBucket.endpoint               :+: // GET    /bucketName
-    GetService.endpoint              :+: // GET    /
-    UploadPart.endpoint              :+: // PUT    /bucketName/keyName?uploadId=***?partNumber=***
-    PutObject.endpoint               :+: // PUT    /bucketName/keyName
-    PutBucket.endpoint               :+: // PUT    /bucketName
-    InitiateMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploads
-    CompleteMultipartUpload.endpoint :+: // POST   /bucketName/keyName?uploadId=***
-    DeleteObject.endpoint            :+: // DELETE /bucket/keyName
-    adminService
+  val adminRoute =
+    Add.route ~
+    List.route ~
+    Get.route ~
+    Update.route
 
-  val endpoint = api.handle {
+  val adminErrHandler = ExceptionHandler {
+    case admin.Error.Exception(e) =>
+      val (code, message) = admin.Error.interpret(e)
+      val status = StatusCode.int2StatusCode(code)
+      complete(status, ResponseHeaderList.builder.build, message)
+    case _ =>
+      complete(StatusCodes.InternalServerError, HttpEntity.Empty)
+  }
+
+  // I couldn't place this in service package
+  // My guess is evaluation matters for the null pointer issue
+  val serviceRoute =
+    ListMultipartUploads.route ~    // GET    /bucketName?uploads
+    GetBucketAcl.route ~            // GET    /bucketName?acl
+    GetBucketLocation.route ~       // GET    /bucketName?location
+    GetBucketObjectVersions.route ~ // GET    /bucketName?versions
+    GetBucket.route ~               // GET    /bucketName
+    ListParts.route ~               // GET    /bucketName/keyName?uploadId=***
+    GetObjectAcl.route ~            // GET    /bucketName/keyName&acl
+    GetObject.route ~               // GET    /bucketName/keyName
+    GetService.route ~              // GET    /
+    HeadBucket.route ~              // HEAD   /bucketName
+    HeadObject.route ~              // HEAD   /bucketName/keyName
+    PutBucketAcl.route ~            // PUT    /bucketName?acl
+    PutBucket.route ~               // PUT    /bucketName
+    UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
+    PutObjectAcl.route ~            // PUT    /bucketName/keyName?acl
+    PutObject.route ~               // PUT    /bucketName/keyName
+    DeleteBucket.route ~            // DELETE /bucketName
+    AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
+    DeleteObject.route ~            // DELETE /bucketName/keyName
+    DeleteMultipleObjects.route ~   // POST   /bucketName
+    InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
+    CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
+
+  val serviceErrHandler = ExceptionHandler {
     case service.Error.Exception(context, e) =>
       val withMessage = service.Error.withMessage(e)
       val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
-      val cause = io.finch.Error(xml.toString)
-      Output.Failure(cause, Status.fromCode(withMessage.httpCode))
-        .withHeader(("a", "b"))
-    case admin.Error.Exception(e) =>
-      val (code, message) = admin.Error.interpret(e)
-      val cause = io.finch.Error(message)
-      Output.Failure(cause, Status.fromCode(code))
+      val status = StatusCode.int2StatusCode(withMessage.httpCode)
+      complete(status, ResponseHeaderList.builder.build, xml)
+    case _ =>
+      complete(StatusCodes.InternalServerError, HttpEntity.Empty)
   }
+
+  val apiRoute =
+    handleExceptions(adminErrHandler) { admin.apiLogger(adminRoute) } ~
+    handleExceptions(serviceErrHandler) { scala.concurrent.blocking(service.apiLogger(serviceRoute)) }
+
+  val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
+  val unmatchRoute =
+    // We need to extract entity to consume the payload
+    // otherwise client never knows the end of connection.
+    ignoreEntity { complete(StatusCodes.BadRequest, HttpEntity.Empty) }
+
+  val route =
+    apiRoute ~
+    unmatchRoute
 
   def address = s"${config.ip}:${config.port}"
 
-  var listeningServer: ListeningServer = NullServer
-  def start {
-    implicit val encodeXML: EncodeResponse[NodeSeq] = EncodeResponse.fromString("application/xml")(a => a.toString)
-    val logFilter = new SimpleFilter[Request, Response] {
-      def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
-        println(req)
-        val res = service(req)
-        res.onSuccess(println(_))
-        res.onFailure(println(_))
-        res
-      }
-    }
-    val service = logFilter andThen this.endpoint.toService
-    listeningServer = Http.server
-      // .configured(Transport.Verbose(true))
-      .serve(s"${address}", service)
+  var binding: Future[Http.ServerBinding] = _
+
+  def start = {
+    logger.info("start server")
+    binding = Http().bindAndHandle(
+      handler = Route.handlerFlow(route),
+      interface = config.ip,
+      port = config.port)
+    binding
   }
 
-  def stop {
-    Await.ready(listeningServer.close())
-    listeningServer = NullServer
+  def stop = {
+    logger.info("stop server")
+    binding.flatMap(_.unbind)
   }
 }

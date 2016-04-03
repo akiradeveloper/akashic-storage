@@ -1,13 +1,14 @@
 package akashic.storage
 
-import akashic.storage.patch.Version
-import cats.Eval
-import com.twitter.util.Future
+import java.net.{URLDecoder, URLEncoder}
 
-import io.finch._
-import shapeless.HNil
+import akashic.storage.admin._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.DebuggingDirectives
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
-package object service {
+package object service extends Directives {
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
     def `<+`(other: Option[A]): Option[A] = 
@@ -17,19 +18,21 @@ package object service {
       }
   }
 
-  implicit class _Output[A](unwrap: Output[A]) {
-    def append(list: KVList.t): Output[A] = list.unwrap.foldLeft(unwrap) { (acc, a) => acc.withHeader(a) }
-  }
-
-  case class ParamExists(name: String) extends Endpoint[HNil] {
-    private[this] val hnilFutureOutput: Eval[Future[Output[HNil]]] = Eval.now(Future.value(Output.payload(HNil)))
-    def apply(input: Input): Endpoint.Result[HNil] =
-      if (input.request.containsParam(name)) Some((input, hnilFutureOutput))
-      else None
-  }
-  def paramExists(name: String): Endpoint[HNil] = ParamExists(name)
-
   val X_AMZ_REQUEST_ID = "x-amz-request-id"
   val X_AMZ_VERSION_ID = "x-amz-version-id"
   val X_AMZ_DELETE_MARKER = "x-amz-delete-marker"
+
+  def quoteString(raw: String): String = s""""${raw}""""
+
+  def encodeKeyName(keyName: String): String = URLEncoder.encode(keyName, "UTF-8")
+  def decodeKeyName(keyName: String): String = URLDecoder.decode(keyName, "UTF-8")
+
+  trait AuthorizableTask extends Task with Error.Reportable with Authorizable with RequestIdAllocable with Measure
+  type AuthorizedAPI = AuthorizableTask
+
+  trait AnonymousTask extends Task with Error.Reportable with RequestIdAllocable with Measure
+  type AnonymousAPI = AnonymousTask
+
+  val logger = Logger(LoggerFactory.getLogger("akashic.storage.service"))
+  val apiLogger = withLog(logger).tflatMap(_ => DebuggingDirectives.logRequestResult(""))
 }

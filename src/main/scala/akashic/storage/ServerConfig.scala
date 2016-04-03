@@ -1,29 +1,25 @@
 package akashic.storage
 
-import java.nio.file.{Path, Paths, Files}
+import com.typesafe.config.Config
 
-import com.typesafe.config.{Config, ConfigFactory}
-
-trait ServerConfig {
-  def mountpoint: Path
-  def ip: String
-  def port: Int
-}
+case class ServerConfig(
+  rawConfig: Config,
+  ip: String,
+  port: Int,
+  adminPassword: String
+)
 
 object ServerConfig {
-  def apply(configRoot: Config, init: Boolean) = new ServerConfig {
-    val config = configRoot.getConfig("akashic.storage")
+  def fromConfig(configRoot: Config) = {
+    logger.info("configRoot: {}", configRoot)
 
-    val mp = Paths.get(config.getString("mountpoint"))
-    if (init && Files.exists(mp)) {
-      files.purgeDirectory(mp)
-    }
-    if (!Files.exists(mp)) {
-      Files.createDirectory(mp)
-    }
+    val rawConfig = configRoot.getConfig("akashic.storage")
+    val ip = rawConfig.getString("ip")
+    val port: Int = rawConfig.getInt("port")
+    val adminPassword = rawConfig.getString("admin-passwd")
 
-    override def mountpoint = mp
-    override def ip = config.getString("ip")
-    override def port: Int = config.getInt("port")
+    logger.info("config: {}", (ip, port, adminPassword))
+
+    ServerConfig(rawConfig, ip, port, adminPassword)
   }
 }

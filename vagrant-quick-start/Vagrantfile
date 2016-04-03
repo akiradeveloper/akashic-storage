@@ -8,7 +8,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "bento/centos-7.2"
   config.vm.network "forwarded_port", guest: 10946, host: 10946
-  config.vm.network "private_network", ip: "55.89.144.233"
+  # config.vm.network "private_network", ip: "55.89.144.233"
   config.vm.network "public_network"
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -20,28 +20,24 @@ Vagrant.configure(2) do |config|
     vb.memory = "1024"
   end
 
-  config.vm.provision "shell", inline: <<-SHELL
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
     sudo yum -y update
-    sudo yum -y install jsvc ruby tree
+    sudo yum -y install jsvc ruby tree curl
 
     if [ ! -e jdk-8u65-linux-x64.rpm ]; then
       wget --no-check-certificate --no-cookies - --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.rpm
       sudo yum localinstall -y jdk-8u65-linux-x64.rpm
     fi
-    if [ -e /usr/java/default ]; then
-      echo "/usr/java/default exists [OK]"
-    fi
+
+    # run `sh compile-jar.sh` in installer/ first
+    # so you can avoid compiling jar file in this Vagrant script
     cd akashic-storage/installer
-    sudo sh install.sh
-    cd -
-
-    if [ ! -e mc ]; then
-      wget https://dl.minio.io/client/mc/release/linux-amd64/mc
-      sudo cp mc /usr/local/bin
-      sudo chmod +x /usr/local/bin/mc
+    if [ ! -e akashic-storage.jar ]; then
+      curl https://bintray.com/sbt/rpm/rpm | sudo tee /etc/yum.repos.d/bintray-sbt-rpm.repo
+      sudo yum -y install sbt
+      make
     fi
-    /usr/local/bin/mc --help
-
-    sudo /etc/init.d/akashic-storage start
+    sudo make install
+    cd -
   SHELL
 end

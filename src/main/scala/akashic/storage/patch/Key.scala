@@ -1,18 +1,21 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
+import akashic.storage.backend.NodePath
 
-case class Key(root: Path) extends Patch {
-  val versions = PatchLog(root.resolve("versions"))
+case class Key(bucket: Bucket, root: NodePath) extends Patch {
+  val versions = Versions(this, root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
-  override def init {
-    Files.createDirectory(versions.root)
-    Files.createDirectory(uploads.root)
+  def init {
+    versions.root.makeDir
+    uploads.root.makeDir
   }
   def findLatestVersion: Option[Version] = {
-    versions.find.map(_.asVersion)
+    versions.findLatestVersion
   }
   def findVersion(id: Int): Option[Version] = {
-    versions.find(id).map(_.asVersion)
+    versions.findVersion(id)
+  }
+  def deletable: Boolean = {
+    versions.listVersions.forall(_.deletable)
   }
 }

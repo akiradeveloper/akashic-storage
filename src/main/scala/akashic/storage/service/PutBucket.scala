@@ -1,43 +1,72 @@
 package akashic.storage.service
 
-import akashic.storage.server
 import akashic.storage.patch._
-import akashic.storage.service.Error.Reportable
-import io.finch._
+import akashic.storage.server
+import akashic.storage.service.Acl.Grant
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+
+import scala.xml.{NodeSeq, XML}
 
 object PutBucket {
-  val matcher = put(string ? RequestId.reader ? CallerId.reader).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    put &
+    extractBucket &
+    optionalHeaderValueByName("x-amz-acl") &
+    extractGrantsFromHeaders &
+    optionalStringBody
 
-  case class t(bucketName: String, requestId: String, callerId: String) extends Task[Output[Unit]] with Reportable {
+  val route = matcher.as(t)(_.run)
+
+  case class t(bucketName: String,
+               cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Grant],
+               entity: Option[String]) extends AuthorizedAPI {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
-      val created = Commit.once(server.tree.bucketPath(bucketName)) { patch =>
-        val bucketPatch = patch.asBucket
-        bucketPatch.init
+      val dest = server.tree.bucketPath(bucketName)
 
-        Commit.retry(bucketPatch.acl) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.init
-
-          dataPatch.writeBytes(Acl.t(callerId, Seq(
-            Acl.Grant(
-              Acl.ById(callerId),
-              Acl.FullControl()
-            )
-          )).toBytes)
-        }
-        Commit.retry(bucketPatch.versioning) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.init
-
-          dataPatch.writeBytes(Versioning.t(Versioning.UNVERSIONED).toBytes)
+      if (dest.exists) {
+        val bucket = findBucket(server.tree, bucketName)
+        val bucketAcl = bucket.acl.get
+        if (bucketAcl.owner == callerId) {
+          failWith(Error.BucketAlreadyOwnByYou())
+        } else {
+          failWith(Error.BucketAlreadyExists())
         }
       }
-      if (!created) failWith(Error.BucketAlreadyExists())
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      Commit.once(dest) { patch =>
+        val bucketPatch = Bucket(patch.root)
+        bucketPatch.init
+
+        bucketPatch.acl.put {
+          val grantsFromCanned = (cannedAcl <+ Some("private"))
+            .map(Acl.CannedAcl.forName(_, callerId, callerId))
+            .map(_.makeGrants).get
+          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
+        }
+
+        bucketPatch.versioning.put {
+          Versioning.UNVERSIONED
+        }
+
+        bucketPatch.location.put {
+          // [spec] empty string (for the US East (N. Virginia) region)
+          val loc: Option[String] = entity.map(XML.loadString).map(parseLocationConstraint) <+ Some("")
+          Location(loc.get)
+        }
+      }
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
+  }
+  def parseLocationConstraint(xml: NodeSeq): String = {
+    (xml \ "LocationConstraint").text
   }
 }

@@ -1,72 +1,83 @@
 package akashic.storage.service
 
-import akashic.storage.compactor.KeyCompactor
-import akashic.storage.patch.Commit
-import akashic.storage.{files, server}
-import akashic.storage.service.Error.Reportable
-import io.finch._
+import akashic.storage.patch.{Commit, Key, Version}
+import akashic.storage.{HeaderList, server}
+import akka.http.scaladsl.model.headers.ETag
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import org.apache.commons.codec.binary.{Base64, Hex}
+import org.apache.commons.codec.digest.DigestUtils
 
 object PutObject {
-  val matcher = put(
-    string / string ?
-    binaryBody ?
-    headerOption("Content-Type") ?
-    headerOption("Content-Disposition") ?
-    RequestId.reader ?
-    CallerId.reader).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher = put &
+    extractObject &
+    entity(as[Array[Byte]]) &
+    optionalHeaderValueByName("x-amz-acl") &
+    extractGrantsFromHeaders &
+    optionalHeaderValueByName("Content-Type") &
+    optionalHeaderValueByName("Content-Disposition") &
+    optionalHeaderValueByName("Content-MD5") &
+    extractMetadata
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                objectData: Array[Byte],
+               cannedAcl: Option[String],
+               grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
                contentDisposition: Option[String],
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               contentMd5: Option[String],
+               metadata: HeaderList) extends AuthorizedAPI {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
-      val computedETag = files.computeMD5(objectData)
+      val computedMD5 = DigestUtils.md5(objectData)
+      for (md5 <- contentMd5)
+        if (Base64.encodeBase64String(computedMD5) != md5)
+          failWith(Error.BadDigest())
+
+      val computedETag = Hex.encodeHexString(computedMD5)
+
       val bucket = findBucket(server.tree, bucketName)
-      Commit.once(bucket.keyPath(keyName)) { patch => 
-        val keyPatch = patch.asKey
+      val bucketAcl = bucket.acl.get
+
+      if (!bucketAcl.grant(callerId, Acl.Write()))
+        failWith(Error.AccessDenied())
+
+      Commit.once(bucket.keyPath(keyName)) { patch =>
+        val keyPatch = Key(bucket, patch.root)
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      Commit.retry(key.versions) { patch =>
-        val version = patch.asVersion
-        version.init
+      Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
+        val version = Version(key, patch.root)
 
-        Commit.retry(version.acl) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.init
-
-          dataPatch.writeBytes(Acl.t(callerId, Seq(
-            Acl.Grant(
-              Acl.ById(callerId),
-              Acl.FullControl()
-            )
-          )).toBytes)
+        version.acl.put {
+          val grantsFromCanned = (cannedAcl <+ Some("private"))
+            .map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner))
+            .map(_.makeGrants).get
+          Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
-        version.data.asData.writeBytes(objectData)
-        version.meta.asData.writeBytes(
-          Meta.t(
-            isVersioned = false,
-            isDeleteMarker = false,
+        version.data.put(objectData)
+        version.meta.put(
+          Meta(
+            versionId = "null",
             eTag = computedETag,
-            attrs = KVList.builder
+            attrs = HeaderList.builder
               .appendOpt("Content-Type", contentType)
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
-            xattrs = KVList.builder.build
-          ).toBytes)
+            xattrs = metadata
+          ))
       }
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(X_AMZ_VERSION_ID, "null")
+        .withHeader(ETag(computedETag))
+        .build
 
-      server.compactorQueue.queue(KeyCompactor(key))
-
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(X_AMZ_VERSION_ID -> "null")
-        .withHeader("ETag" -> computedETag)
-        // TODO Origin
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

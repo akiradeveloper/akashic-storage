@@ -1,29 +1,36 @@
 package akashic.storage
 
 import java.io.{FileInputStream, File}
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Paths, Files, Path}
 
 import com.amazonaws.services.s3.model.S3Object
-import com.twitter.finagle.{NullServer, ListeningServer}
 import com.typesafe.config._
 import org.apache.commons.io.IOUtils
 import org.scalatest._
 import akashic.storage.admin.TestUsers
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.util.Random
+
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
-  def makeConfig = ServerConfig(ConfigFactory.load("test.conf"), init = true)
+  def makeConfig = ServerConfig.fromConfig(ConfigFactory.load("test.conf"))
 
   override def beforeEach {
     val config = makeConfig
-    server = Server(config)
-    server.start
+    val mountpoint = Paths.get(config.rawConfig.getConfig("backend").getString("mountpoint"))
+    Files.createDirectories(mountpoint)
+    server = Server(config, cleanup = true)
 
-    // FIXME (should via HTTP)
-    server.users.addUser(TestUsers.hoge)
+    Await.ready(server.start, Duration.Inf)
+
+    server.users.add(TestUsers.hoge)
+    server.users.add(TestUsers.s3testsMain)
+    server.users.add(TestUsers.s3testsAlt)
   }
 
   override def afterEach {
-    server.stop
+    Await.ready(server.stop, Duration.Inf)
   }
 
   def getTestFile(name: String): File = {
@@ -31,10 +38,11 @@ abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
     new File(loader.getResource(name).getFile)
   }
 
-  val LARGE_FILE_PATH = Paths.get("/tmp/akashic-storage-test-large-file")
-  def createLargeFile(path: Path): Unit = {
+  def createLargeFile(path: Path, sizeMB: Int): Unit = {
     if (!Files.exists(path)) {
-      files.writeBytes(path, strings.random(32 * 1024 * 1024).map(_.toByte).toArray)
+      val result = new Array[Byte](sizeMB * 1024 * 1024)
+      new Random().nextBytes(result)
+      Files.write(path, result)
     }
   }
 

@@ -1,51 +1,53 @@
 package akashic.storage.service
 
-import akashic.storage.compactor.PartCompactor
-import akashic.storage.{files, server}
-import akashic.storage.patch.{Part, Commit, PatchLog}
-import akashic.storage.service.Error.Reportable
-import io.finch._
-import org.apache.http.HttpHeaders
+import akashic.storage.patch.{Commit, Data}
+import akashic.storage.server
+import akka.http.scaladsl.model.headers.ETag
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import org.apache.commons.codec.binary.{Base64, Hex}
+import org.apache.commons.codec.digest.DigestUtils
 
 object UploadPart {
-  val matcher = put(string / string / paramExists("uploadId") / paramExists("partNumber") ?
-    param("uploadId") ?
-    param("partNumber").as[Int] ?
-    binaryBody ?
-    RequestId.reader ? CallerId.reader).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    put &
+    extractObject &
+    parameters("uploadId", "partNumber".as[Int]) &
+    entity(as[Array[Byte]]) &
+    optionalHeaderValueByName("Content-MD5")
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,
                partData: Array[Byte],
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+               contentMd5: Option[String]) extends AuthorizedAPI {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
-      // similar to ensuring the existence of key directory
-      // in the PutObject operation
-      Commit.once(upload.partPath(partNumber)) { patch =>
-        val partPatch = patch.asPart
-        partPatch.init
-      }
-      val part = upload.findPart(partNumber).get
-      val computedMD5 = files.computeMD5(partData)
-      Commit.retry(part.versions) { patch =>
-        val dataPatch = patch.asData
-        dataPatch.init
 
-        dataPatch.writeBytes(partData)
+      val computedMD5 = DigestUtils.md5(partData)
+      for (md5 <- contentMd5)
+        if (Base64.encodeBase64String(computedMD5) != md5)
+          failWith(Error.BadDigest())
+
+      val computedETag = Hex.encodeHexString(computedMD5)
+
+      val part = upload.part(partNumber)
+      Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
+        data.put(partData)
       }
 
-      server.compactorQueue.queue(PartCompactor(part))
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(ETag(computedETag))
+        .build
 
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(HttpHeaders.ETAG -> computedMD5)
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

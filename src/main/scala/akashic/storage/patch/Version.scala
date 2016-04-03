@@ -1,17 +1,15 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
+import akashic.storage.backend.NodePath
+import akashic.storage.service.{Acl, Meta}
 
-case class Version(root: Path) extends Patch {
-  def key = Key(root.getParent.getParent)
-  val data = Data(root.resolve("data"))
-  val meta = Data(root.resolve("meta"))
-  val acl = PatchLog(root.resolve("acl"))
-  override def init {
-    Files.createDirectory(data.root)
-    data.init
-    Files.createDirectory(meta.root)
-    meta.init
-    Files.createDirectory(acl.root)
-  }
+case class Version(key: Key, root: NodePath) extends Patch {
+  val data = Data.Pure(root.resolve("data"))
+  val meta = Meta.makeCache(root.resolve("meta"))
+  val acl = Acl.makeCache(root.resolve("acl"))
+  // [spec] All objects (including all object versions and delete markers)
+  // in the bucket must be deleted before the bucket itself can be deleted.
+  val deletable = false
+  def versionId = meta.get.versionId
+  def isDeleteMarker = meta.get.isDeleteMarker
 }

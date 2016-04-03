@@ -1,0 +1,34 @@
+<configuration debug="true">
+    <appender name="ERROR_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/akashic-storage/error.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+    <appender name="ADMIN_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/akashic-storage/admin.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
+        </encoder>
+    </appender>
+    <appender name="ALL_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/akashic-storage/all.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="akashic.storage.admin" level="INFO">
+        <appender-ref ref="ADMIN_LOG"/>
+    </logger>
+    <root level="DEBUG">
+        <appender-ref ref="ALL_LOG"/>
+        <appender-ref ref="ERROR_LOG"/>
+    </root>
+</configuration>

@@ -1,22 +1,31 @@
 package akashic.storage.service
 
 import akashic.storage.server
-import akashic.storage.service.Error.Reportable
-import io.finch._
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives._
 
 object HeadBucket {
-  val matcher = head(string ? RequestId.reader ? CallerId.reader).as[t]
-  val endpoint = matcher { a: t => a.run }
-  case class t(bucketName: String,
-               requestId: String,
-               callerId: String) extends Task[Output[Unit]] with Reportable {
+  val matcher =
+    head &
+    extractBucket
+
+  val route = matcher.as(t)(_.run)
+
+  case class t(bucketName: String) extends AuthorizedAPI {
     def name = "HEAD Bucket"
     def resource = Resource.forBucket(bucketName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      // TODO check acl
-      Ok()
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val bucketAcl = bucket.acl.get
+      if (!bucketAcl.grant(callerId, Acl.Read()))
+        failWith(Error.AccessDenied())
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, HttpEntity.Empty)
     }
   }
 }

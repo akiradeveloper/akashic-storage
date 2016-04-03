@@ -1,17 +1,25 @@
 package akashic.storage
 
-import java.io.{FileInputStream, File}
+import java.io.{StringBufferInputStream, FileInputStream, File}
 import java.nio.file.{Paths, Files, Path}
 
 import akashic.storage.admin.TestUsers
-import com.amazonaws.ClientConfiguration
+import com.amazonaws.{HttpMethod, ClientConfiguration}
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion
 import com.amazonaws.services.s3.model._
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.codec.digest.HmacUtils
 import org.apache.commons.io.IOUtils
+import org.apache.http.client.methods.{HttpPut, HttpGet, HttpPost}
+import org.apache.http.entity.FileEntity
+import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.impl.client.HttpClients
+import org.scalatest.Ignore
 
-import scalaj.http.Http
+import scala.xml.XML
 
 class AmazonSDKTest extends ServerTestBase {
   case class FixtureParam(client: AmazonS3Client)
@@ -28,12 +36,16 @@ class AmazonSDKTest extends ServerTestBase {
 
   import scala.collection.JavaConversions._
 
+  test("no buckets") { p =>
+    import p._
+    val res = client.listBuckets
+    assert(res.size == 0)
+  }
+
   test("add buckets") { p =>
     import p._
 
     client.createBucket("myb1")
-    val postRes = Http(s"http://${server.address}/myb1").method("HEAD").asString
-    assert(postRes.code === 200)
 
     client.createBucket("myb2")
     val res = client.listBuckets
@@ -44,6 +56,14 @@ class AmazonSDKTest extends ServerTestBase {
     // location
     // val loc = cli.getBucketLocation("mybucket1")
     // assert(loc == "US")
+  }
+
+  test("add -> delete bucket") { p =>
+    import p._
+    client.createBucket("myb")
+    client.deleteBucket("myb")
+    val res = client.listBuckets
+    assert(res.size == 0)
   }
 
   test("put and get object") { p =>
@@ -62,11 +82,97 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("list objects with / delimiter") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "a/b", f)
+    client.putObject("myb", "a/c", f)
+    val req = new ListObjectsRequest()
+      .withBucketName("myb")
+      .withDelimiter("/")
+    val res = client.listObjects(req)
+    assert(res.getCommonPrefixes.size == 1)
+    val cp: String = res.getCommonPrefixes.get(0)
+    assert(cp == "a")
+  }
+
+  test("list versions") { p =>
+    import p._
+    client.createBucket("myb")
+
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "myo2", f)
+    client.putObject("myb", "myo1", f)
+
+    val res1 = client.listVersions("myb", "myooooo") // []
+    assert(res1.getVersionSummaries.size == 0)
+
+    val res2 = client.listVersions("myb", "myo")
+    assert(res2.getVersionSummaries.size === 2) // [myo1, myo2]
+    assert(res2.getVersionSummaries.get(0).isDeleteMarker === false)
+
+    val req = new ListVersionsRequest()
+      .withBucketName("myb")
+      .withDelimiter("o")
+    val res3 = client.listVersions(req) // [myo(1,2)]
+    assert(res3.getVersionSummaries.size == 0)
+    assert(res3.getCommonPrefixes.size == 1)
+  }
+
+  test("partial get") { p =>
+    import p._
+
+    client.createBucket("a.b")
+    val f = getTestFile("test.txt")
+    client.putObject("a.b", "myobj.txt", f)
+
+    val get = new GetObjectRequest("a.b", "myobj.txt")
+      .withRange(4, 8)
+
+    val obj = client.getObject(get)
+    val s = IOUtils.toString(obj.getObjectContent)
+    assert(s === "ove S")
+  }
+
+  test("conditional get test") { p =>
+    import p._
+    client.createBucket("a.b")
+    val f = getTestFile("test.txt")
+    val putRes = client.putObject("a.b", "myobj.txt", f)
+
+    val get = new GetObjectRequest("a.b", "myobj.txt")
+      .withNonmatchingETagConstraint(s""""${putRes.getETag}"""")
+
+    val res = client.getObject(get)
+    assert(res == null)
+  }
+
+  test("put key delimited") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "a/b", f)
+    val obj = client.getObject("myb", "a/b")
+    checkFileContent(obj, f)
+  }
+
   test("put and get image object") { p =>
     import p._
 
     client.createBucket("myb")
     val f = getTestFile("test.jpg")
+    client.putObject("myb", "myobj", f)
+    val obj = client.getObject("myb", "myobj")
+    checkFileContent(obj, f)
+  }
+
+  test("put 8mb file") { p =>
+    import p._
+    client.createBucket("myb")
+    val path = Paths.get("/tmp/akashic-storage-test-file-8mb")
+    createLargeFile(path, 8)
+    val f = path.toFile
     client.putObject("myb", "myobj", f)
     val obj = client.getObject("myb", "myobj")
     checkFileContent(obj, f)
@@ -99,11 +205,11 @@ class AmazonSDKTest extends ServerTestBase {
     val f1 = getTestFile("test.txt")
     client.putObject("myb", "myobj", f1)
     val key = bucket.findKey("myobj").get
-    assert(key.findVersion(1).isDefined)
+    val obj1 = client.getObject("myb", "myobj")
+    checkFileContent(obj1, f1)
 
     val f2 = getTestFile("test.jpg")
     client.putObject("myb", "myobj", f2)
-    assert(key.findVersion(2).isDefined)
     val obj2 = client.getObject("myb", "myobj")
     checkFileContent(obj2, f2)
   }
@@ -137,13 +243,36 @@ class AmazonSDKTest extends ServerTestBase {
     assert(client.listObjects("myb").getObjectSummaries.size === 1)
   }
 
+  test("multiple delete") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "myobj1", f)
+    client.putObject("myb", "a/b", f)
+    client.putObject("myb", "c/d/e", f)
+    assert(client.listObjects("myb").getObjectSummaries.size === 3)
+
+    val req = new DeleteObjectsRequest("myb")
+    req.setKeys(Seq(new KeyVersion("myobj1"), new KeyVersion("c/d/e")))
+    val result = client.deleteObjects(req)
+    assert(result.getDeletedObjects.get(1).getKey == "c/d/e")
+    assert(result.getDeletedObjects.size === 2)
+    assert(result.getDeletedObjects.forall(!_.isDeleteMarker))
+    // hmm... the SDK should use Option. returning null is bewildering
+    assert(result.getDeletedObjects.forall(_.getDeleteMarkerVersionId === null))
+
+    assert(client.listObjects("myb").getObjectSummaries.size === 1)
+    assert(client.listObjects("myb").getObjectSummaries.get(0).getKey === "a/b")
+  }
+
   test("multipart upload (lowlevel)") { p =>
     import p._
 
     client.createBucket("myb")
 
-    createLargeFile(LARGE_FILE_PATH)
-    val upFile = LARGE_FILE_PATH.toFile
+    val filePath = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(filePath, 32)
+    val upFile = filePath.toFile
 
     val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
     val initRes = client.initiateMultipartUpload(initReq)
@@ -203,8 +332,9 @@ class AmazonSDKTest extends ServerTestBase {
 
     client.createBucket("myb")
 
-    createLargeFile(LARGE_FILE_PATH)
-    val upFile = LARGE_FILE_PATH.toFile
+    val filePath = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(filePath, 32)
+    val upFile = filePath.toFile
 
     val tmUp = new TransferManager(client)
     val upload = tmUp.upload("myb", "myobj", upFile)
@@ -226,31 +356,68 @@ class AmazonSDKTest extends ServerTestBase {
     ))
   }
 
-  test("put -> initiate -> put -> put") { p =>
-    import p._
+  test("presigend get") { p =>
+    val cli = p.client
+
+    cli.createBucket("myb")
+    val f = getTestFile("test.txt")
+    cli.putObject("myb", "a/b", f)
+
+    val expires = new java.util.Date()
+    var msec = expires.getTime()
+    msec += 1000 * 60 * 60; // 1 hour.
+    expires.setTime(msec)
+
+    val generatePresignedUrlRequest = new GeneratePresignedUrlRequest("myb", "a/b")
+    generatePresignedUrlRequest.setMethod(HttpMethod.GET)
+    generatePresignedUrlRequest.setExpiration(expires)
+    val url = cli.generatePresignedUrl(generatePresignedUrlRequest)
+    println(url.toString)
+
+    val res = HttpClients.createDefault.execute(new HttpGet(url.toString))
+    assert(res.getStatusLine.getStatusCode === 200)
+    assert(IOUtils.contentEquals(res.getEntity.getContent, new FileInputStream(f)))
+  }
+
+  test("presigned put (or upload)") { p =>
+    val cli = p.client
+    cli.createBucket("myb")
+
+    val expires = new java.util.Date()
+    var msec = expires.getTime()
+    msec += 1000 * 60 * 60 // 1 hour.
+    expires.setTime(msec)
 
     val f = getTestFile("test.txt")
+    val contentType = "text/plain"
 
-    client.createBucket("myb")
-    val bucket = server.tree.findBucket("myb").get
+    val req = new GeneratePresignedUrlRequest("myb", "a/b")
+    req.setMethod(HttpMethod.PUT)
+    req.setExpiration(expires)
+    req.setContentType(contentType)
+    val url = cli.generatePresignedUrl(req)
+    println(url.toString)
 
-    client.putObject("myb", "myobj", f)
-    val key = bucket.findKey("myobj").get
+    val putReq = new HttpPut(url.toString)
+    putReq.setHeader("Content-Type", contentType)
+    putReq.setEntity(new FileEntity(f))
 
-    val initReq = new InitiateMultipartUploadRequest("myb", "myobj")
-    val initRes = client.initiateMultipartUpload(initReq)
-    assert(key.findVersion(1).isDefined)
+    val putRes = HttpClients.createDefault.execute(putReq)
+    assert(putRes.getStatusLine.getStatusCode === 200)
 
-    client.putObject("myb", "myobj", f)
-    Thread.sleep(100)
-    assert(key.findVersion(1).isEmpty)
-    assert(Files.exists(key.versions.patchPath(2)))
-    assert(key.findVersion(3).isDefined)
+    val obj = cli.getObject("myb", "a/b")
+    checkFileContent(obj, f)
+  }
 
-    client.putObject("myb", "myobj", f)
-    Thread.sleep(100)
-    assert(Files.exists(key.versions.patchPath(2)))
-    assert(key.findVersion(3).isEmpty)
-    assert(key.findVersion(4).isDefined)
+  test("[performance] put/get XMB") { p =>
+    val cli = p.client
+    cli.createBucket("myb")
+    for (size <- Seq(1, 10, 100)) { // MB
+      val filePath = Paths.get(s"/tmp/akashic-storage-test-file-${size}mb")
+      createLargeFile(filePath, size)
+      val putRes = cli.putObject("myb", "obj1", filePath.toFile)
+
+      val getRes = cli.getObject("myb", "obj1")
+    }
   }
 }

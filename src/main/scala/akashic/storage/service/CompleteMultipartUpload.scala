@@ -1,46 +1,41 @@
 package akashic.storage.service
 
-import java.net.URLEncoder
-import java.nio.file.Path
-
-import akashic.storage.compactor.KeyCompactor
-import akashic.storage.{files, server}
-import akashic.storage.patch.{Commit, Patch, Version, Data}
-import akashic.storage.service.Error.Reportable
+import akashic.storage.backend.{NodePath, Streams}
+import akashic.storage.patch.{Commit, Version}
+import akashic.storage.server
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
-import com.twitter.util.Future
-import org.apache.commons.io.FileUtils
+import org.apache.commons.codec.binary.Hex
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.xml.{XML, NodeSeq}
-import io.finch._
+import scala.xml.{NodeSeq, XML}
 
 object CompleteMultipartUpload {
-  val matcher = post(string / string / paramExists("uploadId") ?
-    param("uploadId") ?
-    body ?
-    RequestId.reader ?
-    CallerId.reader
-  ).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    post &
+    extractObject &
+    parameter("uploadId") &
+    entity(as[String])
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
-               data: String,
-               requestId: String,
-               callerId: String) extends Task[Output[Future[NodeSeq]]] with Reportable {
+               data: String) extends AuthorizedAPI {
     def name = "Complete Multipart Upload"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       case class Part(partNumber: Int, eTag: String)
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
-      // uploadId = $versionId-$random (summed up in 16 chars)
-      val versionId = uploadId.split("-")(0).toInt
-
-      val parts = Try {
+      val parts: Seq[Part] = Try {
         val xml = XML.loadString(data)
         (xml \ "Part").map { a =>
           Part(
@@ -53,6 +48,9 @@ object CompleteMultipartUpload {
         case Failure(_) => failWith(Error.MalformedXML())
       }
 
+      if (parts.size == 0)
+        failWith(Error.MalformedXML())
+
       // parts must be sorted
       if (parts != parts.sortBy(_.partNumber))
         failWith(Error.InvalidPartOrder())
@@ -60,15 +58,16 @@ object CompleteMultipartUpload {
       val lastPartNumber = parts.last.partNumber
 
       for (Part(partNumber, eTag) <- parts) {
-        val uploadedPart: Path = upload.findPart(partNumber).flatMap(_.versions.find).map(_.asData.filePath) match {
+        val uploadedPart: NodePath = upload.findPart(partNumber).map(_.unwrap.filePath) match {
           case Some(a) => a
           case None => failWith(Error.InvalidPart())
         }
-        if (files.computeMD5(uploadedPart) != eTag) {
+        val computedETag = Hex.encodeHexString(uploadedPart.computeMD5)
+        if (computedETag != eTag) {
           failWith(Error.InvalidPart())
         }
-        // Each part must be at least 5MB in size, expect the last part.
-        if (partNumber < lastPartNumber && files.fileSize(uploadedPart) < (5 << 20)) {
+        // Each part must be at least 5MB in size, except the last part.
+        if (partNumber < lastPartNumber && uploadedPart.getAttr.length < (5 << 20)) {
           failWith(Error.EntityTooSmall())
         }
       }
@@ -88,55 +87,45 @@ object CompleteMultipartUpload {
       }
       val newETag = calcETag(parts.map(_.eTag))
 
-      val mergeFut: Future[NodeSeq] = Future {
+      val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
-        val versionPatch: Version = key.versions.get(versionId).asVersion
-        // we need to clean the directory
-        // because this may be the second complete request
-        // (should purge the old stuffs)
-        FileUtils.cleanDirectory(versionPatch.root.toFile)
-        versionPatch.init
+        Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
+          val versionPatch = Version(key, patch.root)
 
-        val aclBytes: Array[Byte] = upload.acl.readBytes
-        Commit.retry(versionPatch.acl) { patch =>
-          val dataPatch = patch.asData
-          dataPatch.init
+          val streamedPartData: Stream[Option[Array[Byte]]] =
+            parts.toStream.map(part => Some(upload.part(part.partNumber).unwrap.get)) #::: Streams.eod
+          versionPatch.data.root.createFile(streamedPartData)
 
-          dataPatch.writeBytes(aclBytes)
+          versionPatch.acl.put(upload.acl.get)
+
+          val oldMeta = upload.meta.get
+          val newMeta = oldMeta.copy(eTag = newETag)
+          versionPatch.meta.put(newMeta)
         }
 
-        val oldMeta = Meta.fromBytes(upload.meta.readBytes)
-        val newMeta = oldMeta.copy(eTag = newETag)
-        versionPatch.meta.writeBytes(newMeta.toBytes)
-
-        files.Implicits.using(FileUtils.openOutputStream(versionPatch.data.filePath.toFile)) { f =>
-          for (part <- parts) {
-            f.write(upload.findPart(part.partNumber).get.versions.find.get.asData.readBytes)
-          }
-        }
-
-        versionPatch.commit
-
-        server.compactorQueue.queue(KeyCompactor(key))
+        server.astral.free(upload.root)
 
         <CompleteMultipartUploadResult>
           <Location>{s"http://${server.address}/${bucketName}/${keyName}"}</Location>
           <Bucket>{bucketName}</Bucket>
           <Key>{keyName}</Key>
-          <ETag>{newETag}</ETag>
+          <ETag>{quoteString(newETag)}</ETag>
         </CompleteMultipartUploadResult>
-      } handle {
+      } recoverWith {
         case e: Throwable =>
-          Error.mkXML(
+          val xml = Error.mkXML(
             Error.withMessage(Error.InternalError("merge parts failed")),
             resource,
             requestId)
+          Future(xml)
       }
 
-      // TODO versionId (but what if on failure?)
-      Ok(mergeFut)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
-        .withHeader(X_AMZ_VERSION_ID -> "null")
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .withHeader(X_AMZ_VERSION_ID, "null")
+        .build
+
+      complete(StatusCodes.OK, headers, mergeResult)
     }
   }
 }

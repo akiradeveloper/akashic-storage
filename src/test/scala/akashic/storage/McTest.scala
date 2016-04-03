@@ -1,12 +1,16 @@
 package akashic.storage
 
+import java.io.File
 import java.nio.file.{Paths, Files}
 
 import akashic.storage.server
 import akashic.storage.admin.User
-import org.apache.commons.io.FileUtils
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.io.{IOUtils, FileUtils}
+import org.apache.http.client.methods.{HttpGet, HttpPost}
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.message.BasicHeader
 import scala.xml.XML
-import scalaj.http.Http
 import scala.sys.process.Process
 
 class McTest extends ServerTestBase {
@@ -19,7 +23,8 @@ class McTest extends ServerTestBase {
   val confDir = "/tmp/akashic-storage-mc"
 
   def mc(cmd: String) = {
-    val cmdline = s"mc --config-folder=${confDir} ${cmd}"
+    // val cmdline = s"mc --config-folder=${confDir} ${cmd}"
+    val cmdline = s"mc --debug ${cmd}"
     println(cmdline)
     Process(cmdline)
   }
@@ -28,9 +33,14 @@ class McTest extends ServerTestBase {
     super.beforeEach()
 
     val url = s"http://${server.address}/admin/user"
-    val postRes = Http(url).method("POST").asString
-    assert(postRes.code === 200)
-    val newUser = User.fromXML(XML.loadString(postRes.body))
+    val authHeader = new BasicHeader("Authorization", s"Basic ${Base64.encodeBase64URLSafeString("admin:passwd".getBytes)}")
+
+    val postReq = new HttpPost(url)
+    postReq.addHeader(authHeader)
+
+    val postRes = HttpClients.createDefault.execute(postReq)
+    assert(postRes.getStatusLine.getStatusCode === 200)
+    val newUser = User.fromXML(XML.load(postRes.getEntity.getContent))
     println(newUser)
 
     val confDirPath = Paths.get(confDir)
@@ -39,16 +49,26 @@ class McTest extends ServerTestBase {
     }
     FileUtils.cleanDirectory(confDirPath.toFile)
 
-    assert(mc(s"config host add http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
-    assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)
+    assert(mc(s"config host add ${alias} http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
+    // assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)
   }
 
   test("add buckets") { _ =>
-    assert(mc(s"ls ${alias}").!!.split("\n").length === 1)
+    // assert(mc(s"ls ${alias}").!!.split("\n").length === 1)
     assert(mc(s"mb ${alias}/abc").! === 0)
     assert(mc(s"ls ${alias}").!!.split("\n").length === 1)
-    assert(mc(s"mb ${alias}/DEF").! === 0)
+    assert(mc(s"mb ${alias}/def").! === 0)
     assert(mc(s"ls ${alias}").!!.split("\n").length === 2)
+  }
+
+  test("ls bucket") { _ =>
+    mc(s"mb ${alias}/abc").!
+    val f = getTestFile("test.txt")
+    // in sbt test we need to add --quiet flag otherwise
+    // mc: <ERROR> Unable to get terminal size. Please use --quiet option. inappropriate ioctl for device
+    mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/aaaaa").!
+    mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/bbbbb").!
+    mc(s"ls ${alias}/abc/").!
   }
 
   test("cp file and cat") { _ =>
@@ -71,16 +91,31 @@ class McTest extends ServerTestBase {
     assert(mc(s"cat ${alias}/abc/hoge.txt").!!.trim === "hoge")
   }
 
-  // test("share (presigned get)") { _ =>
-  //   (mc(s"mb ${alias}/abc") !) orFail
-  //   val f = getTestFile("test.txt")
-  //   (mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc") !) orFail
-  //
-  //   val httpCli = HttpClients.createDefault
-  //   val url: String = (mc(s"share ${alias}/abc/test.txt") !!).split("\n")(1).split("URL: ")(1)
-  //
-  //   val method = new HttpGet(url)
-  //   val contents: String = IOUtils.toString(httpCli.execute(method).getEntity.getContent).trim
-  //   assert(contents === "We love Scala!")
-  // }
+  test("share (presigned get)") { _ =>
+    assert(mc(s"mb ${alias}/abc").! === 0)
+    val f = getTestFile("test.txt")
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc").! === 0)
+
+    val url = (mc(s"share download ${alias}/abc/test.txt").!!).split("\n")(2).split("Share: ")(1)
+    println(url)
+    val res = HttpClients.createDefault.execute(new HttpGet(url))
+    assert(IOUtils.toString(res.getEntity.getContent) === "We love Scala!")
+  }
+
+  test("cp file and cp (small)") { _ =>
+    (mc(s"mb ${alias}/abc").! === 0)
+    val f = getTestFile("test.txt")
+    assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/aaa").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
+  }
+
+  test("cp file and cp (large)") { _ =>
+    val path = Paths.get("/tmp/akashic-storage-test-file-32mb")
+    createLargeFile(path, 32)
+    val f = path.toFile
+
+    assert(mc(s"mb ${alias}/abc").! === 0)
+    assert(mc(s"--quiet cp ${f.getAbsoluteFile} ${alias}/abc/aaa").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
+  }
 }

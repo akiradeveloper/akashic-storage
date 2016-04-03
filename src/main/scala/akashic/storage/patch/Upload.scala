@@ -1,32 +1,25 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
 
-import akashic.storage.files
+import akashic.storage.backend.NodePath
+import akashic.storage.service.{Acl, Meta}
 
-case class Upload(root: Path) extends Patch {
+case class Upload(root: NodePath) extends Patch {
   val parts = root.resolve("parts")
-  def partPath(n: Int): Path = parts.resolve(n.toString)
+  private def partPath(n: Int) = parts.resolve(n.toString)
   def part(n: Int) = Part(partPath(n))
-  val meta = Data(root.resolve("meta"))
-  val acl = Data(root.resolve("acl"))
-  override def init {
-    Files.createDirectory(parts)
-    Files.createDirectory(meta.root)
-    meta.init
-    Files.createDirectory(acl.root)
-    acl.init
-  }
-  def reservedVersionId: Int = {
-    name.split("-")(0).toInt
+  val meta = Meta.makeCache(root.resolve("meta"))
+  val acl = Acl.makeCache(root.resolve("acl"))
+  def init {
+    parts.makeDir
   }
   def findPart(partNumber: Int): Option[Part] = {
     val path = partPath(partNumber)
-    if (Files.exists(path) && Part(path).committed) {
+    if (path.exists) {
       Some(Part(path))
     } else {
       None
     }
   }
-  def listParts: Seq[Part] = files.children(parts).map(Part(_)).sortBy(_.id)
+  def listParts: Seq[Part] = parts.listDir.map(Part(_)).toSeq.sortBy(_.id)
 }

@@ -1,19 +1,36 @@
 os:
   - linux
+dist: trusty
 language: scala
 env:
   - TEST_KIND="sbt-test"
   - TEST_KIND="s3-tests"
+  - TEST_KIND="daemon-test"
 jdk:
   - oraclejdk8
 scala:
   - 2.11.6
 sudo: required
 before_install:
+  - uname -a
+  - whoami
+  - echo JAVA_HOME="$JAVA_HOME"
+  - export
   - sudo apt-get -y -qq update
+  - unset GOROOT
+  - export GOPATH="$HOME/go"
+  - export PATH="/usr/local/go/bin:$PATH"
 install:
-  - wget https://dl.minio.io/client/mc/release/linux-amd64/mc; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
-  - sudo apt-get -y -qq install python-virtualenv
+  # install Go
+  - wget https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz; sudo tar -C /usr/local -xzf go1.6.linux-amd64.tar.gz; go version
+  # install Admin CLI
+  - cd admin-cli; make; sudo make install; ls /usr/local/bin; cd -
+  # install minio/mc
+  - wget https://dl.minio.io/client/mc/release/linux-amd64/mc.tar.gz; tar -xzf mc.tar.gz; sudo mv mc /usr/local/bin; sudo chmod +x /usr/local/bin/mc; mc --help
+  # install virtualenv for s3-tests
+  - sudo apt-get -y -qq install python-virtualenv jsvc tree
+  - jsvc -help
 script:
   - if [ "$TEST_KIND" = "sbt-test" ]; then cd travis-script; sh sbt-test.sh; fi
   - if [ "$TEST_KIND" = "s3-tests" ]; then cd travis-script; sh s3-tests.sh; fi
+  - if [ "$TEST_KIND" = "daemon-test" ]; then cd travis-script; sh daemon-test.sh; fi

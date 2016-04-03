@@ -1,8 +1,11 @@
 #!/bin/sh
 
+cat ~/.boto
+mv boto.config ~/.boto
+
 cd ..
 sbt compile
-sbt -Dconfig.file=src/test/resources/test.conf "runMain akashic.storage.app.RunServer" &
+sbt "runMain akashic.storage.app.RunServer" &
 processId=$!
 echo server process id: $processId
 cd -
@@ -18,7 +21,8 @@ cd $CLONEDIR
 # FIXME should wait for the server to get ready
 echo wait 10 seconds until server is up
 sleep 10 # tmp
-S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests
+netstat -tanp
+S3TEST_CONF=$CONFNAME ./virtualenv/bin/nosetests $@
 cd -
 
 echo successfully run and shut down the server

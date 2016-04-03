@@ -1,30 +1,32 @@
 package akashic.storage.service
 
-import akashic.storage.{files, server}
-import akashic.storage.service.Error.Reportable
-import io.finch._
+import java.util.Date
+
 import akashic.storage.patch.Part
+import akashic.storage.server
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 
 import scala.xml.NodeSeq
 
 object ListParts {
-  val matcher = get(string / string / paramExists("uploadId") ?
-    param("uploadId") ?
-    paramOption("part-number-marker").as[Int] ?
-    paramOption("max-parts").as[Int] ?
-    RequestId.reader ?
-    CallerId.reader).as[t]
-  val endpoint = matcher { a: t => a.run }
+  val matcher =
+    get &
+    extractObject &
+    parameters("uploadId", "part-number-marker".as[Int]?, "max-parts".as[Int]?)
+
+  val route = matcher.as(t)(_.run)
+
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumberMarker: Option[Int],
-               maxParts: Option[Int],
-               requestId: String, callerId: String) extends Task[Output[NodeSeq]] with Reportable {
+               maxParts: Option[Int]) extends AuthorizedAPI {
     def name = "List Parts"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
       val bucket = findBucket(server.tree, bucketName)
-      val key = findKey(bucket, keyName)
+      val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
 
       val startNumber = partNumberMarker match {
@@ -38,9 +40,7 @@ object ListParts {
       }
 
       val emitList0 = upload.listParts
-        .filter(_.committed)
         .dropWhile (_.id < startNumber)
-        .filter(_.find.isDefined) // having valid upload
 
       val truncated = emitList0.size > listMaxLen
 
@@ -51,7 +51,7 @@ object ListParts {
         case None => 0
       }
 
-      val acl = Acl.fromBytes(upload.acl.readBytes)
+      val acl = upload.acl.get
 
       val ownerId = acl.owner
 
@@ -60,12 +60,12 @@ object ListParts {
       val initiatorId = ownerId
 
       def xmlPart(part: Part): NodeSeq = {
-        val filePath = part.find.get.filePath
+        val filePath = part.unwrap.filePath
         <Part>
           <PartNumber>{part.id}</PartNumber>
-          <LastModified>{dates.format000Z(files.lastDate(filePath))}</LastModified>
-          <ETag>{files.computeMD5(part.find.get.filePath)}</ETag>
-          <Size>{files.fileSize(filePath)}</Size>
+          <LastModified>{dates.format000Z(new Date(filePath.getAttr.creationTime))}</LastModified>
+          <ETag>{filePath.computeMD5}</ETag>
+          <Size>{filePath.getAttr.length}</Size>
         </Part>
       }
 
@@ -76,11 +76,11 @@ object ListParts {
           <UploadId>{uploadId}</UploadId>
           <Initiator>
             <ID>{initiatorId}</ID>
-            <DisplayName>{server.users.getUser(initiatorId).get.displayName}</DisplayName>
+            <DisplayName>{server.users.find(initiatorId).get.displayName}</DisplayName>
           </Initiator>
           <Owner>
             <ID>{ownerId}</ID>
-            <DisplayName>{server.users.getUser(ownerId).get.displayName}</DisplayName>
+            <DisplayName>{server.users.find(ownerId).get.displayName}</DisplayName>
           </Owner>
           <StorageClass>STANDARD</StorageClass>
           { partNumberMarker match { case Some(a) => <PartNumberMarker>{a}</PartNumberMarker>; case None => NodeSeq.Empty } }
@@ -90,8 +90,12 @@ object ListParts {
           { for (part <- emitList) yield xmlPart(part) }
         </ListPartsResult>
 
-      Ok(xml)
-        .withHeader(X_AMZ_REQUEST_ID -> requestId)
+
+      val headers = ResponseHeaderList.builder
+        .withHeader(X_AMZ_REQUEST_ID, requestId)
+        .build
+
+      complete(StatusCodes.OK, headers, xml)
     }
   }
 }

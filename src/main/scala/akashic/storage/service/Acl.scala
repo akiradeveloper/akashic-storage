@@ -1,26 +1,145 @@
 package akashic.storage.service
 
+import akashic.storage.auth.CallerId
+import akashic.storage.backend.NodePath
+import akashic.storage.caching.{Cache, CacheMap}
+import akashic.storage.server
+import akashic.storage.service.Acl._
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
+
 import scala.pickling.Defaults._
 import scala.pickling.binary._
 import scala.xml.NodeSeq
+case class Acl(owner: String, grants: Iterable[Grant]) {
+  def toBytes: Array[Byte] = this.pickle.value
+  def grant(callerId: String, perm: Permission): Boolean = {
+    if (getPermission(callerId).contains(perm)) {
+      true
+    } else {
+      logger.error(s"failed to grant permission: callerId=${callerId} grants=${grants}")
+      false
+    }
+  }
+  private def getPermission(callerId: String): Set[Permission] = {
+    grants.foldLeft(Set.empty[Permission])((acc, grant) => acc ++ grant.getPermission(callerId))
+  }
+  private def ownerXML = {
+    val displayName = server.users.find(owner).get.displayName
+    <Owner>
+      <ID>{owner}</ID>
+      <DisplayName>{displayName}</DisplayName>
+    </Owner>
+  }
+  def toXML = {
+    <AccessControlPolicy>
+      {ownerXML}
+      <AccessControlList>
+        { for (grant <- grants) yield grant.toXML }
+      </AccessControlList>
+    </AccessControlPolicy>
+  }
+}
 
 object Acl {
-  case class t(owner: String, grants: Seq[Grant]) {
-    def toBytes: Array[Byte] = this.pickle.value
+  type t = Acl
+
+  val logger = Logger(LoggerFactory.getLogger("akashic.storage.service.acl"))
+  def writer(a: t): Array[Byte] = a.toBytes
+  def reader(a: Array[Byte]): t = fromBytes(a)
+  def makeCache(path: NodePath) = new Cache[t] {
+    override val filePath = path
+    override def writer: (t) => Array[Byte] = Acl.writer
+    override def reader: (Array[Byte]) => t = Acl.reader
+    override def cacheMap: CacheMap[K, t] = server.cacheMaps.forAcl
   }
+
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]
 
-  case class Grant(grantee: Grantee, perm: Permission)
+  case class Grant(grantee: Grantee, perm: Permission) {
+    def getPermission(callerId: String): Set[Permission] = {
+      grantee.permit(callerId) match {
+        case true => perm.dissolve
+        case false => Set()
+      }
+    }
+    def toXML: NodeSeq = {
+      <Grant>
+        {grantee.toXML}
+        {perm.toXML}
+      </Grant>
+    }
+  }
 
-  trait Grantee
-  case class ById(id: String) extends Grantee
-  case class ByEmail(email: String) extends Grantee // TODO
-  case class AuthenticatedUsers() extends Grantee // TODO
-  case class AllUsers() extends Grantee // TODO
+  sealed trait Grantee {
+    def permit(callerId: String): Boolean = {
+      this match {
+        case ById(id: String) => {
+          id match {
+            case CallerId.ANONYMOUS =>
+              true
+            case _ =>
+              id == callerId
+          }
+        }
+        case ByEmail(email: String) =>
+          server.users.find(callerId).get.email == email
+        case AuthenticatedUsers() =>
+          callerId != CallerId.ANONYMOUS
+        case AllUsers() =>
+          true
+      }
+    }
+    def toXML: NodeSeq
+  }
+  val URI_AUTHENTICATED_USERS = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+  val URI_ALL_USERS = "http://acs.amazonaws.com/groups/global/AllUsers"
+  case class ById(id: String) extends Grantee {
+    override def toXML: NodeSeq = {
+      <Garantee xsi:type="CanonicalUser">
+        <ID>{id}</ID>
+        <DisplayName>{server.users.find(id).get.displayName}</DisplayName>
+      </Garantee>
+    }
+  }
+  case class ByEmail(email: String) extends Grantee {
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="GanonicalUser">
+        <EmailAddress>{email}</EmailAddress>
+      </Garantee>
+  }
+  case class AuthenticatedUsers() extends Grantee {
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="Group">
+        <URI>{URI_AUTHENTICATED_USERS}</URI>
+      </Garantee>
+  }
+  case class AllUsers() extends Grantee {
+    override def toXML: NodeSeq =
+      <Garantee xsi:type="Group">
+        <URI>{URI_ALL_USERS}</URI>
+      </Garantee>
+  }
 
   // not sealed because WriteAcp and Read are allowed to bucket ACL only
-  trait Permission
-  case class Deny() extends Permission
+  sealed trait Permission {
+    def dissolve: Set[Permission] = {
+      this match {
+        case FullControl() => Set(Write(), Read(), WriteAcp(), ReadAcp())
+        case a => Set(a)
+      }
+    }
+    def toXML: NodeSeq = {
+      val s = this match {
+        case Write() => "WRITE"
+        case Read() => "Read"
+        case WriteAcp() => "WRITE_ACP"
+        case ReadAcp() => "READ_ACP"
+        case FullControl() => "FULL_CONTROL"
+      }
+      <Permission>{s}</Permission>
+    }
+  }
   case class FullControl() extends Permission
   case class Write() extends Permission
   case class Read() extends Permission // bucket only
@@ -42,6 +161,91 @@ object Acl {
       }
       Grant(grantee, perm)
     }
-    t(owner, grants)
+    Acl(owner, grants)
+  }
+
+  sealed trait CannedAcl {
+    def makeGrants: Set[Grant] = {
+      def default(owner: String) = {
+        val grantee = owner match {
+          case CallerId.ANONYMOUS => AllUsers()
+          case _ => ById(owner)
+        }
+        Grant(grantee, FullControl())
+      }
+      this match {
+        case Private(owner: String) => Set(default(owner))
+        case PublicRead(owner: String)  => Set(default(owner), Grant(AllUsers(), Read()))
+        case PublicReadWrite(owner: String) => Set(default(owner), Grant(AllUsers(), Read()), Grant(AllUsers(), Write()))
+        case AuthenticatedRead(owner: String) => Set(default(owner), Grant(AuthenticatedUsers(), Read()))
+        case BucketOwnerRead(owner: String, bucketOwner: String) => Set(default(owner), Grant(ById(bucketOwner), Read()))
+        case BucketOwnerFullControl(owner: String, bucketOwner: String) => Set(default(owner), Grant(ById(bucketOwner), FullControl()))
+      }
+    }
+  }
+  case class Private(owner: String) extends CannedAcl
+  case class PublicRead(owner: String) extends CannedAcl
+  case class PublicReadWrite(owner: String) extends CannedAcl
+  case class AuthenticatedRead(owner: String) extends CannedAcl
+  case class BucketOwnerRead(owner: String, bucketOwner: String) extends CannedAcl // object only
+  case class BucketOwnerFullControl(owner: String, bucketOwner: String) extends CannedAcl // object only
+
+  object CannedAcl {
+    def forName(name: String, owner: String, bucketOwner: String): CannedAcl = {
+      name match {
+        case "private" => Private(owner)
+        case "public-read" => PublicRead(owner)
+        case "public-read-write" => PublicReadWrite(owner)
+        case "authenticated-read" => AuthenticatedRead(owner)
+        case "bucket-owner-read" => BucketOwnerRead(owner, bucketOwner)
+        case "bucket-owner-full-control" => BucketOwnerFullControl(owner, bucketOwner)
+      }
+    }
+  }
+
+  sealed trait GrantHeader {
+    def grantees: Iterable[Grantee]
+    def permission: Permission
+    def makeGrants: Iterable[Grant] = grantees.map(Grant(_, permission))
+  }
+  case class GrantRead(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = Read()
+  }
+  case class GrantWrite(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = Write()
+  }
+  case class GrantReadAcp(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = ReadAcp()
+  }
+  case class GrantWriteAcp(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = WriteAcp()
+  }
+  case class GrantFullControl(grantees: Iterable[Grantee]) extends GrantHeader {
+    val permission = FullControl()
+  }
+  object GrantHeader {
+    def doParseLine(k: String, v: String): Grantee = {
+      k match {
+        case "id" => ById(v)
+        case "emailAddress" => ByEmail(v)
+        case "uri" => v match {
+          case URI_AUTHENTICATED_USERS => AuthenticatedUsers()
+          case URI_ALL_USERS => AllUsers()
+        }
+      }
+    }
+    def parseLine(k: String, v: String): GrantHeader = {
+      val grantees = v
+        .split(",")
+        .map(_.split("="))
+        .map(a => doParseLine(a(0), a(1)))
+      k match {
+        case "x-amz-grant-read" => GrantRead(grantees)
+        case "x-amz-grant-write" => GrantWrite(grantees)
+        case "x-amz-grant-read-acp" => GrantReadAcp(grantees)
+        case "x-amz-grant-write-acp" => GrantWriteAcp(grantees)
+        case "x-amz-grant-full-control" => GrantFullControl(grantees)
+      }
+    }
   }
 }

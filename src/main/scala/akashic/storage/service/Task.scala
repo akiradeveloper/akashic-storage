@@ -1,15 +1,12 @@
 package akashic.storage.service
 
-trait Task[T] extends CallerIdAssertable {
-  def name: String
-  def runOnce: T
-  def run: T = {
-    checkCallerId
+import akka.http.scaladsl.server.Route
 
-    val start = System.currentTimeMillis
+trait Task extends Runnable {
+  def runOnce: Route
+  def run = {
     var retry = 0
-    println(s"-> ${name}")
-    val a = try {
+    val result = try {
       runOnce
     } catch {
       case e: Error.Exception => throw e
@@ -17,8 +14,6 @@ trait Task[T] extends CallerIdAssertable {
         retry += 1
         runOnce
     }
-    val end = System.currentTimeMillis
-    println(s"<- ${name} ${end-start}[ms] (${retry} retry)")
-    a
+    result
   }
 }

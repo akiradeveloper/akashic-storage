@@ -1,70 +1,45 @@
 package akashic.storage.patch
 
-import java.nio.file.{FileAlreadyExistsException, Files, Path}
+import java.nio.file._
 
-import akashic.storage.files
-
-import scala.util.{Failure, Success, Try}
+import akashic.storage.backend.NodePath
+import akashic.storage.server
 
 object Commit {
-  def once(to: Path)(fn: Patch => Unit) = Once(to)(fn).run
-  private case class Once(to: Path)(fn: Patch => Unit) {
-    def run: Boolean = {
-      Try {
-        val patch = Patch(to)
-        if (Files.exists(to) && !patch.committed) {
-          // this path is unlikely because Patches committed by Once are small
-          // such as creating key directory. Sleeping 1 second is enough long
-          // to wait for another process finishs commit in process.
-          Thread.sleep(1000)
-
-          if (!patch.committed) {
-            files.purgeDirectory(to)
-          }
-        }
-
-        Files.createDirectory(patch.root)
-        // As the previous line throws exception if the directory exists
-        // only a process created the directory can reach this line.
-        try {
-          fn(patch)
-          patch.commit
-        } catch {
-          case e: Throwable =>
-            files.purgeDirectory(patch.root)
-            throw e
-        }
-      } match {
-        case Success(a) => true
-        case Failure(a) => false
-      }
-    }
+  // for file
+  def replaceData[V](to: Data[V], makeTemp: NodePath => Data[V])(fn: Data[V] => Unit): Unit = {
+    val from: Data[V] = server.astral.allocData(makeTemp, fn)
+    from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = true)
   }
-  // used by multipart upload just to allocate empty directory
-  case class RetryGenericNoCommit(makePath: () => Path)(fn: Patch => Unit) {
-    def run: Patch = {
+
+  // for directory
+  def once(to: NodePath)(fn: Patch => Unit): Unit = {
+    if (to.exists)
+      return
+    val src = server.astral.allocDirectory(fn)
+    src.root.moveTo(to.dir, to.name, replaceIfExists = false)
+  }
+
+  def replaceDirectory(to: Patch)(fn: Patch => Unit): Unit = {
+    server.astral.free(to)
+    val from = server.astral.allocDirectory(fn)
+    from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = false)
+  }
+
+  def retry(alloc: () => NodePath)(fn: Patch => Unit): Patch = {
+    def move(src: Patch): Patch = {
+      val dest = Patch(alloc())
       try {
-        val patch = Patch(makePath())
-        Files.createDirectory(patch.root)
-        try {
-          fn(patch)
-          patch
-        } catch {
-          case e: Throwable =>
-            files.purgeDirectory(patch.root)
-            throw e
-        }
+        src.root.moveTo(dest.root.dir, dest.root.name, replaceIfExists = false)
       } catch {
-        case e: FileAlreadyExistsException => run
-        case e: Throwable => throw e
+        case e: FileAlreadyExistsException =>
+          move(src)
+        case e: Throwable =>
+          throw e
       }
+      dest
     }
-  }
-  case class RetryGeneric(makePath: () => Path)(fn: Patch => Unit) {
-    def run = RetryGenericNoCommit(makePath) { patch => fn(patch); patch.commit }.run
-  }
-  def retry(to: PatchLog)(fn: Patch => Unit) = Retry(to)(fn).run
-  private case class Retry(to: PatchLog)(fn: Patch => Unit) {
-    def run: Patch = RetryGeneric(() => to.acquireNewLoc)(fn).run
+    val src = server.astral.allocDirectory(fn)
+    move(src)
   }
 }

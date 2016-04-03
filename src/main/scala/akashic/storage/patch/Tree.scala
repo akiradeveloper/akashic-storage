@@ -1,18 +1,17 @@
 package akashic.storage.patch
 
-import java.nio.file.{Files, Path}
+import akashic.storage.backend.NodePath
 
-import akashic.storage.files
-
-case class Tree(root: Path) {
-  def bucketPath(name: String): Path = root.resolve(name)
+case class Tree(root: NodePath) {
+  def bucketPath(name: String): NodePath = root.resolve(name)
   def findBucket(name: String): Option[Bucket] = {
     val path = bucketPath(name)
-    if (Files.exists(path) && Bucket(path).committed) {
+    if (path.exists) {
       Some(Bucket(path))
     } else {
       None
     }
   }
-  def listBuckets: Iterable[Bucket] = files.children(root).map(Bucket(_))
+  def listBuckets: Iterable[Bucket] =
+    root.listDir.map(Bucket(_))
 }
