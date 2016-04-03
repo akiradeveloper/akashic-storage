@@ -1,6 +1,6 @@
 require "sinatra"
 set :bind, '0.0.0.0'
-set :port, 8080
+set :port, 10947
 
 require "sinatra/reloader" if development?
 
