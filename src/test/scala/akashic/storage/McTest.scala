@@ -106,7 +106,7 @@ class McTest extends ServerTestBase {
     (mc(s"mb ${alias}/abc").! === 0)
     val f = getTestFile("test.txt")
     assert(mc(s"--quiet cp ${f.getAbsolutePath} ${alias}/abc/aaa").! === 0)
-    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa /tmp/bbb").! === 0)
   }
 
   test("cp file and cp (large)") { _ =>
@@ -116,6 +116,6 @@ class McTest extends ServerTestBase {
 
     assert(mc(s"mb ${alias}/abc").! === 0)
     assert(mc(s"--quiet cp ${f.getAbsoluteFile} ${alias}/abc/aaa").! === 0)
-    assert(mc(s"--quiet cp ${alias}/abc/aaa bbb").! === 0)
+    assert(mc(s"--quiet cp ${alias}/abc/aaa /tmp/bbb").! === 0)
   }
 }
