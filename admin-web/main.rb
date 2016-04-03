@@ -10,11 +10,11 @@ get "/" do
   newUserId = `akashic-admin-add`
   xml = (`akashic-admin-get #{newUserId}` rescue "<Error/>")
   doc = REXML::Document.new(xml)
-  def gettext(key)
+  def gettext(doc, key)
     (doc.elements["User/#{key}"].text rescue "INVALID")
   end
-  @id = gettext("Id")
-  @access_key = gettext("AccessKey")
-  @secret_key = gettext("SecretKey")
+  @id = gettext(doc, "Id")
+  @access_key = gettext(doc, "AccessKey")
+  @secret_key = gettext(doc, "SecretKey")
   erb :index
 end
