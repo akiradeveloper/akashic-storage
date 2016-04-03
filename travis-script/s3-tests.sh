@@ -1,4 +1,4 @@
-sudo mkdir -p /var/log/akashic-storage; sudo chmod o+rwx /var/log/akashic-storage
+sudo mkdir -p /opt/akashic-storage/log; sudo chmod o+rwx /opt/akashic-storage/log
 
 cd ../s3-tests
 sh run.sh
