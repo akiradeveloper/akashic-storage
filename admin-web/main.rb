@@ -8,9 +8,13 @@ require "rexml/document"
 
 get "/" do
   newUserId = `akashic-admin-add`
-  xml = `akashic-admin-get #{newUserId}`
+  xml = (`akashic-admin-get #{newUserId}` rescue "<Error/>")
   doc = REXML::Document.new(xml)
-  @access_key = doc.elements["User/AccessKey"].text
-  @secret_key = doc.elements["User/SecretKey"].text
+  def gettext(key)
+    (doc.elements["User/#{key}"].text rescue "INVALID")
+  end
+  @id = gettext("Id")
+  @access_key = gettext("AccessKey")
+  @secret_key = gettext("SecretKey")
   erb :index
 end
