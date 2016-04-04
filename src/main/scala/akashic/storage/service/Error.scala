@@ -21,6 +21,7 @@ object Error {
   case class InlineDataTooLarge() extends t
   case class InternalError(s: String) extends t
   case class InvalidArgument() extends t
+  case class InvalidBucketName() extends t
   case class InvalidPart() extends t
   case class InvalidPartOrder() extends t
   case class InvalidToken() extends t
@@ -47,6 +48,7 @@ object Error {
       case ExpireToken() => (400, "The provided token has expired.")
       case InternalError(s) => (500, s"We encountered an internal error. Please try again. (${s})")
       case InvalidArgument() => (400, "Invalid Argument")
+      case InvalidBucketName() => (400, "The specified bucket is not valid")
       case InvalidPart() => (400, "One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.")
       case InvalidPartOrder() => (400, "The list of parts was not in ascending order.Parts list must specified in order by part number.")
       case InvalidToken() => (400, "The provided token is malformed or otherwise invalid.")

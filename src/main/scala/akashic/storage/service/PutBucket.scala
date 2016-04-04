@@ -1,11 +1,14 @@
 package akashic.storage.service
 
+import java.net.InetAddress
+
 import akashic.storage.patch._
 import akashic.storage.server
 import akashic.storage.service.Acl.Grant
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 
+import scala.util.Try
 import scala.xml.{NodeSeq, XML}
 
 object PutBucket {
@@ -24,7 +27,21 @@ object PutBucket {
                entity: Option[String]) extends AuthorizedAPI {
     def name = "PUT Bucket"
     def resource = Resource.forBucket(bucketName)
+    def isIPAddress(s: String): Boolean = {
+      Try(InetAddress.getByName(s)).isSuccess
+    }
+    def isValidName(name: String): Boolean = {
+      def invalid = {
+        bucketName.size < 3 ||
+        bucketName.size > 63 ||
+        isIPAddress(name)
+      }
+      !invalid
+    }
     def runOnce = {
+      if (!isValidName(bucketName))
+        failWith(Error.InvalidBucketName())
+
       val dest = server.tree.bucketPath(bucketName)
 
       if (dest.exists) {
