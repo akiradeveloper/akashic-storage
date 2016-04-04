@@ -265,6 +265,33 @@ class AmazonSDKTest extends ServerTestBase {
     assert(client.listObjects("myb").getObjectSummaries.get(0).getKey === "a/b")
   }
 
+  test("multipart abort and list") { p =>
+    import p._
+
+    client.createBucket("myb")
+    val initreq1 = new InitiateMultipartUploadRequest("myb", "myobj")
+    val initres1 = client.initiateMultipartUpload(initreq1)
+
+    val listreq1 = new ListMultipartUploadsRequest("myb")
+    val listres1 = client.listMultipartUploads(listreq1)
+    assert(listres1.getMultipartUploads.size() == 1)
+
+    val initreq2 = new InitiateMultipartUploadRequest("myb", "myobj")
+    val initres2 = client.initiateMultipartUpload(initreq2)
+
+    val listreq2 = new ListMultipartUploadsRequest("myb")
+    val listres2 = client.listMultipartUploads(listreq2)
+    assert(listres2.getMultipartUploads.size() == 2)
+
+    val abortreq1 = new AbortMultipartUploadRequest("myb", "myobj", initres1.getUploadId)
+    client.abortMultipartUpload(abortreq1)
+
+    val listreq3 = new ListMultipartUploadsRequest("myb")
+    val listres3 = client.listMultipartUploads(listreq3)
+    assert(listres3.getMultipartUploads.size() == 1)
+    assert(listres3.getMultipartUploads.get(0).getUploadId == initres2.getUploadId)
+  }
+
   test("multipart upload (lowlevel)") { p =>
     import p._
 
