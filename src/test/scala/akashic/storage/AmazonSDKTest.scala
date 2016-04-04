@@ -197,6 +197,36 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  test("list objects: maxkeys") { p =>
+    import p._
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    client.putObject("myb", "aaa", f)
+    client.putObject("myb", "b/a", f)
+    client.putObject("myb", "b/c", f)
+    client.putObject("myb", "ccc", f)
+
+    val req1 = new ListObjectsRequest()
+      .withBucketName("myb")
+      .withMaxKeys(2)
+      .withDelimiter("/")
+    val res1 = client.listObjects(req1)
+    assert(res1.getObjectSummaries.size == 1)
+    assert(res1.getCommonPrefixes.size == 1)
+    assert(res1.isTruncated == true)
+    assert(res1.getMaxKeys == 2)
+    assert(res1.getNextMarker == "b/c")
+
+    val req2 = new ListObjectsRequest()
+      .withBucketName("myb")
+      .withDelimiter("/")
+      .withMarker("b/c")
+    val res2 = client.listObjects(req2)
+    assert(res2.getMaxKeys == 1000)
+    assert(res2.getObjectSummaries.size == 1)
+    assert(res2.isTruncated == false)
+  }
+
   test("overwrite") { p =>
     import p._
     client.createBucket("myb")
