@@ -17,7 +17,7 @@ get "/" do
   @access_key = gettext(doc, "AccessKey")
   @secret_key = gettext(doc, "SecretKey")
 
-  @ip = request.ip
+  @host = request.host
   @port = request.port
   erb :index
 end
