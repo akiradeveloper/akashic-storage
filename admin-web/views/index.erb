@@ -24,12 +24,15 @@
 
     <p>
       NONE values are optional. If neccesary, you can set your Name, Email and DisplayName by<br>
-      $ curl -X PUT *****:*****/<%= @id %>?name=*****&email=*****&display-name=*****
+      $ curl -X PUT <%= @ip %>:<%= @port %>/<%= @id %>?name=****&email=****&display-name=****
     </p>
     <p>
       You can use these account info to setup your client tools.<br>
-      Particularly if you are interested in <a href="https://github.com/minio/mc">minio/mc</a> command line tool,<br>
-      please visit the <a href="https://github.com/akiradeveloper/akashic-storage/wiki/Access-from-minio-mc" target="_blank">Github page</a> and spare a minute to install.
-    </p>
+      Particularly if you are interested in <a href="https://github.com/minio/mc">minio/mc</a> command line tool,
+      please visit the README and spare a minutes to install.
+    <p> 
+      And to configure mc, please run<br>
+      $ mc config host add akashic-storage http://<%= @ip %>:10946 <%= @access_key %> <%= @secret_key %> S3v2
+    </p>  
   </body>
 </html>
