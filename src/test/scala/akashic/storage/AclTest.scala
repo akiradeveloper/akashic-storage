@@ -86,4 +86,14 @@ class AclTest extends ServerTestBase {
 
     auth2.listObjects("auth1b")
   }
+
+  test("auth2 can't list auth1's buckets") { p =>
+    import p._
+    anon.createBucket("myba-1")
+    auth1.createBucket("myb1-1")
+    auth1.createBucket("myb1-2")
+    auth2.createBucket("myb2-1")
+    assert(auth1.listBuckets.size() === 2)
+    assert(auth2.listBuckets.size() === 1)
+  }
 }
