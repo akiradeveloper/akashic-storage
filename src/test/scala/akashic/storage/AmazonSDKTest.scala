@@ -82,6 +82,17 @@ class AmazonSDKTest extends ServerTestBase {
     checkFileContent(obj2, f)
   }
 
+  // FIXME signature doesn't match (403)
+  ignore("object name with special characters") { p =>
+    import p._
+    val names = Seq(" ", "\"", "$", "%", "&", "\'", "<", ">", "_", "_ ", "_ _", "__")
+    client.createBucket("myb")
+    val f = getTestFile("test.txt")
+    names.foreach { name =>
+      client.putObject("myb", name, f)
+    }
+  }
+
   test("list objects with / delimiter") { p =>
     import p._
     client.createBucket("myb")
