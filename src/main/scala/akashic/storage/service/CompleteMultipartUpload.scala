@@ -92,8 +92,8 @@ object CompleteMultipartUpload {
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = Version(key, patch.root)
 
-          val streamedPartData: Stream[Option[Array[Byte]]] =
-            parts.toStream.map(part => Some(upload.part(part.partNumber).unwrap.get)) #::: Streams.eod
+          val streamedPartData: Stream[Array[Byte]] =
+            parts.toStream.map(part => upload.part(part.partNumber).unwrap.get)
           versionPatch.data.root.createFile(streamedPartData)
 
           versionPatch.acl.put(upload.acl.get)

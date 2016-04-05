@@ -44,13 +44,9 @@ class Local(mountpoint: Path) extends BAL {
   override def getFileInputStream(n: Node): InputStream = {
     Files.newInputStream(n)
   }
-  override def createFile(dir: Node, name: String, data: Stream[Option[Array[Byte]]]): Unit = {
+  override def createFile(dir: Node, name: String, data: Stream[Array[Byte]]): Unit = {
     using(Files.newOutputStream(dir.resolve(name))) { inp =>
-      val validData = data.takeWhile(_.isDefined)
-      validData.foreach {
-        case Some(buf) => inp.write(buf)
-        case None =>
-      }
+      data.foreach(inp.write)
     }
   }
   override def getFileAttr(n: Node): FileAttr = {

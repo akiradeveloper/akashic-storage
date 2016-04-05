@@ -34,7 +34,7 @@ case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implici
     fs.purgeDirectory(self)
   }
   def getSource(chunkSize: Int) = fs.getSource(self, chunkSize)
-  def createFile(data: Stream[Option[Array[Byte]]]) = fs.createFile(dir, name, data)
+  def createFile(data: Stream[Array[Byte]]) = fs.createFile(dir, name, data)
   def createFile(data: Array[Byte]) = fs.createFile(dir, name, data)
   def readFile: Array[Byte] = fs.getBytes(self)
   def getAttr: FileAttr = fs.getFileAttr(self)
