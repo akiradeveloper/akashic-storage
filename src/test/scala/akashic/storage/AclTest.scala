@@ -3,7 +3,7 @@ package akashic.storage
 import akashic.storage.admin.TestUsers
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.{AnonymousAWSCredentials, BasicAWSCredentials}
-import com.amazonaws.services.s3.model.{CannedAccessControlList, CreateBucketRequest}
+import com.amazonaws.services.s3.model._
 import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3Client}
 
 class AclTest extends ServerTestBase {
@@ -95,5 +95,20 @@ class AclTest extends ServerTestBase {
     auth2.createBucket("myb2-1")
     assert(auth1.listBuckets.size() === 2)
     assert(auth2.listBuckets.size() === 1)
+  }
+
+  ignore("grant read access by xml") { p =>
+    import p._
+    auth1.createBucket("myb1")
+    val f = getTestFile("test.txt")
+    auth1.putObject("myb1", "aaa", f)
+    auth1.putObject("myb1", "bbb", f)
+    shouldThrow(auth2.listObjects("myb1"))
+    val acl = new AccessControlList()
+    acl.grantPermission(new CanonicalGrantee(TestUsers.s3testsAlt.id), Permission.Read)
+    auth1.setBucketAcl("myb1", acl)
+    auth2.listObjects("myb1")
+    shouldThrow(auth2.putObject("myb1", "ccc", f))
+    auth1.listObjects("myb1")
   }
 }
