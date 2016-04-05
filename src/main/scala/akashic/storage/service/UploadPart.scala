@@ -13,7 +13,7 @@ object UploadPart {
     put &
     extractObject &
     parameters("uploadId", "partNumber".as[Int]) &
-    entity(as[Array[Byte]]) &
+    entity(akashic.storage.chunkedStreamUnmarshaller) &
     optionalHeaderValueByName("Content-MD5")
 
   val route = matcher.as(t)(_.run)
@@ -21,7 +21,7 @@ object UploadPart {
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,
-               partData: Array[Byte],
+               partData: Stream[Array[Byte]],
                contentMd5: Option[String]) extends AuthorizedAPI {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)
@@ -29,17 +29,16 @@ object UploadPart {
       val bucket = findBucket(server.tree, bucketName)
       val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
-
-      val computedMD5 = DigestUtils.md5(partData)
-      for (md5 <- contentMd5)
-        if (Base64.encodeBase64String(computedMD5) != md5)
-          failWith(Error.BadDigest())
-
-      val computedETag = Hex.encodeHexString(computedMD5)
-
       val part = upload.part(partNumber)
+      var computedETag = ""
       Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
-        data.put(partData)
+        data.filePath.createFile(partData)
+
+        val computedMD5 = DigestUtils.md5(data.filePath.getInputStream)
+        for (md5 <- contentMd5)
+          if (Base64.encodeBase64String(computedMD5) != md5)
+            failWith(Error.BadDigest())
+        computedETag = Hex.encodeHexString(computedMD5)
       }
 
       val headers = ResponseHeaderList.builder

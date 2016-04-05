@@ -1,5 +1,7 @@
 package akashic.storage.backend
 
+import java.io.InputStream
+
 case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implicit fs: BAL) {
   def self = lookup.get
   def resolve(name: String): NodePath = {
@@ -36,6 +38,7 @@ case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implici
   def getSource(chunkSize: Int) = fs.getSource(self, chunkSize)
   def createFile(data: Stream[Array[Byte]]) = fs.createFile(dir, name, data)
   def createFile(data: Array[Byte]) = fs.createFile(dir, name, data)
+  def getInputStream: InputStream = fs.getFileInputStream(self)
   def readFile: Array[Byte] = fs.getBytes(self)
   def getAttr: FileAttr = fs.getFileAttr(self)
   def moveTo(dir: Node, name: String, replaceIfExists: Boolean) = fs.moveNode(self, dir, name, replaceIfExists)

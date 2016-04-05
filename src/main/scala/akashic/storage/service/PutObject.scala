@@ -11,7 +11,7 @@ import org.apache.commons.codec.digest.DigestUtils
 object PutObject {
   val matcher = put &
     extractObject &
-    entity(as[Array[Byte]]) &
+    entity(akashic.storage.chunkedStreamUnmarshaller) &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
@@ -22,7 +22,7 @@ object PutObject {
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
-               objectData: Array[Byte],
+               objectData: Stream[Array[Byte]],
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
@@ -32,13 +32,6 @@ object PutObject {
     def name = "PUT Object"
     def resource = Resource.forObject(bucketName, keyName)
     def runOnce = {
-      val computedMD5 = DigestUtils.md5(objectData)
-      for (md5 <- contentMd5)
-        if (Base64.encodeBase64String(computedMD5) != md5)
-          failWith(Error.BadDigest())
-
-      val computedETag = Hex.encodeHexString(computedMD5)
-
       val bucket = findBucket(server.tree, bucketName)
       val bucketAcl = bucket.acl.get
 
@@ -50,6 +43,7 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
+      var computedETag = ""
       Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
         val version = Version(key, patch.root)
 
@@ -59,7 +53,15 @@ object PutObject {
             .map(_.makeGrants).get
           Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
-        version.data.put(objectData)
+
+        version.data.filePath.createFile(objectData)
+
+        val computedMD5 = DigestUtils.md5(version.data.filePath.getInputStream)
+        for (md5 <- contentMd5)
+          if (Base64.encodeBase64String(computedMD5) != md5)
+            failWith(Error.BadDigest())
+        computedETag = Hex.encodeHexString(computedMD5)
+
         version.meta.put(
           Meta(
             versionId = "null",
