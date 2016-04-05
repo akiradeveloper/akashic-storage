@@ -3,7 +3,9 @@ package akashic
 import akashic.storage.backend.BAL
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.unmarshalling._
 import akka.stream.ActorMaterializer
+import akka.util.ByteString
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
@@ -31,4 +33,10 @@ package object storage {
     override protected def notifyWarning(message: String): Unit = log.warn(message)
     override protected def notifyDebug(message: String): Unit = log.debug(message)
   }
+
+  // experimental
+  implicit def chunkedStreamUnmarshaller: FromRequestUnmarshaller[Stream[Array[Byte]]] =
+    Unmarshaller.withMaterializer(_ => implicit mat => {
+      case req ⇒ req.entity.dataBytes.runFold(Stream.empty[Array[Byte]])(_ :+ _.toArray)
+    })
 }
