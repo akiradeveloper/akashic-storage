@@ -1,5 +1,7 @@
 package akashic.storage.service
 
+import java.io.InputStream
+
 import akashic.storage.patch.{Commit, Data}
 import akashic.storage.server
 import akka.http.scaladsl.model.headers.ETag
@@ -13,7 +15,7 @@ object UploadPart {
     put &
     extractObject &
     parameters("uploadId", "partNumber".as[Int]) &
-    entity(akashic.storage.chunkedStreamUnmarshaller) &
+    entityAsInputStream &
     optionalHeaderValueByName("Content-MD5")
 
   val route = matcher.as(t)(_.run)
@@ -21,7 +23,7 @@ object UploadPart {
   case class t(bucketName: String, keyName: String,
                uploadId: String,
                partNumber: Int,
-               partData: Stream[Array[Byte]],
+               partData: InputStream,
                contentMd5: Option[String]) extends AuthorizedAPI {
     def name = "Upload Part"
     def resource = Resource.forObject(bucketName, keyName)

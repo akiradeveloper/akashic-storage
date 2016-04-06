@@ -1,5 +1,7 @@
 package akashic.storage.service
 
+import java.io.InputStream
+
 import akashic.storage.patch.{Commit, Key, Version}
 import akashic.storage.{HeaderList, server}
 import akka.http.scaladsl.model.headers.ETag
@@ -11,7 +13,7 @@ import org.apache.commons.codec.digest.DigestUtils
 object PutObject {
   val matcher = put &
     extractObject &
-    entity(akashic.storage.chunkedStreamUnmarshaller) &
+    entityAsInputStream &
     optionalHeaderValueByName("x-amz-acl") &
     extractGrantsFromHeaders &
     optionalHeaderValueByName("Content-Type") &
@@ -22,7 +24,7 @@ object PutObject {
   val route = matcher.as(t)(_.run)
 
   case class t(bucketName: String, keyName: String,
-               objectData: Stream[Array[Byte]],
+               objectData: InputStream,
                cannedAcl: Option[String],
                grantsFromHeaders: Iterable[Acl.Grant],
                contentType: Option[String],
