@@ -1,5 +1,8 @@
 package akashic.storage.service
 
+import java.io.{ByteArrayInputStream, SequenceInputStream}
+import java.util.Collections
+
 import akashic.storage.backend.{NodePath, Streams}
 import akashic.storage.patch.{Commit, Version}
 import akashic.storage.server
@@ -10,6 +13,7 @@ import com.google.common.hash.Hashing
 import com.google.common.io.BaseEncoding
 import org.apache.commons.codec.binary.Hex
 
+import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -92,9 +96,8 @@ object CompleteMultipartUpload {
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = Version(key, patch.root)
 
-          val streamedPartData: Stream[Array[Byte]] =
-            parts.toStream.map(part => upload.part(part.partNumber).unwrap.get)
-          versionPatch.data.root.createFile(streamedPartData)
+          val streams = parts.map(part => upload.part(part.partNumber).unwrap.filePath.getInputStream)
+          using(new SequenceInputStream(Collections.enumeration(streams)))(versionPatch.data.root.createFile)
 
           versionPatch.acl.put(upload.acl.get)
 

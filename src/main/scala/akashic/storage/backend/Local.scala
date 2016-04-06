@@ -5,6 +5,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import com.typesafe.config.Config
+import org.apache.commons.io.IOUtils
 
 object Local {
   def fromConfig(config: Config): Local = {
@@ -44,9 +45,9 @@ class Local(mountpoint: Path) extends BAL {
   override def getFileInputStream(n: Node): InputStream = {
     Files.newInputStream(n)
   }
-  override def createFile(dir: Node, name: String, data: Stream[Array[Byte]]): Unit = {
-    using(Files.newOutputStream(dir.resolve(name))) { inp =>
-      data.foreach(inp.write)
+  override def createFile(dir: Node, name: String, data: InputStream): Unit = {
+    using(Files.newOutputStream(dir.resolve(name))) { outp =>
+      IOUtils.copyLarge(data, outp)
     }
   }
   override def getFileAttr(n: Node): FileAttr = {

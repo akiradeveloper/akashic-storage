@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.directives.DebuggingDirectives
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
-package object service extends Directives {
+package object service extends Directives with Syntax {
   // first appearance wins
   implicit class _Option[A](unwrap: Option[A]) {
     def `<+`(other: Option[A]): Option[A] = 

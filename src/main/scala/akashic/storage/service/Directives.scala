@@ -1,14 +1,18 @@
 package akashic.storage.service
 
+import java.io.InputStream
+
 import akashic.storage.auth.GetCallerId
 import akashic.storage.service.Acl.Grant
 import akashic.storage.{HeaderList, auth}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive, Directive0, Directive1}
+import akka.stream.scaladsl.StreamConverters
 
 import scala.collection.immutable
 
 trait Directives {
+  val entityAsInputStream = akashic.storage.entityAsInputStream
 
   def withParameter(name: String): Directive0 = parameter(name).tflatMap(a => pass)
 

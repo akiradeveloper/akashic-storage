@@ -476,4 +476,15 @@ class AmazonSDKTest extends ServerTestBase {
     val obj = cli.getObject("myb", "a/b")
     checkFileContent(obj, f)
   }
+
+  test("put files of various size") { p =>
+    val cli = p.client
+    cli.createBucket("myb")
+    for (size <- Seq(1, 10)) { // MB
+      val filePath = Paths.get(s"/tmp/akashic-storage-test-file-${size}mb")
+      createLargeFile(filePath, size)
+      val putRes = cli.putObject("myb", "obj1", filePath.toFile)
+      val getRes = cli.getObject("myb", "obj1")
+    }
+  }
 }
