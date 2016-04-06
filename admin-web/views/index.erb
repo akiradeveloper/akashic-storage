@@ -9,7 +9,7 @@
   <body>
     <figure><img style="width: 192px;" src="logo-transparent.png"></figure>
 
-    <p>Welcome come to akashic-storage open server!</p>
+    <p>Welcome to Open Storage!</p>
 
     <p>I created your user account:</p>
 
@@ -24,7 +24,7 @@
 
     <p>
       NONE values are optional. If neccesary, you can set your Name, Email and DisplayName by<br>
-      $ curl -X PUT <%= @host %>:<%= @port %>/<%= @id %>?name=****&email=****&display-name=****
+      <b>$ curl -X PUT <%= @host %>:<%= @port %>/<%= @id %>?name=****&email=****&display-name=****</b>
     </p>
     <p>
       You can use these account info to setup your client tools.<br>
@@ -33,7 +33,7 @@
     </p>
     <p> 
       And to configure mc, please run<br>
-      $ mc config host add akashic-storage http://<%= @host %>:10946 <%= @access_key %> <%= @secret_key %> S3v2
+      <b>$ mc config host add akashic-storage http://<%= @host %>:10946 <%= @access_key %> <%= @secret_key %> S3v2</b>
     </p>  
   </body>
 </html>
