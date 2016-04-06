@@ -46,7 +46,9 @@ class Local(mountpoint: Path) extends BAL {
     Files.newInputStream(n)
   }
   override def createFile(dir: Node, name: String, data: InputStream): Unit = {
-    IOUtils.copyLarge(data, Files.newOutputStream(dir.resolve(name)))
+    using(Files.newOutputStream(dir.resolve(name))) { outp =>
+      IOUtils.copyLarge(data, outp)
+    }
   }
   override def getFileAttr(n: Node): FileAttr = {
     val attr = Files.readAttributes(n, classOf[BasicFileAttributes])

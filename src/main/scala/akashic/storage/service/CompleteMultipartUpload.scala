@@ -96,9 +96,8 @@ object CompleteMultipartUpload {
         Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
           val versionPatch = Version(key, patch.root)
 
-          val streams = parts.map(part => upload.part(part.partNumber).unwrap.getInputStream)
-          val concat = new SequenceInputStream(Collections.enumeration(streams))
-          versionPatch.data.root.createFile(concat)
+          val streams = parts.map(part => upload.part(part.partNumber).unwrap.filePath.getInputStream)
+          using(new SequenceInputStream(Collections.enumeration(streams)))(versionPatch.data.root.createFile)
 
           versionPatch.acl.put(upload.acl.get)
 

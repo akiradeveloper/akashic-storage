@@ -56,9 +56,9 @@ object PutObject {
           Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
         }
 
-        version.data.filePath.createFile(objectData)
+        using(objectData)(version.data.filePath.createFile)
 
-        val computedMD5 = DigestUtils.md5(version.data.filePath.getInputStream)
+        val computedMD5 = version.data.filePath.computeMD5
         for (md5 <- contentMd5)
           if (Base64.encodeBase64String(computedMD5) != md5)
             failWith(Error.BadDigest())

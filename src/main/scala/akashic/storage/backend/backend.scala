@@ -1,5 +1,5 @@
 package akashic.storage
 
-package object backend {
+package object backend extends Syntax {
   type Node = Object
 }

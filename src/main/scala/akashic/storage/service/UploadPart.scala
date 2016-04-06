@@ -34,9 +34,8 @@ object UploadPart {
       val part = upload.part(partNumber)
       var computedETag = ""
       Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
-        data.filePath.createFile(partData)
-
-        val computedMD5 = DigestUtils.md5(data.filePath.getInputStream)
+        using(partData)(data.filePath.createFile)
+        val computedMD5 = data.filePath.computeMD5
         for (md5 <- contentMd5)
           if (Base64.encodeBase64String(computedMD5) != md5)
             failWith(Error.BadDigest())
