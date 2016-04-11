@@ -1,3 +1,11 @@
+2016-04-11  Akira Hayakawa <ruby.wktk@gmail.com>
+
+	* v1.0.0-RC2
+	* Limit content size to 16MB
+	* Add bucket name validation
+	* Change BAL. Using InputStream instead of Stream[Array[Byte]]
+	* Add Tests
+
 2016-04-03  Akira Hayakawa <ruby.wktk@gmail.com>
 
 	* v1.0.0-RC1
