@@ -40,13 +40,13 @@ object PutObject {
       if (!bucketAcl.grant(callerId, Acl.Write()))
         failWith(Error.AccessDenied())
 
-      Commit.once(bucket.keyPath(keyName)) { patch =>
-        val keyPatch = Key(bucket, patch.root)
+      Commit.once(bucket.keyPath(keyName)) { newPath =>
+        val keyPatch = Key(bucket, newPath)
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      val computedETag = Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
-        val version = Version(key, patch.root)
+      val computedETag = Commit.replaceDirectory(key.versions.acquireWriteDest) { newPath =>
+        val version = Version(key, newPath)
 
         version.acl.put {
           val grantsFromCanned = (cannedAcl <+ Some("private"))

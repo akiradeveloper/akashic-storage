@@ -14,17 +14,17 @@ object Commit {
   }
 
   // for directory
-  def once(to: NodePath)(fn: Patch => Unit): Unit = {
+  def once(to: DirectoryPath)(fn: DirectoryPath => Unit): Unit = {
     if (to.exists)
       return
     val (src, _) = server.astral.allocDirectory(fn)
-    src.root.moveTo(to.dir, to.name, replaceIfExists = false)
+    src.moveTo(to.dir, to.name, replaceIfExists = false)
   }
 
-  def replaceDirectory[A](to: Patch)(fn: Patch => A): A = {
+  def replaceDirectory[A](to: DirectoryPath)(fn: DirectoryPath => A): A = {
     server.astral.free(to)
     val (from, res) = server.astral.allocDirectory(fn)
-    from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = false)
+    from.moveTo(to.dir, to.name, replaceIfExists = false)
     res
   }
 }

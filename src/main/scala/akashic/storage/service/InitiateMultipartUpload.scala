@@ -34,15 +34,15 @@ object InitiateMultipartUpload {
       if (!bucketAcl.grant(callerId, Acl.Write()))
         failWith(Error.AccessDenied())
 
-      Commit.once(bucket.keyPath(keyName)) { patch =>
-        val keyPatch = Key(bucket, patch.root)
+      Commit.once(bucket.keyPath(keyName)) { newPath =>
+        val keyPatch = Key(bucket, newPath)
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
 
       val uploadId = key.uploads.acquireNewUpload
-      Commit.once(key.uploads.root.resolve(uploadId)) { patch =>
-        val upload = Upload(patch.root)
+      Commit.once(key.uploads.root.resolve(uploadId)) { newPath =>
+        val upload = Upload(newPath)
         upload.init
 
         upload.acl.put {

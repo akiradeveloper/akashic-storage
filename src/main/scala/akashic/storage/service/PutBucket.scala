@@ -54,8 +54,8 @@ object PutBucket {
         }
       }
 
-      Commit.once(dest) { patch =>
-        val bucketPatch = Bucket(patch.root)
+      Commit.once(dest) { newPath =>
+        val bucketPatch = Bucket(newPath)
         bucketPatch.init
 
         bucketPatch.acl.put {

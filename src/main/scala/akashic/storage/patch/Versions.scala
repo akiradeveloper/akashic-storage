@@ -3,9 +3,9 @@ package akashic.storage.patch
 import akashic.storage.backend.NodePath
 
 case class Versions(key: Key, root: NodePath) {
-  def acquireWriteDest: Patch = {
+  def acquireWriteDest: NodePath = {
     // versioning disabled
-    Patch.apply(root.resolve("0"))
+    root.resolve("0")
   }
   private def acquireNewLoc: NodePath = {
     val xs = root.listDir.map(_.name.toInt)
