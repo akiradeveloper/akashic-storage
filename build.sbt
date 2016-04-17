@@ -12,7 +12,7 @@ parallelExecution in Test := false
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "ch.qos.logback" % "logback-classic" % "1.1.6",
+  "ch.qos.logback" % "logback-classic" % "1.1.7",
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 
