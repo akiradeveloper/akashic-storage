@@ -23,6 +23,7 @@ trait BAL {
   def getFileInputStream(n: Node): InputStream
   def getFileAttr(n: Node): FileAttr
 
+  // TODO move to NodePath
   private[backend] def isFile(n: Node): Boolean = !isDirectory(n)
   private[backend] def exists(dir: Node, name: String): Boolean = lookup(dir, name).isDefined
   private[backend] def createFile(dir: Node, name: String, data: Array[Byte]): Unit = using(new ByteArrayInputStream(data)) { inp =>
