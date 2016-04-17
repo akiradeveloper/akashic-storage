@@ -6,8 +6,8 @@ case class Key(bucket: Bucket, root: NodePath) extends Patch {
   val versions = Versions(this, root.resolve("versions"))
   val uploads = Uploads(root.resolve("uploads"))
   def init {
-    versions.root.makeDir
-    uploads.root.makeDir
+    versions.root.makeDirectory
+    uploads.root.makeDirectory
   }
   def findLatestVersion: Option[Version] = {
     versions.findLatestVersion

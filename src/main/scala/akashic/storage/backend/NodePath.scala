@@ -26,13 +26,13 @@ case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implici
       case None =>
     }
   }
-  def makeDir: Unit = {
+  def makeDirectory: Unit = {
     fs.makeDirectory(dir, name)
   }
-  def cleanDir = {
+  def cleanDirectory = {
     fs.cleanDirectory(self)
   }
-  def purgeDir = {
+  def purgeDirectory = {
     fs.purgeDirectory(self)
   }
   def getSource(chunkSize: Int) = fs.getSource(self, chunkSize)

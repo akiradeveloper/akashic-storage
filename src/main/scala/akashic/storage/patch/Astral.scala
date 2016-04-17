@@ -22,13 +22,13 @@ case class Astral(root: NodePath) {
 
   def allocDirectory[A](fn: NodePath => A): (NodePath, A) = {
     val newPath = root.resolve(strings.random(32))
-    newPath.makeDir
+    newPath.makeDirectory
 
     val res = try {
       fn(newPath)
     } catch {
       case e: Throwable =>
-        newPath.purgeDir
+        newPath.purgeDirectory
         throw e
     }
     (newPath, res)
@@ -50,7 +50,7 @@ case class Astral(root: NodePath) {
 
   def free[V](data: Data[V]): Unit = {
     moveBack(data.root) match {
-      case Some(a) => a.purgeDir // is this correct?
+      case Some(a) => a.remove
       case None =>
     }
   }
@@ -59,12 +59,8 @@ case class Astral(root: NodePath) {
     if (!dir.exists)
       return
     moveBack(dir) match {
-      case Some(a) => a.purgeDir
+      case Some(a) => a.purgeDirectory
       case None =>
     }
-  }
-
-  def free(dir: Patch): Unit = {
-    free(dir.root)
   }
 }
