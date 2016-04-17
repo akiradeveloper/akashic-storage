@@ -7,25 +7,28 @@ import akashic.storage.server
 
 object Commit {
   // for file
-  def replaceData[V](to: Data[V], makeTemp: NodePath => Data[V])(fn: Data[V] => Unit): Unit = {
-    val from: Data[V] = server.astral.allocData(makeTemp, fn)
+  def replaceData[V, A](to: Data[V], makeTemp: NodePath => Data[V])(fn: Data[V] => A): A = {
+    val (from, res) = server.astral.allocData(makeTemp, fn)
     from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = true)
+    res
   }
 
   // for directory
   def once(to: NodePath)(fn: Patch => Unit): Unit = {
     if (to.exists)
       return
-    val src = server.astral.allocDirectory(fn)
+    val (src, _) = server.astral.allocDirectory(fn)
     src.root.moveTo(to.dir, to.name, replaceIfExists = false)
   }
 
-  def replaceDirectory(to: Patch)(fn: Patch => Unit): Unit = {
+  def replaceDirectory[A](to: Patch)(fn: Patch => A): A = {
     server.astral.free(to)
-    val from = server.astral.allocDirectory(fn)
+    val (from, res) = server.astral.allocDirectory(fn)
     from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = false)
+    res
   }
 
+  // not used
   def retry(alloc: () => NodePath)(fn: Patch => Unit): Patch = {
     def move(src: Patch): Patch = {
       val dest = Patch(alloc())
@@ -39,7 +42,7 @@ object Commit {
       }
       dest
     }
-    val src = server.astral.allocDirectory(fn)
+    val (src, _) = server.astral.allocDirectory(fn)
     move(src)
   }
 }

@@ -45,8 +45,7 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      var computedETag = ""
-      Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
+      val computedETag = Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
         val version = Version(key, patch.root)
 
         version.acl.put {
@@ -62,7 +61,7 @@ object PutObject {
         for (md5 <- contentMd5)
           if (Base64.encodeBase64String(computedMD5) != md5)
             failWith(Error.BadDigest())
-        computedETag = Hex.encodeHexString(computedMD5)
+        val computedETag = Hex.encodeHexString(computedMD5)
 
         version.meta.put(
           Meta(
@@ -74,6 +73,8 @@ object PutObject {
               .build,
             xattrs = metadata
           ))
+
+        computedETag
       }
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)

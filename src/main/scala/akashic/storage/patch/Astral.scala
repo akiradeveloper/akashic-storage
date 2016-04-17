@@ -7,32 +7,32 @@ import akashic.storage.strings
 
 /** Astral is where everything is given birth and die */
 case class Astral(root: NodePath) {
-  def allocData[V](makeTemp: NodePath => Data[V], fn: Data[V] => Unit): Data[V] = {
+  def allocData[V, A](makeTemp: NodePath => Data[V], fn: Data[V] => A): (Data[V], A) = {
     val newPath = root.resolve(strings.random(32))
     val data = makeTemp(newPath)
-    try {
+    val res = try {
       fn(data)
     } catch {
       case e: Throwable =>
         newPath.removeIfExists
         throw e
     }
-    data
+    (data, res)
   }
 
-  def allocDirectory(fn: Patch => Unit): Patch = {
+  def allocDirectory[A](fn: Patch => A): (Patch, A) = {
     val newPath = root.resolve(strings.random(32))
     newPath.makeDir
 
     val patch = Patch(newPath)
-    try {
+    val res = try {
       fn(Patch(newPath))
     } catch {
       case e: Throwable =>
         newPath.purgeDir
         throw e
     }
-    patch
+    (patch, res)
   }
 
   private def moveBack(path: NodePath): Option[NodePath] = {
