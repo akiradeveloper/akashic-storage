@@ -2,7 +2,7 @@ package akashic.storage.backend
 
 import java.io.InputStream
 
-case class NodePath(dir: Node, name: String, var resolved: Option[Node])(implicit fs: BAL) {
+case class NodePath(dir: Node, name: String, private var resolved: Option[Node])(implicit fs: BAL) {
   def self = lookup.get
   def resolve(name: String): NodePath = {
     NodePath(self, name, None)
