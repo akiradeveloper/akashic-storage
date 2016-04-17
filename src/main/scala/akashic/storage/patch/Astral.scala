@@ -5,7 +5,6 @@ import java.nio.file.{FileAlreadyExistsException, NoSuchFileException}
 import akashic.storage.backend.NodePath
 import akashic.storage.strings
 
-/** Astral is where everything is given birth and die */
 case class Astral(root: NodePath) {
   def allocData[V, A](makeTemp: NodePath => Data[V], fn: Data[V] => A): (Data[V], A) = {
     val newPath = root.resolve(strings.random(32))
@@ -20,7 +19,7 @@ case class Astral(root: NodePath) {
     (data, res)
   }
 
-  def allocDirectory[A](fn: NodePath => A): (NodePath, A) = {
+  def allocDirectory[A](fn: DirectoryPath => A): (DirectoryPath, A) = {
     val newPath = root.resolve(strings.random(32))
     newPath.makeDirectory
 
@@ -55,7 +54,7 @@ case class Astral(root: NodePath) {
     }
   }
 
-  def free(dir: NodePath): Unit = {
+  def free(dir: DirectoryPath): Unit = {
     if (!dir.exists)
       return
     moveBack(dir) match {
