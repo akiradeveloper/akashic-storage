@@ -27,22 +27,4 @@ object Commit {
     from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = false)
     res
   }
-
-  // not used
-  def retry(alloc: () => NodePath)(fn: Patch => Unit): Patch = {
-    def move(src: Patch): Patch = {
-      val dest = Patch(alloc())
-      try {
-        src.root.moveTo(dest.root.dir, dest.root.name, replaceIfExists = false)
-      } catch {
-        case e: FileAlreadyExistsException =>
-          move(src)
-        case e: Throwable =>
-          throw e
-      }
-      dest
-    }
-    val (src, _) = server.astral.allocDirectory(fn)
-    move(src)
-  }
 }
