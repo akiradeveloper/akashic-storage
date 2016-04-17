@@ -1,7 +1,6 @@
 <configuration debug="true">
     <appender name="ERROR_LOG" class="ch.qos.logback.core.FileAppender">
   	<file>/opt/akashic-storage/log/error.log</file>
-        <append>false</append>
         <encoder>
             <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
@@ -11,14 +10,17 @@
     </appender>
     <appender name="ADMIN_LOG" class="ch.qos.logback.core.FileAppender">
     	<file>/opt/akashic-storage/log/admin.log</file>
-        <append>false</append>
         <encoder>
             <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
     </appender>
-    <appender name="ALL_LOG" class="ch.qos.logback.core.FileAppender">
+    <appender name="ALL_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
     	<file>/opt/akashic-storage/log/all.log</file>
-        <append>false</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>/opt/akashic-storage/log/all.log-%d{yyyy-MM-dd}.%i.zip</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>1000</maxHistory>
+        </rollingPolicy>
         <encoder>
             <pattern>%d{yyyyMMdd HH:mm:ss.SSS} %-5le [%t] - %msg %n</pattern>
         </encoder>
