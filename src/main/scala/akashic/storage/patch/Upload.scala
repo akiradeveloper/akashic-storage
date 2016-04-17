@@ -11,7 +11,7 @@ case class Upload(root: NodePath) extends Patch {
   val meta = Meta.makeCache(root.resolve("meta"))
   val acl = Acl.makeCache(root.resolve("acl"))
   def init {
-    parts.makeDir
+    parts.makeDirectory
   }
   def findPart(partNumber: Int): Option[Part] = {
     val path = partPath(partNumber)

@@ -10,7 +10,7 @@ case class Bucket(root: NodePath) extends Patch {
   val keys: NodePath = root.resolve("keys")
   def keyPath(name: String): NodePath = keys.resolve(name)
   def init {
-    keys.makeDir
+    keys.makeDirectory
   }
   def findKey(name: String): Option[Key] = {
     val path = keys.resolve(name)

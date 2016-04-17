@@ -19,15 +19,15 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   val root = NodePath(null, null, Some(fs.getRoot))
 
   if (cleanup) {
-    root.cleanDir
+    root.cleanDirectory
     logger.info("mountpoint is cleaned up")
   }
 
   if (root.listDir.isEmpty) {
     logger.info("initialize mountpoint")
-    root.resolve("tree").makeDir
-    root.resolve("admin").makeDir
-    root.resolve("astral").makeDir
+    root.resolve("tree").makeDirectory
+    root.resolve("admin").makeDirectory
+    root.resolve("astral").makeDirectory
   }
 
   val initialized =

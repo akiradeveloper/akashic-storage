@@ -93,8 +93,8 @@ object CompleteMultipartUpload {
 
       val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
-        Commit.replaceDirectory(key.versions.acquireWriteDest) { patch =>
-          val versionPatch = Version(key, patch.root)
+        Commit.replaceDirectory(key.versions.acquireWriteDest) { newPath =>
+          val versionPatch = Version(key, newPath)
 
           val streams = parts.toStream.map(part => upload.part(part.partNumber).unwrap.filePath.getInputStream)
           using(new SequenceInputStream(Collections.enumeration(streams)))(versionPatch.data.root.createFile)

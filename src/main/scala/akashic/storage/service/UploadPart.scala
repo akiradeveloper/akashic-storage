@@ -32,14 +32,13 @@ object UploadPart {
       val key = findKey(bucket, keyName, Error.NoSuchUpload())
       val upload = findUpload(key, uploadId)
       val part = upload.part(partNumber)
-      var computedETag = ""
-      Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
+      val computedETag = Commit.replaceData(part.unwrap, Data.Pure.make) { data =>
         using(partData)(data.filePath.createFile)
         val computedMD5 = data.filePath.computeMD5
         for (md5 <- contentMd5)
           if (Base64.encodeBase64String(computedMD5) != md5)
             failWith(Error.BadDigest())
-        computedETag = Hex.encodeHexString(computedMD5)
+        Hex.encodeHexString(computedMD5)
       }
 
       val headers = ResponseHeaderList.builder

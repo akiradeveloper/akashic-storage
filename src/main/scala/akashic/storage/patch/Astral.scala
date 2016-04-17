@@ -5,34 +5,32 @@ import java.nio.file.{FileAlreadyExistsException, NoSuchFileException}
 import akashic.storage.backend.NodePath
 import akashic.storage.strings
 
-/** Astral is where everything is given birth and die */
 case class Astral(root: NodePath) {
-  def allocData[V](makeTemp: NodePath => Data[V], fn: Data[V] => Unit): Data[V] = {
+  def allocData[V, A](makeTemp: NodePath => Data[V], fn: Data[V] => A): (Data[V], A) = {
     val newPath = root.resolve(strings.random(32))
     val data = makeTemp(newPath)
-    try {
+    val res = try {
       fn(data)
     } catch {
       case e: Throwable =>
         newPath.removeIfExists
         throw e
     }
-    data
+    (data, res)
   }
 
-  def allocDirectory(fn: Patch => Unit): Patch = {
+  def allocDirectory[A](fn: DirectoryPath => A): (DirectoryPath, A) = {
     val newPath = root.resolve(strings.random(32))
-    newPath.makeDir
+    newPath.makeDirectory
 
-    val patch = Patch(newPath)
-    try {
-      fn(Patch(newPath))
+    val res = try {
+      fn(newPath)
     } catch {
       case e: Throwable =>
-        newPath.purgeDir
+        newPath.purgeDirectory
         throw e
     }
-    patch
+    (newPath, res)
   }
 
   private def moveBack(path: NodePath): Option[NodePath] = {
@@ -51,21 +49,17 @@ case class Astral(root: NodePath) {
 
   def free[V](data: Data[V]): Unit = {
     moveBack(data.root) match {
-      case Some(a) => a.purgeDir
+      case Some(a) => a.remove
       case None =>
     }
   }
 
-  def free(dir: NodePath): Unit = {
+  def free(dir: DirectoryPath): Unit = {
     if (!dir.exists)
       return
     moveBack(dir) match {
-      case Some(a) => a.purgeDir
+      case Some(a) => a.purgeDirectory
       case None =>
     }
-  }
-
-  def free(dir: Patch): Unit = {
-    free(dir.root)
   }
 }
