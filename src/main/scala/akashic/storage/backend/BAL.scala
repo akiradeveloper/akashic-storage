@@ -14,8 +14,8 @@ import org.apache.tika.Tika
 trait BAL {
   def getRoot: Node
   def isDirectory(n: Node): Boolean
-  def moveNode(n: Node, dir: Node, name: String, replaceIfExists: Boolean)
-  def removeNode(n: Node)
+  def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String, replaceIfExists: Boolean)
+  def removeNode(dir: Node, name: String)
   def makeDirectory(dir: Node, name: String): Unit
   def lookup(dir: Node, name: String): Option[Node]
   def listDirectory(n: Node): Iterable[(String, Node)]
@@ -48,23 +48,18 @@ trait BAL {
     DigestUtils.md5(f)
   }
   private[backend] def cleanDirectory(n: Node): Unit = {
-    def cleanDirRec(m: Node): Unit = {
+    def cleanDirRec(dir: Node, name: String, m: Node): Unit = {
       if (isFile(m) || listDirectory(m).isEmpty) {
-        removeNode(m)
+        removeNode(dir, name)
         return
       }
-
       listDirectory(m).foreach { case (name: String, l: Node) =>
-        cleanDirRec(l)
+        cleanDirRec(m, name, l)
       }
-      removeNode(m)
+      removeNode(dir, name)
     }
     listDirectory(n).foreach { case (name: String, m: Node) =>
-      cleanDirRec(m)
+      cleanDirRec(n, name, m)
     }
-  }
-  private[backend] def purgeDirectory(n: Node) = {
-    cleanDirectory(n)
-    removeNode(n)
   }
 }
