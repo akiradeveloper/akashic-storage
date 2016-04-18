@@ -41,9 +41,9 @@ object GetBucketObjectVersions {
             <Key>{name}</Key>
             <VersionId>{meta.versionId}</VersionId>
             <IsLatest>true</IsLatest>
-            <LastModified>{dates.format000Z(new Date(unwrap.root.getAttr.creationTime))}</LastModified>
+            <LastModified>{dates.format000Z(new Date(unwrap.getAttr.creationTime))}</LastModified>
             <ETag>{quoteString(meta.eTag)}</ETag>
-            <Size>{unwrap.data.length}</Size>
+            <Size>{unwrap.getAttr.length}</Size>
             <Owner>
               <ID>{acl.owner}</ID>
             </Owner>

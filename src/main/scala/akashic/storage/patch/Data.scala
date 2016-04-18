@@ -4,7 +4,6 @@ import akashic.storage.backend.NodePath
 
 trait Data[V] extends Patch {
   val filePath: NodePath
-  def length: Long = filePath.getAttr.length
   def root = filePath
   def get: V
   def put(v: V)

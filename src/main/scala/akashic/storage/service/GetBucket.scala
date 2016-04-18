@@ -38,9 +38,9 @@ object GetBucket {
         override def toXML = {
           <Contents>
             <Key>{decodeKeyName(key.name)}</Key>
-            <LastModified>{dates.format000Z(new Date(version.root.getAttr.creationTime))}</LastModified>
+            <LastModified>{dates.format000Z(new Date(version.getAttr.creationTime))}</LastModified>
             <ETag>{quoteString(meta.eTag)}</ETag>
-            <Size>{version.data.length}</Size>
+            <Size>{version.getAttr.length}</Size>
             <StorageClass>STANDARD</StorageClass>
             <Owner>
               <ID>{ownerId}</ID>
