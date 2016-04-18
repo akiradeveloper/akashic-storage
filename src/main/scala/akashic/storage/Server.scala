@@ -5,6 +5,7 @@ import akashic.storage.backend.{BALFactory, NodePath}
 import akashic.storage.caching.CacheMaps
 import akashic.storage.patch.{Astral, Tree}
 import akashic.storage.service._
+import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model.{HttpEntity, StatusCode, StatusCodes}
@@ -16,7 +17,7 @@ import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
   fs = new BALFactory(config.rawConfig.getConfig("backend")).build
-  val root = NodePath(null, null, Some(fs.getRoot))
+  private val root = NodePath(null, null, Some(fs.getRoot))
 
   if (cleanup) {
     root.cleanDirectory
@@ -30,7 +31,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     root.resolve("astral").makeDirectory
   }
 
-  val initialized =
+  private val initialized =
     root.resolve("tree").exists &&
     root.resolve("admin").exists &&
     root.resolve("astral").exists
@@ -42,13 +43,13 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
   val astral = Astral(root.resolve("astral"))
   val cacheMaps = CacheMaps(config)
 
-  val adminRoute =
+  private val adminRoute =
     Add.route ~
     List.route ~
     Get.route ~
     Update.route
 
-  val adminErrHandler = ExceptionHandler {
+  private val adminErrHandler = ExceptionHandler {
     case admin.Error.Exception(e) =>
       val (code, message) = admin.Error.interpret(e)
       val status = StatusCode.int2StatusCode(code)
@@ -59,7 +60,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   // I couldn't place this in service package
   // My guess is evaluation matters for the null pointer issue
-  val serviceRoute =
+  private val serviceRoute =
     ListMultipartUploads.route ~    // GET    /bucketName?uploads
     GetBucketAcl.route ~            // GET    /bucketName?acl
     GetBucketLocation.route ~       // GET    /bucketName?location
@@ -76,14 +77,14 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     UploadPart.route ~              // PUT    /bucketName/keyName?uploadId=***?partNumber=***
     PutObjectAcl.route ~            // PUT    /bucketName/keyName?acl
     PutObject.route ~               // PUT    /bucketName/keyName
+    DeleteMultipleObjects.route ~   // POST   /bucketName?delete
+    InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
+    CompleteMultipartUpload.route ~ // POST   /bucketName/keyName?uploadId=***
     DeleteBucket.route ~            // DELETE /bucketName
     AbortMultipartUpload.route ~    // DELETE /bucketName/keyName?uploadId=***
-    DeleteObject.route ~            // DELETE /bucketName/keyName
-    DeleteMultipleObjects.route ~   // POST   /bucketName
-    InitiateMultipartUpload.route ~ // POST   /bucketName/keyName?uploads
-    CompleteMultipartUpload.route   // POST   /bucketName/keyName?uploadId=***
+    DeleteObject.route              // DELETE /bucketName/keyName
 
-  val serviceErrHandler = ExceptionHandler {
+  private val serviceErrHandler = ExceptionHandler {
     case service.Error.Exception(context, e) =>
       val withMessage = service.Error.withMessage(e)
       val xml = service.Error.mkXML(withMessage, context.resource, context.requestId)
@@ -93,25 +94,25 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
       complete(StatusCodes.InternalServerError, HttpEntity.Empty)
   }
 
-  val apiRoute =
+  private val apiRoute =
     handleExceptions(adminErrHandler) { admin.apiLogger(adminRoute) } ~
     handleExceptions(serviceErrHandler) { service.apiLogger(serviceRoute) }
 
-  val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
-  val unmatchRoute =
+  private val ignoreEntity: Directive0 = entity(as[ByteString]).tflatMap(_ => pass)
+  private val unmatchRoute =
     // We need to extract entity to consume the payload
     // otherwise client never knows the end of connection.
     ignoreEntity { complete(StatusCodes.BadRequest, HttpEntity.Empty) }
 
-  val route =
+  private val route =
     apiRoute ~
     unmatchRoute
 
   def address = s"${config.ip}:${config.port}"
 
-  var binding: Future[Http.ServerBinding] = _
+  private var binding: Future[Http.ServerBinding] = _
 
-  def start = {
+  def start: Future[ServerBinding] = {
     logger.info("start server")
     binding = Http().bindAndHandle(
       handler = Route.handlerFlow(route),
@@ -120,7 +121,7 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
     binding
   }
 
-  def stop = {
+  def stop: Future[Unit] = {
     logger.info("stop server")
     binding.flatMap(_.unbind)
   }
