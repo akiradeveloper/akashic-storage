@@ -20,4 +20,8 @@ case class Bucket(root: NodePath) extends Patch {
       None
   }
   def listKeys: Iterable[Key] = keys.listDir.map(Key(this, _))
+  // Since there is no API to change the location of existing bucket
+  // and there is no chance that location file isn't created.
+  // We can use the creation time as the creation time of the bucket.
+  def creationTime: Long = location.root.getAttr.creationTime
 }

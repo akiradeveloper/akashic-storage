@@ -12,4 +12,5 @@ case class Version(key: Key, root: NodePath) extends Patch {
   val deletable = false
   def versionId = meta.get.versionId
   def isDeleteMarker = meta.get.isDeleteMarker
+  def getAttr = data.filePath.getAttr
 }

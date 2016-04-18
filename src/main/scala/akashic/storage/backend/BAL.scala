@@ -21,6 +21,13 @@ trait BAL {
   def listDirectory(n: Node): Iterable[(String, Node)]
   def createFile(dir: Node, name: String, data: InputStream): Unit
   def getFileInputStream(n: Node): InputStream
+
+  /**
+   * Return FileAttr for the file.
+   * The implementer doesn't need to implement this method for directories.
+   * Because there should be a chance for a backend not to have a attributes on the directory.
+   * (or it may not have a structure like directory or bucket internally)
+   */
   def getFileAttr(n: Node): FileAttr
 
   // TODO move to NodePath

@@ -41,7 +41,7 @@ object ListMultipartUploads {
         val acl = upload.acl.get
         val ownerId = acl.owner
         val displayName = server.users.find(ownerId).get.displayName
-        val initiatedDate = dates.format000Z(new Date(upload.root.getAttr.creationTime))
+        val initiatedDate = dates.format000Z(new Date(upload.creationTime))
         <Upload>
           <Key>{keyName}</Key>
           <UploadId>{upload.name}</UploadId>

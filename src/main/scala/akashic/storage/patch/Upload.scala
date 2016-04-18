@@ -22,4 +22,5 @@ case class Upload(root: NodePath) extends Patch {
     }
   }
   def listParts: Seq[Part] = parts.listDir.map(Part(_)).toSeq.sortBy(_.id)
+  def creationTime = meta.root.getAttr.creationTime
 }

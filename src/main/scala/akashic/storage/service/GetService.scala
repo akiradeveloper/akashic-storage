@@ -26,7 +26,7 @@ object GetService {
         </Owner>
       }
       def Bucket(b: patch.Bucket) = {
-        val date = new Date(b.root.getAttr.creationTime)
+        val date = new Date(b.creationTime)
         val creationDate = dates.format000Z(date)
         <Bucket>
           <Name>{b.name}</Name>
