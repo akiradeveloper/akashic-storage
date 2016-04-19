@@ -5,7 +5,7 @@ It simply requires mountpoint.
 
 ```
 backend {
-  type = akashic.storage.backend.Local
+  type = akashic.storage.backend.impl.Local
   # The mountpoint of the backing filesystem
   # User need to prepare this mountpoint before starting akashic-storage server.
   mountpoint = /mnt/akashic-storage
