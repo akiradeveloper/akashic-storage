@@ -1,8 +1,7 @@
-package akashic.storage
+package akashic.storage.backend
 
-import java.nio.file.{Paths, Files, Path}
+import java.nio.file.{Files, Path, Paths}
 
-import akashic.storage.backend.BALFactory
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSuite
 
