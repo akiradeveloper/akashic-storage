@@ -1,8 +1,9 @@
-package akashic.storage.backend
+package akashic.storage.backend.impl
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.util.concurrent.atomic.AtomicLong
 
+import akashic.storage.backend._
 import com.typesafe.config.Config
 import org.apache.commons.io.IOUtils
 

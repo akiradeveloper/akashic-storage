@@ -1,9 +1,10 @@
-package akashic.storage.backend
+package akashic.storage.backend.impl
 
 import java.io.InputStream
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
+import akashic.storage.backend._
 import com.typesafe.config.Config
 import org.apache.commons.io.IOUtils
 
