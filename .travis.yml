@@ -6,6 +6,7 @@ env:
   - TEST_KIND="sbt-test"
   - TEST_KIND="s3-tests"
   - TEST_KIND="daemon-test"
+  - TEST_KIND="vagrant-test"
 jdk:
   - oraclejdk8
 scala:
@@ -17,6 +18,10 @@ before_install:
   - echo JAVA_HOME="$JAVA_HOME"
   - export
   - sudo apt-get -y -qq update
+  - sudo apt-get install -q virtualbox --fix-missing
+  - sudo wget -nv https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.2_x86_64.deb
+  - sudo dpkg -i vagrant_1.7.2_x86_64.deb
+  - bundle install
   - unset GOROOT
   - export GOPATH="$HOME/go"
   - export PATH="/usr/local/go/bin:$PATH"
@@ -34,3 +39,4 @@ script:
   - if [ "$TEST_KIND" = "sbt-test" ]; then cd travis-script; sh sbt-test.sh; fi
   - if [ "$TEST_KIND" = "s3-tests" ]; then cd travis-script; sh s3-tests.sh; fi
   - if [ "$TEST_KIND" = "daemon-test" ]; then cd travis-script; sh daemon-test.sh; fi
+  - if [ "$TEST_KIND" = "vagrant-test" ]; then cd travis-script; sh vagrant-test.sh; fi
