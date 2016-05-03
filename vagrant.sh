@@ -44,8 +44,8 @@ passwd
 INP
 cat ~/.akashic-admin
 
-gem install sinatra
-gem install sinatra-contrib
+gem install bundler
 cd akashic-storage/admin-web
+bundle install
 sh run-daemon.sh
 cd -
