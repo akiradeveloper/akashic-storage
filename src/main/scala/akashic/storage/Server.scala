@@ -17,7 +17,7 @@ import scala.concurrent.Future
 
 case class Server(config: ServerConfig, cleanup: Boolean) {
   fs = new BALFactory(config.rawConfig.getConfig("backend")).build
-  private val root = NodePath(null, null, Some(fs.getRoot))
+  private val root = NodePath(null, "/", "", Some(fs.getRoot))
 
   if (cleanup) {
     root.cleanDirectory
@@ -26,21 +26,21 @@ case class Server(config: ServerConfig, cleanup: Boolean) {
 
   if (root.listDir.isEmpty) {
     logger.info("initialize mountpoint")
-    root.resolve("tree").makeDirectory
-    root.resolve("admin").makeDirectory
-    root.resolve("astral").makeDirectory
+    root("tree").makeDirectory
+    root("admin").makeDirectory
+    root("astral").makeDirectory
   }
 
   private val initialized =
-    root.resolve("tree").exists &&
-    root.resolve("admin").exists &&
-    root.resolve("astral").exists
+    root("tree").exists &&
+    root("admin").exists &&
+    root("astral").exists
   require(initialized)
   logger.info("mountpoint is initialized")
 
-  val tree = Tree(root.resolve("tree"))
-  val users = UserDB(root.resolve("admin"))
-  val astral = Astral(root.resolve("astral"))
+  val tree = Tree(root("tree"))
+  val users = UserDB(root("admin"))
+  val astral = Astral(root("astral"))
   val cacheMaps = CacheMaps(config)
 
   private val adminRoute =

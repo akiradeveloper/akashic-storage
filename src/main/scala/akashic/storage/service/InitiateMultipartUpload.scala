@@ -41,7 +41,7 @@ object InitiateMultipartUpload {
       val key = bucket.findKey(keyName).get
 
       val uploadId = key.uploads.acquireNewUpload
-      Commit.once(key.uploads.root.resolve(uploadId)) { newPath =>
+      Commit.once(key.uploads.root(uploadId)) { newPath =>
         val upload = Upload(newPath)
         upload.init
 

@@ -16,7 +16,7 @@ object Location {
   def writer(a: t) = a.toBytes
   def reader(a: Array[Byte]) = fromBytes(a)
   def makeCache(path: NodePath) = new Cache[t] {
-    override def cacheMap: CacheMap[K, t] = server.cacheMaps.forLocation
+    override def cacheMap: CacheMap[t] = server.cacheMaps.forLocation
     override def writer: (t) => Array[Byte] = Location.writer
     override def reader: (Array[Byte]) => t = Location.reader
     override val filePath = path

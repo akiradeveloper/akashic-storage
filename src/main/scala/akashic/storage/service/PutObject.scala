@@ -2,6 +2,7 @@ package akashic.storage.service
 
 import java.io.InputStream
 
+import akashic.storage.caching.Cache
 import akashic.storage.patch.{Commit, Key, Version}
 import akashic.storage.{HeaderList, server}
 import akka.http.scaladsl.model.headers.ETag
@@ -45,15 +46,16 @@ object PutObject {
         keyPatch.init
       }
       val key = bucket.findKey(keyName).get
-      val computedETag = Commit.replaceDirectory(key.versions.acquireWriteDest) { newPath =>
+      val destPath = key.versions.acquireWriteDest
+      val computedETag = Commit.replaceDirectory(destPath) { newPath =>
         val version = Version(key, newPath)
 
-        version.acl.put {
+        version.acl.replace({
           val grantsFromCanned = (cannedAcl <+ Some("private"))
             .map(Acl.CannedAcl.forName(_, callerId, bucketAcl.owner))
             .map(_.makeGrants).get
           Acl(callerId, grantsFromCanned ++ grantsFromHeaders)
-        }
+        }, Cache.creationTimeOf(destPath, "acl"))
 
         using(objectData)(version.data.filePath.createFile)
 
@@ -63,7 +65,7 @@ object PutObject {
             failWith(Error.BadDigest())
         val computedETag = Hex.encodeHexString(computedMD5)
 
-        version.meta.put(
+        version.meta.replace(
           Meta(
             versionId = "null",
             eTag = computedETag,
@@ -72,7 +74,7 @@ object PutObject {
               .appendOpt("Content-Disposition", contentDisposition)
               .build,
             xattrs = metadata
-          ))
+          ), Cache.creationTimeOf(destPath, "meta"))
 
         computedETag
       }

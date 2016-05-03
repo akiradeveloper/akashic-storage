@@ -5,11 +5,11 @@ import akashic.storage.backend.NodePath
 import akashic.storage.service.{Acl, Meta}
 
 case class Upload(root: NodePath) extends Patch {
-  val parts = root.resolve("parts")
-  private def partPath(n: Int) = parts.resolve(n.toString)
+  val parts = root("parts")
+  private def partPath(n: Int) = parts(n.toString)
   def part(n: Int) = Part(partPath(n))
-  val meta = Meta.makeCache(root.resolve("meta"))
-  val acl = Acl.makeCache(root.resolve("acl"))
+  val meta = Meta.makeCache(root("meta"))
+  val acl = Acl.makeCache(root("acl"))
   def init {
     parts.makeDirectory
   }

@@ -51,7 +51,7 @@ object Acl {
     override val filePath = path
     override def writer: (t) => Array[Byte] = Acl.writer
     override def reader: (Array[Byte]) => t = Acl.reader
-    override def cacheMap: CacheMap[K, t] = server.cacheMaps.forAcl
+    override def cacheMap: CacheMap[t] = server.cacheMaps.forAcl
   }
 
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[t]

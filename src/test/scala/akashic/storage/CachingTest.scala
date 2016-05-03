@@ -13,7 +13,7 @@ class CachingTest extends ServerTestBase {
     test(FixtureParam())
   }
 
-  val guava = new CacheMap.Guava[String, String](
+  val guava = new CacheMap.Guava[String](
     CacheBuilder.newBuilder
       .maximumSize(32)
       .build())
@@ -27,10 +27,10 @@ class CachingTest extends ServerTestBase {
 
     cache = new Cache[String] {
       val UTF8 = Charset.forName("UTF-8")
-      override val filePath = NodePath(Paths.get("/tmp"), "t", None)
+      override val filePath = NodePath(Paths.get("/tmp"), "/tmp", "t", None)
       override def writer: (String) => Array[Byte] = (a: String) => a.getBytes(UTF8)
       override def reader: (Array[Byte]) => String = (a: Array[Byte]) => new String(a, UTF8)
-      override def cacheMap: CacheMap[K, String] = guava
+      override def cacheMap: CacheMap[String] = guava
     }
   }
 
@@ -51,5 +51,13 @@ class CachingTest extends ServerTestBase {
     assert(cache.get === "hige")
     guava.backing.invalidateAll()
     assert(cache.get === "hige")
+  }
+
+  test("read after write") { _ =>
+    cache.put("aaa")
+    cache.replace(cache.get + "bbb", Cache.creationTimeOf(cache.filePath))
+    assert(cache.get === "aaabbb")
+    cache.replace(cache.get + "ccc", Cache.creationTimeOf(cache.filePath))
+    assert(cache.get === "aaabbbccc")
   }
 }
