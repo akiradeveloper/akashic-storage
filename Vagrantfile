@@ -8,6 +8,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "bento/centos-7.2"
   config.vm.network "forwarded_port", guest: 10946, host: 10946
+  config.vm.network "forwarded_port", guest: 10947, host: 10947
   config.vm.network "public_network"
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -19,5 +20,5 @@ Vagrant.configure(2) do |config|
     vb.memory = "1024"
   end
 
-  config.vm.provision "shell", privileged: false, path: vagrant.sh
+  config.vm.provision "shell", privileged: false, path: "vagrant.sh"
 end
