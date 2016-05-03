@@ -4,7 +4,7 @@ echo export PATH="/usr/local/go/bin:$PATH" >> .bash_profile
 source .bash_profile
 
 sudo yum -y update
-sudo yum -y install jsvc rubygems tree curl git tree
+sudo yum -y install jsvc rubygems tree curl git
 
 if [ ! -e jdk-8u65-linux-x64.rpm ]; then
   wget --no-check-certificate --no-cookies - --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.rpm
