@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
     source .bash_profile
 
     sudo yum -y update
-    sudo yum -y install jsvc rubygem tree curl
+    sudo yum -y install jsvc rubygems tree curl
 
     if [ ! -e jdk-8u65-linux-x64.rpm ]; then
       wget --no-check-certificate --no-cookies - --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.rpm
@@ -64,8 +64,10 @@ Vagrant.configure(2) do |config|
 
     passwd
     INP
-    cat ~/akashic-admin
+    cat ~/.akashic-admin
 
+    gem install sinatra
+    gem install sinatra-contrib
     cd akashic-storage/admin-web
     sh run-daemon.sh
     cd -
