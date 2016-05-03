@@ -20,10 +20,8 @@ class McTest extends ServerTestBase {
   }
 
   val alias = "akashic-storage"
-  val confDir = "/tmp/akashic-storage-mc"
 
   def mc(cmd: String) = {
-    // val cmdline = s"mc --config-folder=${confDir} ${cmd}"
     val cmdline = s"mc --debug ${cmd}"
     println(cmdline)
     Process(cmdline)
@@ -42,12 +40,6 @@ class McTest extends ServerTestBase {
     assert(postRes.getStatusLine.getStatusCode === 200)
     val newUser = User.fromXML(XML.load(postRes.getEntity.getContent))
     println(newUser)
-
-    val confDirPath = Paths.get(confDir)
-    if (!Files.exists(confDirPath)) {
-      Files.createDirectory(confDirPath)
-    }
-    FileUtils.cleanDirectory(confDirPath.toFile)
 
     assert(mc(s"config host add ${alias} http://${server.address} ${newUser.accessKey} ${newUser.secretKey} S3v2").! === 0)
     // assert(mc(s"config alias add ${alias} http://${server.address}").! === 0)

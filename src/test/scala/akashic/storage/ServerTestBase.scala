@@ -14,12 +14,10 @@ import scala.concurrent.duration.Duration
 import scala.util.Random
 
 abstract class ServerTestBase extends fixture.FunSuite with BeforeAndAfterEach {
-  def makeConfig = ServerConfig.fromConfig(ConfigFactory.load("test.conf"))
+  def makeConfig = ServerConfig.fromConfig(ConfigFactory.load())
 
   override def beforeEach {
     val config = makeConfig
-    val mountpoint = Paths.get(config.rawConfig.getConfig("backend").getString("mountpoint"))
-    Files.createDirectories(mountpoint)
     server = Server(config, cleanup = true)
 
     Await.ready(server.start, Duration.Inf)

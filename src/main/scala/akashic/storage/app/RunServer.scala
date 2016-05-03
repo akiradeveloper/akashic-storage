@@ -11,9 +11,7 @@ import scala.concurrent.duration.Duration
 
 object RunServer extends App {
   // TODO impl --loglevel= option
-  val config = ServerConfig.fromConfig(ConfigFactory.load("run-server.conf"))
-  val mountpoint = Paths.get(config.rawConfig.getConfig("backend").getString("mountpoint"))
-  Files.createDirectories(mountpoint)
+  val config = ServerConfig.fromConfig(ConfigFactory.load())
   server = Server(config, cleanup = true)
 
   val fut = server.start

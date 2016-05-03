@@ -1,5 +1,9 @@
 set -e
 
+MOUNTPOINT=/mnt/akashic-storage
+sudo mkdir -p $MOUNTPOINT
+sudo chmod o+rwx $MOUNTPOINT
+
 cd ../installer
 make
 sudo make install
@@ -8,9 +12,6 @@ cd -
 
 whoami
 export
-
-DIR=/tmp/akashic-storage-test
-mkdir -p $DIR
 
 echo "**** start ****"
 service akashic-storage start
@@ -45,7 +46,7 @@ mc --debug --quiet cp /tmp/up-large aka/myb/myo-large
 mc --debug --quiet cp aka/myb/myo-small down-small-1
 mc --debug --quiet cp aka/myb/myo-large down-large-1
 mc ls aka/myb/
-tree $DIR
+tree $MOUNTPOINT
 
 echo -- daemon.log --
 cat /opt/akashic-storage/log/daemon.log
@@ -70,7 +71,7 @@ service akashic-storage status
 userId=`akashic-admin-add`
 echo "userId: $userId"
 akashic-admin-list
-tree $DIR
+tree $MOUNTPOINT
 cat ~/.mc/config.json
 mc ls aka
 mc ls aka/myb/
