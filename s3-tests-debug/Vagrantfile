@@ -31,13 +31,13 @@ Vagrant.configure(2) do |config|
     ls -l
     git clone https://github.com/ceph/s3-tests $CLONEDIR
 
-    cp $REPO/vagrant-s3-tests/s3-tests.conf $CLONEDIR
+    cp $REPO/s3-tests-debug/s3-tests.conf $CLONEDIR
 
     cd $CLONEDIR
     ./bootstrap
     cd -
 
-    cp $REPO/vagrant-s3-tests/run.sh .
+    cp $REPO/s3-tests-debug/run.sh .
     chmod +x run.sh
 
     cp $REPO/s3-tests/boto.config ~/.boto
