@@ -1,3 +1,10 @@
+2016-05-05  Akira Hayakawa <ruby.wktk@gmail.com>
+
+	* v1.0.0-RC3
+	* Change metadata-caching algorithm
+	* Change BAL interface
+	* Move Vagrantfile to project top level
+
 2016-04-11  Akira Hayakawa <ruby.wktk@gmail.com>
 
 	* v1.0.0-RC2
