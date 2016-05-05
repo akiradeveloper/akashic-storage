@@ -11,13 +11,13 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 
 case class UserDB(root: NodePath) {
-  val cache = new CacheMap.Guava[String, InMem](CacheBuilder.newBuilder
+  val cache = new CacheMap.Guava[InMem](CacheBuilder.newBuilder
     .maximumSize(1)
     .build())
 
-  val dbPath = root.resolve("db")
+  val dbPath = root("db")
   def makeCache(path: NodePath) = new Cache[InMem] {
-    override def cacheMap: CacheMap[K, InMem] = cache
+    override def cacheMap: CacheMap[InMem] = cache
     private def doWriter(a: InMem): Array[Byte] = {
       a.toByteArray
     }
@@ -61,7 +61,7 @@ case class UserDB(root: NodePath) {
     }
     def commit {
       Commit.replaceData(dbData, makeCache) { data =>
-        data.put(this)
+        data.replace(this, Cache.creationTimeOf(dbData.filePath))
       }
     }
   }

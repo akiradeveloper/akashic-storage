@@ -6,8 +6,8 @@ import akashic.storage.backend.NodePath
 import akashic.storage.server
 
 object Commit {
-  def replaceData[V, A](to: Data[V], makeTemp: NodePath => Data[V])(fn: Data[V] => A): A = {
-    val (from, res) = server.astral.allocData(makeTemp, fn)
+  def replaceData[V, A](to: Data[V], makeData: NodePath => Data[V])(fn: Data[V] => A): A = {
+    val (from, res) = server.astral.allocData(makeData, fn)
     from.root.moveTo(to.root.dir, to.root.name, replaceIfExists = true)
     res
   }
@@ -20,8 +20,9 @@ object Commit {
   }
 
   def replaceDirectory[A](to: DirectoryPath)(fn: DirectoryPath => A): A = {
-    server.astral.free(to)
     val (from, res) = server.astral.allocDirectory(fn)
+    // freeing should be after doing fn because fn may refer to the "to" resources
+    server.astral.free(to)
     from.moveTo(to.dir, to.name, replaceIfExists = false)
     res
   }

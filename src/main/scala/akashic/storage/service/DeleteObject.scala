@@ -22,7 +22,7 @@ object DeleteObject {
       // simple DELETE
       versioning match {
         case Versioning.UNVERSIONED =>
-          server.astral.free(key.versions.root.resolve("0"))
+          server.astral.free(key.versions.root("0"))
           None
         case Versioning.ENABLED =>
           assert(false)

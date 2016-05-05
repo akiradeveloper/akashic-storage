@@ -1,7 +1,6 @@
 package akashic.storage.backend.impl
 
 import java.io.{ByteArrayInputStream, InputStream}
-import java.util.concurrent.atomic.AtomicLong
 
 import akashic.storage.backend._
 import com.typesafe.config.Config
@@ -10,7 +9,6 @@ import org.apache.commons.io.IOUtils
 import scala.collection.mutable
 
 object Memory {
-  val ID = new AtomicLong(0)
   trait Entry
   case class Directory() extends Entry {
     val children = mutable.Map[String, Entry]()
@@ -30,7 +28,7 @@ class Memory extends BAL {
   override def lookup(dir: Node, name: String): Option[Node] = dir.asInstanceOf[Directory].children.get(name)
   override def createFile(dir: Node, name: String, data: InputStream): Unit = {
     val buf = IOUtils.toByteArray(data)
-    val attr = FileAttr(System.currentTimeMillis, buf.length, Some(ID.incrementAndGet.toString))
+    val attr = FileAttr(System.currentTimeMillis, buf.length)
     val parent = dir.asInstanceOf[Directory]
     parent.children += name -> File(buf, attr)
   }

@@ -3,7 +3,7 @@ package akashic.storage.patch
 import akashic.storage.backend.NodePath
 
 case class Tree(root: NodePath) {
-  def bucketPath(name: String): NodePath = root.resolve(name)
+  def bucketPath(name: String): NodePath = root(name)
   def findBucket(name: String): Option[Bucket] = {
     val path = bucketPath(name)
     if (path.exists) {

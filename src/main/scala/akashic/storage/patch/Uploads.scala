@@ -9,7 +9,7 @@ case class Uploads(root: NodePath) {
     uploadId
   }
   def findUpload(uploadId: String): Option[Upload] = {
-    val uploadPath = root.resolve(uploadId)
+    val uploadPath = root(uploadId)
     if (uploadPath.exists) {
       Some(Upload(uploadPath))
     } else {

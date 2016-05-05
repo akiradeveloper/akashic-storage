@@ -1,5 +1,6 @@
 package akashic.storage.service
 
+import akashic.storage.caching.Cache
 import akashic.storage.patch.Commit
 import akashic.storage.server
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
@@ -43,7 +44,7 @@ object PutBucketAcl {
       }
 
       Commit.replaceData(bucket.acl, Acl.makeCache) { data =>
-        data.put(newAcl)
+        data.replace(newAcl, Cache.creationTimeOf(bucket.acl.filePath))
       }
       val headers = ResponseHeaderList.builder
         .withHeader(X_AMZ_REQUEST_ID, requestId)

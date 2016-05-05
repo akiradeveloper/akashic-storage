@@ -7,7 +7,7 @@ import akashic.storage.strings
 
 case class Astral(root: NodePath) {
   def allocData[V, A](makeTemp: NodePath => Data[V], fn: Data[V] => A): (Data[V], A) = {
-    val newPath = root.resolve(strings.random(32))
+    val newPath = root(strings.random(32))
     val data = makeTemp(newPath)
     val res = try {
       fn(data)
@@ -20,7 +20,7 @@ case class Astral(root: NodePath) {
   }
 
   def allocDirectory[A](fn: DirectoryPath => A): (DirectoryPath, A) = {
-    val newPath = root.resolve(strings.random(32))
+    val newPath = root(strings.random(32))
     newPath.makeDirectory
 
     val res = try {
@@ -34,7 +34,7 @@ case class Astral(root: NodePath) {
   }
 
   private def moveBack(path: NodePath): Option[NodePath] = {
-    val newPath = root.resolve(strings.random(32))
+    val newPath = root(strings.random(32))
     try {
       // no need to be atomic because if the trash remains in the tree
       // next compaction has a chance to find it out.

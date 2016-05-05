@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, SequenceInputStream}
 import java.util.Collections
 
 import akashic.storage.backend.{NodePath, Streams}
+import akashic.storage.caching.Cache
 import akashic.storage.patch.{Commit, Version}
 import akashic.storage.server
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
@@ -93,17 +94,18 @@ object CompleteMultipartUpload {
 
       val mergeResult: Future[NodeSeq] = Future {
         // the directory is already made
-        Commit.replaceDirectory(key.versions.acquireWriteDest) { newPath =>
+        val destPath = key.versions.acquireWriteDest
+        Commit.replaceDirectory(destPath) { newPath =>
           val versionPatch = Version(key, newPath)
 
           val streams = parts.toStream.map(part => upload.part(part.partNumber).unwrap.filePath.getInputStream)
           using(new SequenceInputStream(Collections.enumeration(streams)))(versionPatch.data.root.createFile)
 
-          versionPatch.acl.put(upload.acl.get)
+          versionPatch.acl.replace(upload.acl.get, Cache.creationTimeOf(destPath, "acl"))
 
           val oldMeta = upload.meta.get
           val newMeta = oldMeta.copy(eTag = newETag)
-          versionPatch.meta.put(newMeta)
+          versionPatch.meta.replace(newMeta, Cache.creationTimeOf(destPath, "meta"))
         }
 
         server.astral.free(upload.root)

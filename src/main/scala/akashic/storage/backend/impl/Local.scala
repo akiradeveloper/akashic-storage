@@ -57,11 +57,7 @@ class Local(mountpoint: Path) extends BAL {
     val attr = Files.readAttributes(n, classOf[BasicFileAttributes])
     val creationTime = attr.creationTime().toMillis
     val length = attr.size
-    val uniqueKey: Option[String] = attr.fileKey match {
-      case null => None
-      case a => Some(a.hashCode.toString)
-    }
-    FileAttr(creationTime, length, uniqueKey)
+    FileAttr(creationTime, length)
   }
   override def lookup(dir: Node, name: String): Option[Node] = {
     val p = dir.resolve(name)

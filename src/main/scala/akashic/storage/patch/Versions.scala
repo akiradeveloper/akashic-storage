@@ -5,7 +5,7 @@ import akashic.storage.backend.NodePath
 case class Versions(key: Key, root: NodePath) {
   def acquireWriteDest: NodePath = {
     // versioning disabled
-    root.resolve("0")
+    root("0")
   }
   private def acquireNewLoc: NodePath = {
     val xs = root.listDir.map(_.name.toInt)
@@ -14,12 +14,12 @@ case class Versions(key: Key, root: NodePath) {
     } else {
       xs.max + 1
     }
-    root.resolve(newId.toString)
+    root(newId.toString)
   }
   def listVersions: Seq[Version] = {
     root.listDir.map(Version(key, _)).toSeq.sortBy(-1 * _.name.toInt)
   }
-  def versionPath(id: Int) = root.resolve(id.toString)
+  def versionPath(id: Int) = root(id.toString)
   def findLatestVersion: Option[Version] = {
     listVersions.headOption
   }

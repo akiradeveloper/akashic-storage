@@ -3,8 +3,8 @@ package akashic.storage.patch
 import akashic.storage.backend.NodePath
 
 case class Key(bucket: Bucket, root: NodePath) extends Patch {
-  val versions = Versions(this, root.resolve("versions"))
-  val uploads = Uploads(root.resolve("uploads"))
+  val versions = Versions(this, root("versions"))
+  val uploads = Uploads(root("uploads"))
   def init {
     versions.root.makeDirectory
     uploads.root.makeDirectory

@@ -16,7 +16,7 @@ object Versioning {
 
   type t = Versioning
   def makeCache(path: NodePath) = new Cache[t] {
-    override def cacheMap: CacheMap[K, t] = server.cacheMaps.forVersioning
+    override def cacheMap: CacheMap[t] = server.cacheMaps.forVersioning
     override def writer: (t) => Array[Byte] = Versioning.writer
     override def reader: (Array[Byte]) => t = Versioning.reader
     override val filePath = path
