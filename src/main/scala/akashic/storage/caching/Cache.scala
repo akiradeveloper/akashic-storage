@@ -8,9 +8,7 @@ object Cache {
   def creationTimeOf(dir: DirectoryPath, name: String): Long = {
     if (!dir.exists)
       return 0
-    if (!dir(name).exists)
-      return 0
-    dir(name).getAttr.creationTime
+    creationTimeOf(dir(name))
   }
   def creationTimeOf(f: NodePath): Long = {
     if (!f.exists)
