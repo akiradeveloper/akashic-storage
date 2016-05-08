@@ -8,6 +8,13 @@ import org.apache.commons.io.IOUtils
 
 import scala.collection.mutable
 
+/** Pseudo backend that holds all data in memory
+ *
+ *  backend {
+ *    type = akashic.storage.backend.impl.Memory
+ *  }
+ */
+
 object Memory {
   trait Entry
   case class Directory() extends Entry {

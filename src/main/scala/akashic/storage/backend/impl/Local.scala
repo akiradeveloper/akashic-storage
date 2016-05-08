@@ -8,6 +8,18 @@ import akashic.storage.backend._
 import com.typesafe.config.Config
 import org.apache.commons.io.IOUtils
 
+/** This is the default backend.
+ *  With this backend, all data are stored in the local filesystem or network filesystem on a mount point.
+ *  THe mountpoinnt should be specified.
+ *
+ *  backend {
+ *    type = akashic.storage.backend.impl.Local
+ *    # The mountpoint of the backing filesystem
+ *    # User need to prepare this mountpoint before starting akashic-storage server.
+ *    mountpoint = /mnt/akashic-storage
+ *  }
+ */
+
 object Local {
   def fromConfig(config: Config): Local = {
     val mp = Paths.get(config.getString("mountpoint"))
