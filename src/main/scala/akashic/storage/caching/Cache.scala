@@ -49,7 +49,7 @@ trait Cache[V] extends Data[V] {
     val bytes = writer(v)
     filePath.createFile(bytes)
 
-    while (filePath.getAttr.creationTime < creTime + 1000) {
+    while (filePath.getAttr.creationTime <= creTime) {
       filePath.removeIfExists
       Thread.sleep(1000)
       filePath.createFile(bytes)
