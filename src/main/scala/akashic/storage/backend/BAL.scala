@@ -14,7 +14,7 @@ import org.apache.tika.Tika
 trait BAL {
   def getRoot: Node
   def isDirectory(n: Node): Boolean
-  def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String, replaceIfExists: Boolean)
+  def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String)
   def removeNode(dir: Node, name: String)
   def makeDirectory(dir: Node, name: String): Unit
   def lookup(dir: Node, name: String): Option[Node]
