@@ -42,7 +42,7 @@ case class NodePath(dir: Node, dirPath: String, name: String, private var resolv
   def getInputStream: InputStream = withBAL(_.getFileInputStream(self))
   def readFile: Array[Byte] = withBAL(_.getBytes(self))
   def getAttr: FileAttr = withBAL(_.getFileAttr(self))
-  def moveTo(toDir: Node, toName: String, replaceIfExists: Boolean) = withBAL(_.moveNode(dir, name, toDir, toName, replaceIfExists))
+  def moveTo(toDir: Node, toName: String) = withBAL(_.moveNode(dir, name, toDir, toName))
   def computeMD5 = withBAL(_.computeMD5(self))
   def detectContentType: String = withBAL(_.detectContentType(self))
 }

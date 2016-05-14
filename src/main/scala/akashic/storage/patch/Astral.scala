@@ -38,7 +38,7 @@ case class Astral(root: NodePath) {
     try {
       // no need to be atomic because if the trash remains in the tree
       // next compaction has a chance to find it out.
-      path.moveTo(newPath.dir, newPath.name, replaceIfExists = false)
+      path.moveTo(newPath.dir, newPath.name)
     } catch {
       case e: NoSuchFileException => return None
       case e: FileAlreadyExistsException => moveBack(path)

@@ -34,14 +34,10 @@ class Local(mountpoint: Path) extends BAL {
     mountpoint
   }
   override def isDirectory(n: Node): Boolean = Files.isDirectory(n)
-  override def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String, replaceIfExists: Boolean): Unit = {
+  override def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String): Unit = {
     val from = fromDir.resolve(fromName)
     val to = toDir.resolve(toName)
-    if (replaceIfExists) {
-      Files.move(from, to, StandardCopyOption.REPLACE_EXISTING)
-    } else {
-      Files.move(from, to)
-    }
+    Files.move(from, to)
   }
   override def removeNode(dir: Node, name: String): Unit = {
     Files.delete(dir.resolve(name))

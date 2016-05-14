@@ -51,7 +51,7 @@ class Memory extends BAL {
   override def removeNode(dir: Node, name: String): Unit = {
     dir.asInstanceOf[Directory].children -= name
   }
-  override def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String, replaceIfExists: Boolean): Unit = {
+  override def moveNode(fromDir: Node, fromName: String, toDir: Node, toName: String): Unit = {
     val n = lookup(fromDir, fromName)
     fromDir.asInstanceOf[Directory].children -= fromName
     val newParent = toDir.asInstanceOf[Directory]
