@@ -47,5 +47,5 @@ cat ~/.akashic-admin
 gem install bundler
 cd akashic-storage/admin-web
 bundle install
-sh run-daemon.sh
+sh run.sh
 cd -

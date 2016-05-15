@@ -1,10 +1,17 @@
 require "sinatra"
-set :bind, '0.0.0.0'
-set :port, 10947
+# set :bind, '0.0.0.0'
+# set :port, 10947
 
 require "sinatra/reloader" if development?
 
 require "rexml/document"
+
+configure do
+  enable :logging
+  file = File.new("/opt/akashic-storage/log/admin-web.log", 'a+')
+  file.sync = true
+  use Rack::CommonLogger, file
+end
 
 get "/" do
   newUserId = `akashic-admin-add`
