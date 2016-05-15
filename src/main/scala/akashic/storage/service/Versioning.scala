@@ -8,6 +8,13 @@ import scala.pickling.Defaults._
 import scala.pickling.binary._
 case class Versioning(value: Int) {
   def toBytes: Array[Byte] = this.pickle.value
+  def toXML = {
+    value match {
+      case 0 => <VersioningConfiguration/>
+      case 1 => <VersioningConfiguration>Enabled</VersioningConfiguration>
+      case 2 => <VersioningConfiguration>Suspended</VersioningConfiguration>
+    }
+  }
 }
 object Versioning {
   val UNVERSIONED = Versioning(0)
@@ -25,4 +32,3 @@ object Versioning {
   def reader(a: Array[Byte]): t = fromBytes(a)
   def fromBytes(bytes: Array[Byte]): t = BinaryPickle(bytes).unpickle[Versioning]
 }
-
